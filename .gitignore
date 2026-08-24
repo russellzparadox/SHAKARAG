@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.chroma/
+catalog.json
+.pytest_cache/

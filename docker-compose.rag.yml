@@ -1,0 +1,31 @@
+services:
+  rag:
+    build:
+      context: .
+      dockerfile: Dockerfile.rag
+    image: odoo_schema_rag:latest
+    container_name: odoo_schema_rag
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # inside the compose network the DB is reachable as "db"
+      DB_HOST: db
+      DB_PORT: "5432"
+      CHROMA_DIR: /data/chroma
+    ports:
+      - "8100:8100"
+    volumes:
+      - ./chroma_data:/data/chroma
+    networks:
+      - odoo_net
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8100/health')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  odoo_net:
+    external: true
+    name: ${ODOO_NET_NAME:-odoo_net}

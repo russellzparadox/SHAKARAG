@@ -1,0 +1,14 @@
+DB_HOST=localhost
+DB_PORT=5433
+DB_USER=shaka
+DB_PASSWORD=g9LhsHOkZbeBeAg9RQar014oL6f7zaN4
+DB_NAME=shaka
+
+CHROMA_DIR=.chroma
+COLLECTION=odoo_schema
+
+EMBED_PROVIDER=auto
+
+LLM_BASE_URL=http://localhost:20128/v1
+LLM_MODEL=nvidia/nvidia/nemotron-3-ultra-550b-a55b
+LLM_API_KEY=sk-e472baab33baef78-is7jwq-c1c55c8b
