@@ -16,6 +16,10 @@ LABELS = {
     "databricks": "Databricks SQL",
 }
 
+def q2id(ident: str) -> str:
+    return '"' + ident.replace('"', '""') + '"'
+
+
 SCHEME_HINTS = {
     "snowflake": (
         "- Qualify tables as DATABASE.SCHEMA.TABLE when shown.\n"
@@ -181,10 +185,29 @@ class GenericSQLAlchemyDialect(BaseDialect):
 
         return tables
 
+    def sample_values(self, schema: str, table: str, column: str, k: int = 10):
+        from sqlalchemy import text
+
+        engine = self._engine()
+        try:
+            with engine.connect() as conn:
+                q = self._qualified(schema or "", table)
+                sql = (
+                    f"SELECT {q2id(column)} AS v FROM {q} "
+                    f"WHERE {q2id(column)} IS NOT NULL "
+                    f"GROUP BY 1 ORDER BY COUNT(*) DESC LIMIT {int(k)}"
+                )
+                rows = conn.execute(text(sql)).fetchall()
+                return [str(r[0]) for r in rows]
+        except Exception:
+            return None
+        finally:
+            engine.dispose()
+
     def execute_readonly(self, sql: str, max_rows: int):
         from sqlalchemy import text
 
-        from ..serializers import cell
+        from ..serializers import row_to_list
 
         engine = self._engine()
         try:
@@ -193,7 +216,7 @@ class GenericSQLAlchemyDialect(BaseDialect):
                 columns = list(result.keys())
                 raw = result.fetchmany(max_rows + 1) if result.returns_rows else []
                 truncated = len(raw) > max_rows
-                rows = [[cell(v) for v in tuple(r)] for r in raw[:max_rows]]
+                rows = [row_to_list(r) for r in raw[:max_rows]]
                 conn.rollback()
                 return columns, rows, truncated
         finally:

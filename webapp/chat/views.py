@@ -121,6 +121,65 @@ def chat_language(request, pk):
     return redirect("chat:detail", pk=session.pk)
 
 
+@login_required
+def chat_feedback(request, pk):
+    session = get_object_or_404(ChatSession.objects.filter(user=request.user), pk=pk)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+    try:
+        payload = json.loads(request.body or "{}")
+        message_id = int(payload.get("message_id") or 0)
+        value = payload.get("value")
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return JsonResponse({"error": "Invalid payload"}, status=400)
+    if value not in ("up", "down"):
+        return JsonResponse({"error": "value must be up/down"}, status=400)
+
+    msg = get_object_or_404(
+        ChatMessage.objects.filter(session=session, role=ChatMessage.Role.ASSISTANT),
+        pk=message_id,
+    )
+    meta = msg.meta or {}
+    if not meta.get("sql"):
+        return JsonResponse({"error": "No SQL on this message to learn from"}, status=400)
+    question = (
+        ChatMessage.objects.filter(session=session, role=ChatMessage.Role.USER, pk__lt=msg.pk)
+        .order_by("-pk")
+        .values_list("content", flat=True)
+        .first()
+    )
+    if not question:
+        return JsonResponse({"error": "No matching question found"}, status=400)
+
+    from .models import QueryExample
+
+    example, created = QueryExample.objects.get_or_create(
+        database=session.database,
+        message=msg,
+        defaults={
+            "question": question,
+            "sql": meta["sql"],
+            "notes": meta.get("explanation") or "",
+            "rating": 1 if value == "up" else -1,
+            "active": value == "up",
+            "created_by": request.user,
+        },
+    )
+    if not created:
+        example.rating = 1 if value == "up" else -1
+        example.active = value == "up"
+        example.save(update_fields=["rating", "active"])
+
+    outcome = rag_service.record_feedback(
+        session.database,
+        question=question,
+        sql=meta["sql"],
+        notes=meta.get("explanation") or "",
+        helpful=(value == "up"),
+    )
+    return JsonResponse({"status": outcome, "value": value})
+
+
 def _msg_json(msg: ChatMessage) -> dict:
     return {
         "id": msg.pk,

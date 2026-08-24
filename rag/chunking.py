@@ -13,6 +13,14 @@ REL_CAP = 14
 IDX_CAP = 15
 HELP_CAP = 160
 INFO_CAP = 400
+VALUE_CAP = 140
+
+ROLE_LABELS = {
+    "fact": "FACT table (transactions/measures)",
+    "dimension": "DIMENSION table (descriptive attributes)",
+    "relation": "JOIN/RELATION table (many-to-many link)",
+    "bridge": "BRIDGE table",
+}
 
 
 @dataclass
@@ -55,6 +63,8 @@ def _column_line(rec: TableRecord, col, field_info=None) -> str:
         parts.append("NOT NULL")
     if col.pk:
         parts.append("[PK]")
+    if col.fk_ref:
+        parts.append(f"[FK->{col.fk_ref}]")
     if col.default:
         parts.append(f"DEFAULT {col.default}")
     if col.identity:
@@ -72,14 +82,17 @@ def _column_line(rec: TableRecord, col, field_info=None) -> str:
         desc_bits.append(col.comment)
     if desc_bits:
         line += f" — {' | '.join(desc_bits)}"
+    if col.sample_values:
+        joined = ", ".join(col.sample_values)[:VALUE_CAP]
+        line += f" — Values seen: {joined}"
     return line
 
 
-def _header_block(rec: TableRecord, model_info, n_chunks_hint: int = 0) -> list[str]:
+def _header_block(rec: TableRecord, model_info, engine_label: str = "SQL", n_chunks_hint: int = 0) -> list[str]:
     label = model_info.label if model_info else None
     info = model_info.info if model_info else None
 
-    head = f"PostgreSQL {rec.kind_label} {_qual(rec)}"
+    head = f"{engine_label} {rec.kind_label} {_qual(rec)}"
     if model_info:
         head += f" (Odoo model: {model_info.model}, Label: \"{label}\")"
     if rec.comment:
@@ -94,6 +107,15 @@ def _header_block(rec: TableRecord, model_info, n_chunks_hint: int = 0) -> list[
         head,
         "Stats: " + " · ".join(meta_bits),
     ]
+
+    if rec.warehouse_role in ROLE_LABELS:
+        role_line = f"Warehouse role: {ROLE_LABELS[rec.warehouse_role]}"
+        if rec.role_reason:
+            role_line += f" — {rec.role_reason}"
+        if rec.warehouse_role == "fact" and rec.foreign_keys:
+            dims = ", ".join(sorted({fk.ref_table for fk in rec.foreign_keys[:REL_CAP]}))
+            role_line += f"\nGrain: one row per combination of ({dims})"
+        block.append(role_line)
 
     relations = _fk_out_lines(rec)
     if relations:
@@ -125,6 +147,7 @@ def build_chunks(
     tables: Iterable[TableRecord],
     models_by_table: dict,
     fields_by_key: dict,
+    engine_label: str = "SQL",
 ) -> list[Chunk]:
     chunks: list[Chunk] = []
 
@@ -136,7 +159,7 @@ def build_chunks(
             _column_line(rec, col, fields_by_key.get((rec.name, col.name))) for col in columns
         ]
 
-        header = "\n".join(_header_block(rec, model_info))
+        header = "\n".join(_header_block(rec, model_info, engine_label=engine_label))
         columns_text = "\n".join(column_lines)
         full_text = header + "\n\nColumns:\n" + columns_text
 
@@ -148,6 +171,7 @@ def build_chunks(
             "rows_est": max(int(rec.row_estimate), 0),
             "model": model_info.model if model_info else "",
             "label": model_info.label if model_info else "",
+            "wh_role": rec.warehouse_role,
         }
 
         if len(full_text) <= FULL_DOC_MAX_CHARS or not column_lines:

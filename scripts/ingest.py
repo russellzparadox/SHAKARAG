@@ -39,7 +39,25 @@ def run_ingest(
             conn.close()
     matched = sum(1 for t in tables if t.name in models_by_table)
 
-    chunks = build_chunks(tables, models_by_table, fields_by_key)
+    from rag.warehouse import classify_tables, candidate_value_columns
+
+    role_counts = classify_tables(tables)
+    sampled = 0
+    if settings.sample_values and hasattr(dialect, "sample_values"):
+        col_by_name: dict[tuple[str, str, str], Any] = {}
+        for rec in tables:
+            for c in rec.columns:
+                col_by_name[(rec.schema, rec.name, c.name)] = c
+        for rec in tables:
+            if rec.kind != "r" or not (0 < rec.row_estimate < settings.value_sample_max_rows):
+                continue
+            for col_name in candidate_value_columns(rec):
+                values = dialect.sample_values(rec.schema, rec.name, col_name, k=10)
+                if values:
+                    col_by_name[(rec.schema, rec.name, col_name)].sample_values = values
+                    sampled += 1
+
+    chunks = build_chunks(tables, models_by_table, fields_by_key, engine_label=dialect.label)
 
     if catalog_path:
         dump_catalog(tables, catalog_path)
@@ -65,6 +83,8 @@ def run_ingest(
         "dialect": dialect.label,
         "tables": len(tables),
         "columns": n_cols,
+        "warehouse_roles": role_counts,
+        "value_samples": sampled,
         "odoo_models": len(models_by_table),
         "models_matched": matched,
         "field_descriptions": len(fields_by_key),
@@ -96,6 +116,11 @@ def main() -> int:
             f"  Odoo metadata: {stats['models_matched']}/{stats['odoo_models']} models matched, "
             f"{stats['field_descriptions']} field descriptions"
         )
+    roles = stats.get("warehouse_roles") or {}
+    if any(v for k, v in roles.items() if k != "unknown"):
+        print(f"  Warehouse roles: {roles}")
+    if stats.get("value_samples"):
+        print(f"  Sampled values for {stats['value_samples']} columns")
     print(f"  Embedder: {stats['embedder']}")
     print(f"Indexed {stats['vectors_indexed']} vectors in {stats['elapsed_seconds']}s.")
     return 0

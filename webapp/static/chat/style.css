@@ -133,6 +133,14 @@ button.linklike { font-size: inherit; }
 .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .chip { background: #10151f; border: 1px solid var(--border); color: var(--muted); padding: 2px 8px; border-radius: 999px; font-size: 11px; }
 
+.fb { margin-top: 8px; display: flex; gap: 6px; }
+.fb-btn {
+  background: transparent; border: 1px solid var(--border); border-radius: 8px;
+  cursor: pointer; font-size: 13px; padding: 3px 8px; opacity: .7;
+}
+.fb-btn:hover { opacity: 1; border-color: var(--accent); }
+.fb-done { color: var(--muted); font-size: 12px; }
+
 #chat-form { display: flex; gap: 10px; padding: 14px; border-top: 1px solid var(--border); background: var(--panel-2); }
 #question-input {
   flex: 1; padding: 12px 14px; background: var(--bg); color: var(--text);

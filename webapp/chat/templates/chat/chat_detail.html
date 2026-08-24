@@ -55,6 +55,12 @@
               {% if m.meta.tables_used %}
                 <small class="chips">{% for t in m.meta.tables_used %}<span class="chip">{{ t }}</span>{% endfor %}</small>
               {% endif %}
+              {% if m.meta.sql %}
+                <div class="fb" data-mid="{{ m.pk }}">
+                  <button class="fb-btn" data-value="up" title="Good answer — remember this query">👍</button>
+                  <button class="fb-btn" data-value="down" title="Wrong — forget this query">👎</button>
+                </div>
+              {% endif %}
             </div>
           {% endif %}
         </div>

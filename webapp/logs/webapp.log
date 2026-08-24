@@ -50,3 +50,52 @@ chromadb.errors.NotFoundError: Collection [4c8cb5cf-9d58-483c-a0b7-c34a8969922a]
 2026-08-24 14:51:23,837 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['vwDataSourceConnectionStatus', 'DimLogisticStep', 'DimPaymentStep', 'DimArrearsKind', 'DimProductionStep', 'FactAccountEstablishment', 'DimBusinessPolicy', 'DimPurchasingAgent'] rows=6
 2026-08-24 14:53:45,915 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['DimMachine', 'FactInventoryReserve', 'DimBusinessPolicy', 'DimProductionStep', 'DimShift', 'FactPartUnitConversion', 'vwDataSourceConnectionStatus', 'vwCompanyBasedEntity'] rows=1
 2026-08-24 14:59:56,637 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['DimMachine', 'FactInventoryReserve', 'DimBusinessPolicy', 'DimProductionStep', 'DimShift', 'FactPartUnitConversion', 'vwDataSourceConnectionStatus', 'vwCompanyBasedEntity'] rows=1
+2026-08-24 15:20:04,925 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-24 15:20:05,416 WARNING django.request — Not Found: /chat/1/send/
+2026-08-24 15:28:42,270 INFO    chat.ask — ask ok db=Odoo shaka (Postgres) llm=9router default tables=['report_pos_order', 'pos_order_line', 'pos_config', 'pos_order', 'product_pricelist_item', 'product_supplierinfo', 'pos_session', 'product_pricelist'] rows=0
+2026-08-24 15:28:54,874 INFO    chat.feedback — example stored for db=Odoo shaka (Postgres) id=ex_c6e38eee3bbc9f038bac8b7ac5cd
+2026-08-24 15:29:10,028 INFO    chat.ask — using 1 verified example(s)
+2026-08-24 15:29:49,843 INFO    chat.ask — ask ok db=Odoo shaka (Postgres) llm=9router default tables=['report_pos_order', 'pos_order_line', 'pos_order', 'res_company', 'pos_session', 'product_taxes_rel', 'pos_config', 'product_supplier_taxes_rel'] rows=0
+2026-08-24 15:32:14,542 INFO    chat.indexing — Indexing started for shaka_dw (pk=3)
+2026-08-24 15:33:11,189 INFO    chat.indexing — Indexing finished for shaka_dw: 197 tables, 203 vectors in 56.6s
+2026-08-24 15:34:58,994 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['DimProductionStep', 'DimBasculePaper', 'DimMachine', 'DimDirectDeliveryReceiptItem', 'DimBusinessPolicy', 'DimShift', 'FactBatchCharacteristic', 'FactFinancialVoucher'] rows=1
+2026-08-24 15:35:03,579 INFO    chat.feedback — example removed for db=shaka_dw
+2026-08-24 15:36:40,230 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['DimPartPrice', 'DimProject', 'DimSalesContractItem', 'DimContractType', 'DimProductPack', 'vwStructure', 'DimSystem', 'DimShippingPoint'] rows=100
+2026-08-24 15:38:48,865 INFO    chat.feedback — example stored for db=shaka_dw id=ex_32972d98e5c8db270a1a03e20c90
+2026-08-24 15:41:30,974 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-24 15:41:31,467 WARNING django.request — Not Found: /chat/1/send/
+2026-08-24 15:42:25,961 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 15:42:35,163 INFO    chat.feedback — example removed for db=shaka_dw
+2026-08-24 15:43:45,871 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['DimProductionStep', 'DimBasculePaper', 'DimMachine', 'DimDirectDeliveryReceiptItem', 'DimBusinessPolicy', 'DimShift', 'FactBatchCharacteristic', 'FactFinancialVoucher'] rows=1
+2026-08-24 15:43:57,753 INFO    chat.feedback — example removed for db=shaka_dw
+2026-08-24 15:44:24,735 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['DimProductionStep', 'DimBasculePaper', 'DimMachine', 'DimDirectDeliveryReceiptItem', 'DimBusinessPolicy', 'DimShift', 'FactBatchCharacteristic', 'FactFinancialVoucher'] rows=1
+2026-08-24 15:47:29,779 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimShift', 'DimBusinessPolicy', 'DimMachine', 'DimProductionStep', 'DimCompany', 'DimSubsidiaryLedger', 'DimSupplier', 'DimBasculePaper'] rows=1
+2026-08-24 15:48:13,356 INFO    chat.feedback — example stored for db=shaka_dw id=ex_4fa3d16eddc3b52c9b12a9d8281b
+2026-08-24 15:48:39,569 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimPurchaseRequestItem', 'DimPricingSource', 'DimPartPrice', 'DimSalesAgent', 'FactPartPrice_Pre', 'FactLogisticControl', 'DimInventoryVoucherKind', 'DimSalesPreOrderItem'] rows=1
+2026-08-24 15:49:20,427 INFO    chat.feedback — example removed for db=shaka_dw
+2026-08-24 15:50:01,256 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimPricingSource', 'DimPurchaseRequestItem', 'DimSalesDocumentStatus', 'DimPurchasingDepartment', 'DimSalesSystem', 'DimPurchasingAgent', 'DimFinancialVoucherState', 'DimMoneyType'] rows=1
+2026-08-24 15:50:56,822 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimPartPrice', 'DimSalesContractItem', 'DimProject', 'DimContractType', 'DimProductPack', 'DimSystem', 'DimSalesReturnWasteStatus', 'DimRouting'] rows=8
+2026-08-24 15:51:21,378 INFO    chat.feedback — example removed for db=shaka_dw
+2026-08-24 15:51:52,122 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimPartPrice', 'DimSalesContractItem', 'DimProject', 'DimContractType', 'DimProductPack', 'DimSystem', 'DimSalesReturnWasteStatus', 'DimRouting'] rows=100
+2026-08-24 15:52:06,562 INFO    chat.feedback — example stored for db=shaka_dw id=ex_87e1afb0e68ff65c14835b4a9109
+2026-08-24 16:10:00,251 INFO    chat.feedback — example stored for db=shaka_dw id=ex_87e1afb0e68ff65c14835b4a9109
+2026-08-24 16:19:55,384 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 16:20:53,200 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['DimRecipient', 'DimDeliveryItem', 'DimReceiptAndPaymentCause', 'DimSalaryRange', 'DimAge', 'DimBank', 'DimReceiptAndPaymentGuaranteeType', 'DimPurchasingDepartment'] rows=1
+2026-08-24 16:20:53,745 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimShift', 'DimMachine', 'DimBusinessPolicy', 'DimSupplier', 'DimCompany', 'DimSubsidiaryLedger', 'DimProductionStep', 'DimDirectDeliveryReceiptItem'] rows=1
+2026-08-24 16:21:07,816 INFO    chat.feedback — example removed for db=shaka_dw
+2026-08-24 16:21:24,654 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['DimRecipient', 'DimDeliveryItem', 'DimReceiptAndPaymentCause', 'DimSalaryRange', 'DimAge', 'DimBank', 'DimReceiptAndPaymentGuaranteeType', 'DimPurchasingDepartment'] rows=1
+2026-08-24 16:22:19,466 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimShift', 'DimMachine', 'DimBusinessPolicy', 'DimSupplier', 'DimCompany', 'DimSubsidiaryLedger', 'DimProductionStep', 'DimDirectDeliveryReceiptItem'] rows=1
+2026-08-24 16:22:51,619 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimRecipient', 'DimDeliveryItem', 'DimReceiptAndPaymentCause', 'DimReceiptAndPaymentGuaranteeType', 'DimSalaryRange', 'DimBank', 'DimPurchasingDepartment', 'DimFinancialVoucherState'] rows=1
+2026-08-24 16:24:00,937 INFO    chat.feedback — example stored for db=shaka_dw id=ex_4fa3d16eddc3b52c9b12a9d8281b
+2026-08-24 16:24:02,210 INFO    chat.feedback — example removed for db=shaka_dw
+2026-08-24 16:24:20,157 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimRecipient', 'DimDeliveryItem', 'DimReceiptAndPaymentCause', 'DimReceiptAndPaymentGuaranteeType', 'DimSalaryRange', 'DimBank', 'DimPurchasingDepartment', 'DimFinancialVoucherState'] rows=1
+2026-08-24 16:25:02,026 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimRecipient', 'DimDeliveryItem', 'DimReceiptAndPaymentCause', 'DimSalaryRange', 'DimBank', 'DimPurchasingDepartment', 'DimAssetState', 'DimFinancialVoucherState'] rows=1
+2026-08-24 16:26:49,081 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 tables=['DimShift', 'DimMachine', 'DimBusinessPolicy', 'DimSupplier', 'DimSubsidiaryLedger', 'DimCompany', 'DimInventoryVoucherKind', 'DimProductionStep'] rows=1
+2026-08-24 16:27:28,544 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 tables=['DimRecipient', 'DimDeliveryItem', 'DimReceiptAndPaymentCause', 'DimSalaryRange', 'DimPurchasingDepartment', 'DimBank', 'DimContractState', 'DimPartRequestItem'] rows=1
+2026-08-24 16:28:56,819 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 tables=['DimProductionStep', 'DimSupplier', 'DimShift', 'DimCompany', 'DimBasculePaper', 'DimDirectDeliveryReceiptItem', 'DimMachine', 'DimArrearsKind'] rows=4
+2026-08-24 16:30:51,729 INFO    chat.feedback — example stored for db=shaka_dw id=ex_2a0271c37ebd314f46e55130260a
+2026-08-24 16:31:00,529 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 tables=['FactBankAccountOpeningBalance', 'FactCustomerBalance', 'DimBank', 'FactBankAccountTransaction', 'FactAccountEstablishment', 'DimBankAccount', 'FactAccountBalance', 'DimAccountDebitCreditStatementItem'] rows=0
+2026-08-24 16:32:09,043 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 tables=['DimSalesPreOrderItem', 'DimSalesDocumentStatus', 'DimSalesAccount', 'DimSales', 'DimSupplier', 'DimSalesAgent', 'DimDepreciationState', 'DimSalesOrderItem'] rows=100
+2026-08-24 16:37:55,519 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 tables=['FactBankAccountOpeningBalance', 'DimBank', 'DimReceiptAndPaymentCause', 'DimBankAccount', 'FactBankAccountTransaction', 'FactCustomerBalance', 'FactAccountEstablishment', 'DimFinancialVoucherKind'] rows=1
+2026-08-24 16:42:51,973 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 tables=['DimPaymentItem', 'DimPayableNote', 'FactAccountBalance', 'FactBankAccountOpeningBalance', 'DimCashFlowFactor', 'FactCustomerBalance', 'FactBankAccountTransaction', 'DimBankAccount'] rows=0
+2026-08-24 16:43:05,393 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimPaymentItem', 'DimPayableNote', 'FactAccountBalance', 'FactBankAccountOpeningBalance', 'DimCashFlowFactor', 'FactCustomerBalance', 'FactBankAccountTransaction', 'DimBankAccount'] rows=1

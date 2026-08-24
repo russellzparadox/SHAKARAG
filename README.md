@@ -133,6 +133,15 @@ Find the real network name with `docker network ls` (compose usually prefixes it
 - The default local embedder downloads a small ONNX MiniLM model on first run (~90 MB).
 - **Rotate the DB password if it was ever shared or committed**; keep `.env` out of git (already ignored).
 
+## Data-warehouse awareness & self-learning
+
+- **Star-schema detection**: on ingest every table is classified as FACT / DIMENSION / RELATION / BRIDGE (name patterns + FK counts + measure/date columns + row-count ratios). Schema cards state the role, evidence, and a fact's grain ("one row per combination of customer × product × …"), and the SQL prompt gets explicit warehouse guidance (aggregate measures on facts, filter via dimensions).
+- **Value sampling**: low-cardinality text columns get real distinct values baked into context (`state — Values seen: draft, done, cancel`), so WHERE clauses stop guessing enums. Disable with `SAMPLE_VALUES=0`.
+- **Feedback loop**: 👍/👎 on any chat answer. Thumbs-up stores the question+SQL as a *verified example* in `<collection>-examples`; similar future questions retrieve it and inject it as few-shot guidance. Thumbs-down removes it. Inspect with `/db/<pk>/status/` or browse the `-examples` collection.
+- **Self-repair**: if generated SQL fails at execution, the DB error is fed back to the LLM for one corrected retry before giving up.
+
+Tuning knobs in `.env`: `SAMPLE_VALUES=1`, `VALUE_SAMPLE_MAX_ROWS=200000`, `EXAMPLES_TOP_K=2`.
+
 ## Web app (Django)
 
 Full multi-user web UI in `webapp/`: registration + login, per-user **database profiles** and **LLM profiles**, background re-indexing, and a chat interface (session history, SQL/results drill-down).

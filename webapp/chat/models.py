@@ -111,3 +111,21 @@ class ChatMessage(models.Model):
 
     class Meta:
         ordering = ["created_at"]
+
+
+class QueryExample(models.Model):
+    database = models.ForeignKey(DatabaseProfile, on_delete=models.CASCADE, related_name="examples")
+    message = models.ForeignKey(ChatMessage, null=True, blank=True, on_delete=models.SET_NULL)
+    question = models.TextField()
+    sql = models.TextField()
+    notes = models.TextField(blank=True, default="")
+    rating = models.SmallIntegerField(choices=[(1, "helpful"), (-1, "not helpful")])
+    active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"[{self.rating:+d}] {self.question[:60]}"

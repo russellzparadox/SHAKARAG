@@ -65,7 +65,10 @@
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || resp.statusText);
       pending.innerHTML =
-        esc(data.assistant.content).replace(/\n/g, "<br>") + resultBlock(data.assistant.meta || {});
+        esc(data.assistant.content).replace(/\n/g, "<br>") +
+        resultBlock(data.assistant.meta || {}) +
+        feedbackBlock(data.assistant.id);
+      wireFeedback(pending);
     } catch (err) {
       pending.innerHTML = `⚠️ ${esc(err.message)}`;
     } finally {
@@ -74,4 +77,37 @@
       list.scrollTop = list.scrollHeight;
     }
   });
+
+  function feedbackBlock(mid) {
+    return `<div class="fb" data-mid="${mid}">
+      <button class="fb-btn" data-value="up" title="Good answer — remember this query">👍</button>
+      <button class="fb-btn" data-value="down" title="Wrong — forget this query">👎</button>
+    </div>`;
+  }
+
+  async function sendFeedback(container, value) {
+    const mid = container.dataset.mid;
+    const resp = await fetch(list.dataset.sendUrl.replace(/\/send\/$/, "/feedback/"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": csrf },
+      body: JSON.stringify({ message_id: parseInt(mid, 10), value }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || resp.statusText);
+    container.innerHTML = data.value === "up"
+      ? '<span class="fb-done">✓ saved as example for future questions</span>'
+      : '<span class="fb-done">✗ example removed</span>';
+  }
+
+  function wireFeedback(root) {
+    root.querySelectorAll(".fb .fb-btn").forEach((btnEl) => {
+      btnEl.addEventListener("click", () => {
+        sendFeedback(btnEl.closest(".fb"), btnEl.dataset.value).catch(
+          (err) => alert(err.message)
+        );
+      });
+    });
+  }
+
+  wireFeedback(document);
 })();

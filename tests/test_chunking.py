@@ -35,7 +35,8 @@ def test_basic_chunk_structure():
     assert c.id == "res_partner::full"
     assert c.metadata["table"] == "res_partner"
     assert c.metadata["kind"] == "TABLE"
-    assert "PostgreSQL TABLE res_partner" in c.text
+    assert f"{c.metadata['kind']} {c.metadata['table']}" in c.text
+    assert "SQL TABLE res_partner" in c.text
     assert "- col_0 integer NOT NULL" in c.text or "- col_0 integer" in c.text
 
 

@@ -1,6 +1,7 @@
+DB_DIALECT=mysql
 DB_HOST=localhost
-DB_PORT=5433
-DB_USER=shaka
+DB_PORT=1433
+DB_USER=sa
 DB_PASSWORD=g9LhsHOkZbeBeAg9RQar014oL6f7zaN4
 DB_NAME=shaka
 

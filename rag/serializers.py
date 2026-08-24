@@ -16,3 +16,9 @@ def cell(value: Any) -> Any:
     if isinstance(value, uuid.UUID):
         return str(value)
     return value
+
+
+def row_to_list(row: Any) -> list[Any]:
+    if isinstance(row, dict):
+        return [cell(v) for v in row.values()]
+    return [cell(v) for v in tuple(row)]

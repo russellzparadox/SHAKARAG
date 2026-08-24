@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import logging
 from dataclasses import dataclass, field
 
 from .chunking import Chunk
@@ -20,7 +22,8 @@ Rules:
 - For counts/aggregates use GROUP BY and ORDER BY the aggregate DESC when ranking.
 - Add a row LIMIT (<= __MAX_ROWS__) for row-level listings unless the user asks for totals.
 - If the CONTEXT does not contain what you need, still produce your best-effort query from related tables you do see and explain the gap in "explanation".
-__HINTS__"""
+__HINTS__
+- __DW_BLOCK__"""
 
 SYSTEM_ANSWER = """You answer questions about a __ENGINE__ database using the result rows of a query that was executed against it.
 Be concise and factual; cite concrete numbers from the results.
@@ -72,8 +75,11 @@ class RagPipeline:
         self.dialect = dialect
 
     def retrieve(self, question: str, top_k: int | None = None) -> list[dict]:
+        from .rerank import rerank_hits
+
         k = top_k or self.settings.top_k
-        return self.store.query_text(question, top_k=k)
+        hits = self.store.query_text(question, top_k=max(k * 3, 12))
+        return rerank_hits(hits, question)[:k]
 
     def build_context(self, hits: list[dict]) -> tuple[str, list[str]]:
         budget = self.settings.context_char_budget
@@ -99,6 +105,35 @@ class RagPipeline:
         context = "\n\n---\n\n".join(parts)
         return context, tables_order
 
+    def _example_store(self):
+        if getattr(self, "_examples", None) is None:
+            from .examples import ExampleStore
+
+            self._examples = ExampleStore(
+                str(self.settings.chroma_dir), self.settings.collection, self.store.embedder
+            )
+        return self._examples
+
+    def _few_shot_block(self, question: str, k: int | None = None) -> str:
+        try:
+            hits = self._example_store().search(question, k=k or 2)
+        except Exception:
+            return ""
+        good = [h for h in hits if h["distance"] < 0.85]
+        if not good:
+            return ""
+        import logging
+
+        logging.getLogger("chat.ask").info("using %d verified example(s)", len(good))
+        parts = []
+        for h in good:
+            note = f"\nNotes: {h['notes']}" if h["notes"] else ""
+            parts.append(f"---\nQ: {h['question']}\nSQL:\n{h['sql']}{note}")
+        return (
+            "\n\nVERIFIED QUERY EXAMPLES previously confirmed correct for this database "
+            "(imitate their join paths, table usage and value formatting):\n" + "\n".join(parts)
+        )
+
     def generate_sql(self, question: str, context: str) -> dict:
         if self.llm is None:
             raise LLMError(
@@ -114,7 +149,8 @@ class RagPipeline:
             },
             {
                 "role": "user",
-                "content": f"CONTEXT:\n{context}\n\nQUESTION: {question}",
+                "content": f"CONTEXT:\n{context}\n\nQUESTION: {question}"
+                + self._few_shot_block(question),
             },
         ]
         parsed = self.llm.chat_json(messages)
@@ -143,6 +179,28 @@ class RagPipeline:
 
         explanation = parsed.get("explanation") if isinstance(parsed, dict) else ""
         return {"sql": validate_sql(parsed["sql"]), "explanation": explanation}
+
+    def _repair_sql(self, question: str, context: str, bad_sql: str, error: str) -> dict:
+        messages = [
+            {
+                "role": "system",
+                "content": render_sql_system(
+                    self.dialect.label, self.dialect.prompt_hints(), self.settings.max_rows
+                ),
+            },
+            {"role": "user", "content": f"CONTEXT:\n{context}\n\nQUESTION: {question}"},
+            {"role": "assistant", "content": json.dumps({"sql": bad_sql})},
+            {
+                "role": "user",
+                "content": f"Executing that query raised this database error:\n{error}\n\n"
+                "Rewrite the corrected read-only query. Respond with ONLY the JSON object.",
+            },
+        ]
+        parsed = self.llm.chat_json(messages)
+        sql = (parsed or {}).get("sql")
+        if not sql:
+            raise SQLGuardError("Repair attempt returned no SQL.")
+        return {"sql": validate_sql(sql), "explanation": (parsed or {}).get("explanation")}
 
     def run_sql(self, sql: str) -> tuple[list[str], list[list], bool]:
         return self.dialect.execute_readonly(sql, self.settings.max_rows)
@@ -206,11 +264,22 @@ class RagPipeline:
         if not execute:
             return result
 
-        try:
-            columns, rows, truncated = self.run_sql(result.sql)
-        except Exception as exc:
-            result.error = f"SQL execution failed: {exc}"
-            return result
+        max_exec_attempts = 2
+        for attempt in range(1, max_exec_attempts + 1):
+            try:
+                columns, rows, truncated = self.run_sql(result.sql)
+                break
+            except Exception as exc:
+                if attempt == max_exec_attempts or self.llm is None:
+                    result.error = f"SQL execution failed: {exc}"
+                    return result
+                try:
+                    fixed = self._repair_sql(question, context, result.sql, str(exc))
+                except Exception:
+                    result.error = f"SQL execution failed: {exc}"
+                    return result
+                result.sql = fixed["sql"]
+                result.explanation = fixed.get("explanation") or result.explanation
 
         result.columns = columns
         result.rows = rows
@@ -240,10 +309,13 @@ def format_markdown_table(columns: list[str], rows: list[list], limit: int = 25)
 
 
 def render_sql_system(label: str, hints: str, max_rows: int) -> str:
+    from .warehouse import warehouse_hints_block
+
     return (
         SYSTEM_SQL.replace("__ENGINE__", label)
         .replace("__MAX_ROWS__", str(max_rows))
         .replace("__HINTS__", hints)
+        .replace("- __DW_BLOCK__", warehouse_hints_block())
     )
 
 

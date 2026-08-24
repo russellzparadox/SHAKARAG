@@ -19,6 +19,22 @@ class PostgresDialect(BaseDialect):
     def execute_readonly(self, sql: str, max_rows: int):
         return execute_readonly(self.settings, sql, max_rows)
 
+    def sample_values(self, schema: str, table: str, column: str, k: int = 10):
+        try:
+            with connect(self.settings) as conn, conn.cursor() as cur:
+                q = self._qualified(schema or "public", table)
+                cur.execute(
+                    f"SELECT {q2(column)} AS v FROM {q} WHERE {q2(column)} IS NOT NULL "
+                    f"GROUP BY 1 ORDER BY count(*) DESC LIMIT {int(k)}",
+                )
+                return [str(r["v"]) for r in cur.fetchall()]
+        except Exception:
+            return None
+
+
+def q2(ident: str) -> str:
+    return '"' + ident.replace('"', '""') + '"'
+
     def prompt_hints(self) -> str:
         return (
             "- Schema-qualify tables when the context shows a schema (e.g. public.res_partner).\n"

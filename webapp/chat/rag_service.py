@@ -43,6 +43,9 @@ def build_rag_settings(dbp, llmp) -> RagSettings:
         context_char_budget=base.context_char_budget,
         max_rows=base.max_rows,
         statement_timeout_ms=base.statement_timeout_ms,
+        sample_values=base.sample_values,
+        value_sample_max_rows=base.value_sample_max_rows,
+        examples_top_k=base.examples_top_k,
     )
 
 
@@ -98,6 +101,39 @@ def run_ask(dbp, llmp, question: str, answer_language: str = "auto") -> dict:
         "answer": answer,
         "error": result.error,
     }
+
+
+def example_store(dbp):
+    from rag.examples import ExampleStore
+    from rag.embeddings import get_embedder
+
+    key = (dbp.collection_name, int(dbp.updated_at.timestamp() * 1000))
+    store = _example_cache.get(dbp.pk)
+    if store is None or store._cache_key != key:
+        settings = build_rag_settings(dbp, None)
+        embedder = get_embedder(settings)
+        store = ExampleStore(str(settings.chroma_dir), settings.collection, embedder)
+        store._cache_key = key
+        _example_cache[dbp.pk] = store
+    return store
+
+
+_example_cache: dict[int, Any] = {}
+
+
+def record_feedback(dbp, question: str, sql: str, notes: str = "", helpful: bool = True) -> str:
+    store = example_store(dbp)
+    if helpful:
+        ex_id = store.add(question=question, sql=sql, notes=notes)
+        logging.getLogger("chat.feedback").info(
+            "example stored for db=%s id=%s", dbp.name, ex_id
+        )
+        return "saved"
+    removed = store.remove(question)
+    logging.getLogger("chat.feedback").info(
+        "example %s for db=%s", "removed" if removed else "absent", dbp.name
+    )
+    return "removed"
 
 
 def start_reindex(dbp) -> None:

@@ -214,7 +214,7 @@ class MySQLDialect(BaseDialect):
     def execute_readonly(self, sql: str, max_rows: int):
         import pymysql
 
-        from ..serializers import cell
+        from ..serializers import row_to_list
 
         s = self.settings
         conn = pymysql.connect(
@@ -240,11 +240,32 @@ class MySQLDialect(BaseDialect):
                 raw = cur.fetchmany(max_rows + 1)
                 truncated = len(raw) > max_rows
                 raw = raw[:max_rows]
-                rows = [[cell(v) for v in tuple(r)] for r in raw]
+                rows = [row_to_list(r) for r in raw]
                 cur.execute("ROLLBACK")
                 return columns, rows, truncated
         finally:
             conn.close()
+
+    def sample_values(self, schema: str, table: str, column: str, k: int = 10):
+        conn = None
+        try:
+            conn = self._connect()
+            with conn.cursor() as cur:
+                q = self._qualified(schema or self.settings.db_name, table, "`")
+                cur.execute(
+                    f"SELECT `{column.replace('`', '')}` AS v FROM {q} "
+                    f"WHERE `{column.replace('`', '')}` IS NOT NULL "
+                    f"GROUP BY 1 ORDER BY COUNT(*) DESC LIMIT {int(k)}"
+                )
+                return [str(r["v"]) for r in cur.fetchall()]
+        except Exception:
+            return None
+        finally:
+            if conn is not None:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
 
     def prompt_hints(self) -> str:
         return (

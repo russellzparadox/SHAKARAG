@@ -82,6 +82,7 @@ class Column:
     generated: bool
     pk: bool = False
     fk_ref: str | None = None
+    sample_values: list[str] | None = None
 
 
 @dataclass
@@ -107,6 +108,8 @@ class TableRecord:
     unique_constraints: list[list[str]] = field(default_factory=list)
     indexes: list[tuple[str, str]] = field(default_factory=list)
     view_def: str | None = None
+    warehouse_role: str = "unknown"
+    role_reason: str = ""
 
     @property
     def qualified(self) -> str:

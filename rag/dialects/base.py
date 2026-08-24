@@ -25,6 +25,14 @@ class BaseDialect(ABC):
     def prompt_hints(self) -> str:
         return ""
 
+    def sample_values(self, schema: str, table: str, column: str, k: int = 10) -> list[str] | None:
+        return None
+
+    def _qualified(self, schema: str, table: str, quote: str = '"') -> str:
+        if schema:
+            return f"{quote}{schema}{quote}.{quote}{table}{quote}"
+        return f"{quote}{table}{quote}"
+
     @staticmethod
     def missing_driver(package: str, extra: str = "") -> RuntimeError:
         return RuntimeError(

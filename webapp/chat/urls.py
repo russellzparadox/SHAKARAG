@@ -11,6 +11,7 @@ urlpatterns = [
     path("chat/<int:pk>/", views.ChatDetailView.as_view(), name="detail"),
     path("chat/<int:pk>/send/", views.chat_send, name="send"),
     path("chat/<int:pk>/language/", views.chat_language, name="language"),
+    path("chat/<int:pk>/feedback/", views.chat_feedback, name="feedback"),
     path("db/", views.DbProfileListView.as_view(), name="db_list"),
     path("db/new/", views.DbProfileCreateView.as_view(), name="db_new"),
     path("db/<int:pk>/edit/", views.DbProfileUpdateView.as_view(), name="db_edit"),

@@ -243,8 +243,29 @@ class SQLServerDialect(BaseDialect):
             conn.close()
         return build_mssql_catalog(tables_rows, view_rows, column_rows, key_rows, fk_rows, index_rows)
 
+    def sample_values(self, schema: str, table: str, column: str, k: int = 10):
+        conn = None
+        try:
+            conn = self._connect()
+            with conn.cursor() as cur:
+                q = self._qualified(schema or "dbo", table)
+                cur.execute(
+                    f"SELECT TOP {int(k)} [{column.replace(']', ']]')}] AS v FROM {q} "
+                    f"WHERE [{column.replace(']', ']]')}] IS NOT NULL "
+                    f"GROUP BY [{column.replace(']', ']]')}] ORDER BY COUNT(*) DESC"
+                )
+                return [str(r["v"]) for r in cur.fetchall()]
+        except Exception:
+            return None
+        finally:
+            if conn is not None:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+
     def execute_readonly(self, sql: str, max_rows: int):
-        from ..serializers import cell
+        from ..serializers import row_to_list
 
         conn = self._connect()
         try:
@@ -256,7 +277,7 @@ class SQLServerDialect(BaseDialect):
                     raw = cur.fetchmany(max_rows + 1)
                     truncated = len(raw) > max_rows
                     raw = raw[:max_rows]
-                    rows = [[cell(v) for v in tuple(r)] for r in raw]
+                    rows = [row_to_list(r) for r in raw]
                 finally:
                     cur.execute("ROLLBACK")
                 return columns, rows, truncated

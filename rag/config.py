@@ -57,6 +57,10 @@ class Settings:
     max_rows: int
     statement_timeout_ms: int
 
+    sample_values: bool
+    value_sample_max_rows: int
+    examples_top_k: int
+
     @property
     def llm_ready(self) -> bool:
         return bool(self.llm_base_url and self.llm_model)
@@ -92,4 +96,7 @@ def load_settings() -> Settings:
         context_char_budget=_env_int("CONTEXT_CHAR_BUDGET", 14000),
         max_rows=_env_int("MAX_ROWS", 100),
         statement_timeout_ms=_env_int("STATEMENT_TIMEOUT_MS", 15000),
+        sample_values=_env("SAMPLE_VALUES", "1") == "1",
+        value_sample_max_rows=_env_int("VALUE_SAMPLE_MAX_ROWS", 200000),
+        examples_top_k=_env_int("EXAMPLES_TOP_K", 2),
     )
