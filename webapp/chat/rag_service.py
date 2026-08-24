@@ -1,0 +1,134 @@
+from __future__ import annotations
+
+import threading
+
+from rag.config import Settings as RagSettings
+from rag.config import load_settings as _load_base
+from rag.pipeline import RagPipeline, make_pipeline as _make_pipeline
+
+from .crypto import decrypt
+
+_base_settings = None
+
+
+def base_settings() -> RagSettings:
+    global _base_settings
+    if _base_settings is None:
+        _base_settings = _load_base()
+    return _base_settings
+
+
+def build_rag_settings(dbp, llmp) -> RagSettings:
+    base = base_settings()
+    return RagSettings(
+        db_dialect=dbp.dialect,
+        db_host=dbp.host,
+        db_port=dbp.port or 0,
+        db_user=dbp.db_user,
+        db_password=decrypt(dbp.password_enc),
+        db_name=dbp.db_name,
+        db_url=dbp.db_url or None,
+        chroma_dir=base.chroma_dir,
+        collection=dbp.collection_name,
+        embed_provider=base.embed_provider,
+        openai_api_key=base.openai_api_key,
+        openai_base_url=base.openai_base_url,
+        embed_model=base.embed_model,
+        llm_base_url=llmp.base_url if llmp else None,
+        llm_model=llmp.model if llmp else None,
+        llm_api_key=decrypt(llmp.api_key_enc) if llmp else None,
+        llm_temperature=llmp.temperature if llmp else base.llm_temperature,
+        top_k=base.top_k,
+        context_char_budget=base.context_char_budget,
+        max_rows=base.max_rows,
+        statement_timeout_ms=base.statement_timeout_ms,
+    )
+
+
+_pipeline_cache: dict[tuple, RagPipeline] = {}
+
+
+def cache_key(dbp, llmp) -> tuple:
+    return (
+        dbp.pk,
+        dbp.collection_name,
+        int(dbp.updated_at.timestamp() * 1000),
+        llmp.pk if llmp else None,
+        int(llmp.updated_at.timestamp() * 1000) if llmp else 0,
+    )
+
+
+def get_pipeline(dbp, llmp) -> RagPipeline:
+    key = cache_key(dbp, llmp)
+    pipeline = _pipeline_cache.get(key)
+    if pipeline is None:
+        settings = build_rag_settings(dbp, llmp)
+        pipeline = _make_pipeline(settings)
+        _pipeline_cache.clear()
+        _pipeline_cache[key] = pipeline
+    return pipeline
+
+
+def run_ask(dbp, llmp, question: str) -> dict:
+    try:
+        pipeline = get_pipeline(dbp, llmp)
+        result = pipeline.ask(question, execute=True)
+    except Exception as exc:
+        return {"error": str(exc), "answer": f"Sorry — the request failed: {exc}"}
+    answer = result.answer
+    if not answer and result.sql and not result.error:
+        answer = "SQL generated (not answered — check LLM config):\n" + result.sql
+    elif not answer and result.error:
+        answer = f"Request failed: {result.error}"
+    return {
+        "sql": result.sql,
+        "explanation": result.explanation,
+        "columns": result.columns,
+        "rows": result.rows,
+        "row_count": result.row_count,
+        "truncated": result.truncated,
+        "tables_used": result.tables_used,
+        "answer": answer,
+        "error": result.error,
+    }
+
+
+def start_reindex(dbp) -> None:
+    thread = threading.Thread(target=_reindex_worker, args=(dbp.pk,), daemon=True)
+    thread.start()
+
+
+def _reindex_worker(dbp_id: int) -> None:
+    import time
+
+    from django.db import close_old_connections
+
+    from chat.models import DatabaseProfile
+
+    close_old_connections()
+    try:
+        dbp = DatabaseProfile.objects.get(pk=dbp_id)
+        dbp.index_status = DatabaseProfile.IndexStatus.INDEXING
+        dbp.index_error = ""
+        dbp.save(update_fields=["index_status", "index_error"])
+
+        from scripts.ingest import run_ingest
+
+        t0 = time.time()
+        stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+        close_old_connections()
+        dbp.refresh_from_db()
+        dbp.index_status = DatabaseProfile.IndexStatus.READY
+        dbp.indexed_vectors = stats["vectors_indexed"]
+        dbp.indexed_at = time.time()
+        dbp.index_error = ""
+        dbp.save(update_fields=["index_status", "indexed_vectors", "indexed_at", "index_error"])
+    except Exception as exc:
+        close_old_connections()
+        try:
+            dbp = DatabaseProfile.objects.get(pk=dbp_id)
+            dbp.index_status = DatabaseProfile.IndexStatus.ERROR
+            dbp.index_error = str(exc)[:2000]
+            dbp.save(update_fields=["index_status", "index_error"])
+        except Exception:
+            pass

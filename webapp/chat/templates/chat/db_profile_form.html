@@ -1,0 +1,16 @@
+{% extends "chat/base.html" %}
+{% block title %}{{ title|default:"Database profile" }}{% endblock %}
+{% block content %}
+<div class="auth-card wide-form">
+  <h1>{% if object %}Edit{% else %}New{% endif %} database</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Save</button>
+    <a class="btn ghost" href="{% url 'chat:db_list' %}">Cancel</a>
+  </form>
+  {% if object and object.indexed_vectors %}
+    <p class="muted small">Indexed: {{ object.indexed_vectors }} vectors at {{ object.indexed_at }}. Re-index after schema changes.</p>
+  {% endif %}
+</div>
+{% endblock %}

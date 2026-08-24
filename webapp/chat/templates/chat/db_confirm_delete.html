@@ -1,0 +1,11 @@
+{% extends "chat/base.html" %}
+{% block content %}
+<div class="auth-card">
+  <h1>Delete “{{ object.name }}”?</h1>
+  <p class="muted">Sessions using it will stop working. The vector collection is kept on disk.</p>
+  <form method="post">{% csrf_token %}
+    <button type="submit" class="btn danger">Yes, delete</button>
+    <a class="btn ghost" href="{% url 'chat:db_list' %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

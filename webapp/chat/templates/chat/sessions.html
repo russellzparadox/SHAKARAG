@@ -1,0 +1,27 @@
+{% extends "chat/base.html" %}
+{% block title %}Chats{% endblock %}
+{% block nav_chat %}active{% endblock %}
+{% block content %}
+<div class="grid-2">
+  <section class="panel">
+    <h2>Your chats</h2>
+    {% for s in sessions %}
+      <a class="row-link" href="{% url 'chat:detail' s.pk %}">
+        <span>{{ s.title }}</span>
+        <small>{{ s.database.name }} · {{ s.llm.name }} · {{ s.created_at|date:"M d H:i" }}</small>
+      </a>
+    {% empty %}
+      <p class="muted">No chats yet. Create one on the right →</p>
+    {% endfor %}
+  </section>
+  <section class="panel">
+    <h2>New chat</h2>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn">Start chatting</button>
+    </form>
+    <p class="muted">Pick an indexed database and an LLM profile.</p>
+  </section>
+</div>
+{% endblock %}

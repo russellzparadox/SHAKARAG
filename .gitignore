@@ -2,6 +2,8 @@
 __pycache__/
 *.pyc
 .env
-.chroma/
+.chroma*/
 catalog.json
 .pytest_cache/
+webapp/db.sqlite3
+webapp/**/*.pyc

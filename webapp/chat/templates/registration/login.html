@@ -1,0 +1,13 @@
+{% extends "chat/base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>Log in</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn wide">Log in</button>
+  </form>
+  <p class="muted">No account? <a href="{% url 'chat:register' %}">Sign up</a>.</p>
+</div>
+{% endblock %}

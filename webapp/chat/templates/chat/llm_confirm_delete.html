@@ -1,0 +1,10 @@
+{% extends "chat/base.html" %}
+{% block content %}
+<div class="auth-card">
+  <h1>Delete “{{ object.name }}”?</h1>
+  <form method="post">{% csrf_token %}
+    <button type="submit" class="btn danger">Yes, delete</button>
+    <a class="btn ghost" href="{% url 'chat:llm_list' %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

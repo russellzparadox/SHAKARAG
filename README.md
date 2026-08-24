@@ -133,8 +133,28 @@ Find the real network name with `docker network ls` (compose usually prefixes it
 - The default local embedder downloads a small ONNX MiniLM model on first run (~90 MB).
 - **Rotate the DB password if it was ever shared or committed**; keep `.env` out of git (already ignored).
 
+## Web app (Django)
+
+Full multi-user web UI in `webapp/`: registration + login, per-user **database profiles** and **LLM profiles**, background re-indexing, and a chat interface (session history, SQL/results drill-down).
+
+```bash
+cd webapp
+../.venv/bin/python manage.py migrate
+../.venv/bin/python manage.py seed_defaults        # shared DB/LLM profiles from .env
+../.venv/bin/python manage.py createsuperuser      # optional admin
+../.venv/bin/python manage.py runserver 8000
+```
+
+Then open http://127.0.0.1:8000 → sign up → **Databases** → *Index* a profile once → **New chat**.
+
+- Secrets (DB passwords, API keys) are encrypted at rest with a Fernet key derived from `DJANGO_SECRET_KEY` — set that env var in production.
+- Profiles are visible to all users; only their owner (or a superuser) can edit/delete them.
+- Indexing runs in a background thread; the badge on the Databases page polls until ready.
+- Chat stores every message with its generated SQL, result rows, and retrieved tables for auditing.
+
 ## Tests
 
 ```bash
-pytest tests/ -q
+pytest tests/ -q                       # core RAG tests
+cd webapp && ../.venv/bin/python manage.py test chat   # Django tests
 ```

@@ -1,0 +1,14 @@
+{% extends "chat/base.html" %}
+{% block title %}LLM profile{% endblock %}
+{% block content %}
+<div class="auth-card wide-form">
+  <h1>{% if object %}Edit{% else %}New{% endif %} LLM</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Save</button>
+    <a class="btn ghost" href="{% url 'chat:llm_list' %}">Cancel</a>
+  </form>
+  <p class="muted small">Any OpenAI-compatible endpoint works: 9Router (http://localhost:20128/v1), Ollama, LM Studio, OpenAI, Groq…</p>
+</div>
+{% endblock %}

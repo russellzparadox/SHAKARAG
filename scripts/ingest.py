@@ -17,9 +17,12 @@ from rag.enrich import fetch_odoo_metadata
 from rag.store import VectorStore
 
 
-def run_ingest(drop: bool = False, catalog_path: Path | None = None) -> dict[str, Any]:
+def run_ingest(
+    drop: bool = False, catalog_path: Path | None = None, settings: Any = None
+) -> dict[str, Any]:
     t0 = time.time()
-    settings = load_settings()
+    if settings is None:
+        settings = load_settings()
     dialect = get_dialect(settings)
 
     tables_map = dialect.introspect()

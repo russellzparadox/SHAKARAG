@@ -6,7 +6,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(_REPO_ROOT / ".env")
 
 
 def _env(key: str, default: str | None = None) -> str | None:
@@ -61,6 +62,13 @@ class Settings:
         return bool(self.llm_base_url and self.llm_model)
 
 
+def _env_path(key: str, default: str) -> Path:
+    value = Path(_env(key, default))
+    if not value.is_absolute():
+        value = _REPO_ROOT / value
+    return value
+
+
 def load_settings() -> Settings:
     return Settings(
         db_dialect=_env("DB_DIALECT", "postgres"),
@@ -70,7 +78,7 @@ def load_settings() -> Settings:
         db_password=_env("DB_PASSWORD", ""),
         db_name=_env("DB_NAME", "shaka"),
         db_url=_env("DB_URL"),
-        chroma_dir=Path(_env("CHROMA_DIR", ".chroma")),
+        chroma_dir=_env_path("CHROMA_DIR", ".chroma"),
         collection=_env("COLLECTION", "odoo_schema"),
         embed_provider=_env("EMBED_PROVIDER", "auto"),
         openai_api_key=_env("OPENAI_API_KEY"),

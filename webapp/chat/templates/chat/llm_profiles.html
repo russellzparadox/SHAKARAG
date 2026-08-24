@@ -1,0 +1,29 @@
+{% extends "chat/base.html" %}
+{% block title %}LLMs{% endblock %}
+{% block nav_llm %}active{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="panel-head">
+    <h2>LLM profiles</h2>
+    <a class="btn" href="{% url 'chat:llm_new' %}">+ Add LLM</a>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>Name</th><th>Endpoint</th><th>Model</th><th></th></tr></thead>
+    <tbody>
+    {% for p in object_list %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td><small>{{ p.base_url }}</small></td>
+        <td><code>{{ p.model }}</code></td>
+        <td class="actions">
+          <a class="btn small ghost" href="{% url 'chat:llm_edit' p.pk %}">Edit</a>
+          {% if p.owner == user %}<a class="btn small danger" href="{% url 'chat:llm_delete' p.pk %}">Delete</a>{% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="muted">No LLM profiles yet — add one (e.g. your 9Router endpoint).</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
