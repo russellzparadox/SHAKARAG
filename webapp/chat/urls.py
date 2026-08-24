@@ -10,6 +10,7 @@ urlpatterns = [
     path("chat/", views.SessionsView.as_view(), name="sessions"),
     path("chat/<int:pk>/", views.ChatDetailView.as_view(), name="detail"),
     path("chat/<int:pk>/send/", views.chat_send, name="send"),
+    path("chat/<int:pk>/language/", views.chat_language, name="language"),
     path("db/", views.DbProfileListView.as_view(), name="db_list"),
     path("db/new/", views.DbProfileCreateView.as_view(), name="db_new"),
     path("db/<int:pk>/edit/", views.DbProfileUpdateView.as_view(), name="db_edit"),

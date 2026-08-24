@@ -15,6 +15,18 @@
       <p>{{ object.llm.name }}</p>
       <small class="muted">{{ object.llm.model }}</small>
     </div>
+    <div class="side-card">
+      <h3>Answer language</h3>
+      <form method="post" action="{% url 'chat:language' object.pk %}">
+        {% csrf_token %}
+        <select name="language" onchange="this.form.submit()">
+          {% for code, label in object.Language.choices %}
+            <option value="{{ code }}" {% if object.language == code %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <noscript><button class="btn small" type="submit">Set</button></noscript>
+      </form>
+    </div>
   </aside>
 
   <section class="chat-main">

@@ -72,10 +72,23 @@ class LLMProfile(models.Model):
 
 
 class ChatSession(models.Model):
+    class Language(models.TextChoices):
+        AUTO = "auto", "Auto"
+        EN = "en", "English"
+        FA = "fa", "فارسی (Persian)"
+        AR = "ar", "العربية (Arabic)"
+        DE = "de", "Deutsch"
+        FR = "fr", "Français"
+        ES = "es", "Español"
+        TR = "tr", "Türkçe"
+        ZH = "zh", "中文"
+        RU = "ru", "Русский"
+
     title = models.CharField(max_length=200, default="New chat")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="chat_sessions")
     database = models.ForeignKey(DatabaseProfile, on_delete=models.PROTECT, related_name="sessions")
     llm = models.ForeignKey(LLMProfile, on_delete=models.PROTECT, related_name="sessions")
+    language = models.CharField(max_length=8, choices=Language.choices, default=Language.AUTO)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

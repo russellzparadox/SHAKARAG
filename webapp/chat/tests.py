@@ -151,6 +151,35 @@ class ChatSendTests(TestCase):
         resp = self.client.post(f"/chat/{session.pk}/send/", data='{"question":"  "}', content_type="application/json")
         self.assertEqual(resp.status_code, 400)
 
+    @patch("chat.rag_service.run_ask")
+    def test_send_passes_session_language(self, mock_ask):
+        mock_ask.return_value = {
+            "sql": "SELECT 1", "explanation": None, "columns": [], "rows": [],
+            "row_count": 0, "truncated": False, "tables_used": [],
+            "answer": "پاسخ", "error": None,
+        }
+        session = self._mk_session()
+        session.language = "fa"
+        session.save(update_fields=["language"])
+        self.client.post(
+            f"/chat/{session.pk}/send/", data='{"question":"q"}', content_type="application/json"
+        )
+        mock_ask.assert_called_once()
+        self.assertEqual(mock_ask.call_args.kwargs.get("answer_language"), "fa")
+
+    def test_change_language(self):
+        session = self._mk_session()
+        resp = self.client.post(f"/chat/{session.pk}/language/", {"language": "fa"})
+        self.assertEqual(resp.status_code, 302)
+        session.refresh_from_db()
+        self.assertEqual(session.language, "fa")
+
+    def test_change_language_invalid_kept(self):
+        session = self._mk_session()
+        self.client.post(f"/chat/{session.pk}/language/", {"language": "klingon"})
+        session.refresh_from_db()
+        self.assertEqual(session.language, "auto")
+
     def test_other_users_session_forbidden(self):
         other = User.objects.create_user("mallory", password="pw12345!!")
         session = ChatSession.objects.create(user=other, database=self.dbp, llm=self.llm)

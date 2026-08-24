@@ -80,3 +80,47 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/chat/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
+
+LOGS_DIR = BASE_DIR / "logs"
+LOGS_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} {levelname:7s} {name} — {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        "appfile": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOGS_DIR / "webapp.log",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 3,
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
+        "errorfile": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOGS_DIR / "errors.log",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 3,
+            "level": "ERROR",
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
+    },
+    "loggers": {
+        "chat": {"handlers": ["console", "appfile", "errorfile"], "level": "INFO"},
+        "scripts": {"handlers": ["console", "appfile", "errorfile"], "level": "INFO"},
+        "django.request": {"handlers": ["appfile", "errorfile"], "level": "WARNING", "propagate": False},
+    },
+    "root": {"handlers": ["console"], "level": "WARNING"},
+}
+

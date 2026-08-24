@@ -81,8 +81,8 @@ class LLMProfileForm(forms.ModelForm):
 class SessionCreateForm(forms.ModelForm):
     class Meta:
         model = ChatSession
-        fields = ["title", "database", "llm"]
-        labels = {"database": "Database", "llm": "LLM"}
+        fields = ["title", "database", "llm", "language"]
+        labels = {"database": "Database", "llm": "LLM", "language": "Answer language"}
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)

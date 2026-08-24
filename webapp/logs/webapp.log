@@ -1,0 +1,52 @@
+2026-08-24 14:13:01,296 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-24 14:13:01,779 WARNING django.request — Not Found: /chat/1/send/
+2026-08-24 14:13:05,546 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-24 14:13:06,043 WARNING django.request — Not Found: /chat/1/send/
+2026-08-24 14:15:17,332 INFO    chat.ask — ask ok db=Odoo shaka (Postgres) llm=9router default tables=['res_lang_install_rel', 'ir_act_server', 'payment_currency_rel', 'mail_mail', 'mail_template_ir_actions_report_rel', 'ir_act_server_res_partner_rel', 'ir_ui_view_group_rel', 'ir_act_server_group_rel'] rows=1
+2026-08-24 14:15:49,660 INFO    chat.test — log smoke test
+2026-08-24 14:16:53,710 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 14:17:11,524 INFO    chat.indexing — Indexing started for Odoo shaka (Postgres) (pk=1)
+2026-08-24 14:17:55,100 INFO    chat.indexing — Indexing finished for Odoo shaka (Postgres): 586 tables, 622 vectors in 43.6s
+2026-08-24 14:18:35,434 ERROR   chat.ask — ask failed db=Odoo shaka (Postgres) llm=9router default
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 77, in run_ask
+    result = pipeline.ask(question, execute=True, answer_language=answer_language)
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 194, in ask
+    hits = self.retrieve(question, top_k=top_k)
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 76, in retrieve
+    return self.store.query_text(question, top_k=k)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/store.py", line 72, in query_text
+    n_results=min(top_k, max(self.count, 1)),
+                             ^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/store.py", line 41, in count
+    return self.collection.count()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/chromadb/api/models/Collection.py", line 55, in count
+    return self._client._count(
+           ~~~~~~~~~~~~~~~~~~~^
+        collection_id=self.id,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        read_level=read_level,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/chromadb/api/rust.py", line 397, in _count
+    return self.bindings.count(str(collection_id), tenant, database)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+chromadb.errors.NotFoundError: Collection [4c8cb5cf-9d58-483c-a0b7-c34a8969922a] does not exist.
+2026-08-24 14:20:17,739 INFO    chat.indexing — Indexing started for new (pk=2)
+2026-08-24 14:31:46,365 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 14:31:54,547 INFO    chat.indexing — Indexing started for Odoo shaka (Postgres) (pk=1)
+2026-08-24 14:32:30,323 INFO    chat.indexing — Indexing finished for Odoo shaka (Postgres): 586 tables, 622 vectors in 35.8s
+2026-08-24 14:33:41,472 INFO    chat.ask — ask ok db=Odoo shaka (Postgres) llm=9router default tables=['discuss_call_history', 'mail_alias', 'pos_order', 'pos_preparation_display_reset_wizard', 'pos_prep_order', 'discuss_channel_member', 'account_journal', 'mail_message_link_preview'] rows=1
+2026-08-24 14:35:34,716 INFO    chat.ask — ask ok db=Odoo shaka (Postgres) llm=9router default tables=['res_lang_install_rel', 'module_country', 'base_language_install', 'base_language_import', 'payment_country_rel', 'ir_act_server', 'avatax_exemption_res_country_rel', 'res_lang'] rows=5
+2026-08-24 14:39:44,164 INFO    chat.ask — ask ok db=Odoo shaka (Postgres) llm=9router default tables=['base_language_install', 'mail_message_translation', 'res_lang_install_rel', 'res_lang', 'base_language_import', 'mail_template', 'res_partner', 'account_return_check_template'] rows=1
+2026-08-24 14:41:00,441 INFO    chat.indexing — Indexing started for shaka_dw (pk=3)
+2026-08-24 14:41:14,694 INFO    chat.indexing — Indexing finished for shaka_dw: 197 tables, 201 vectors in 14.3s
+2026-08-24 14:47:30,560 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['vwDataSourceConnectionStatus', 'vwDeltaUpdateHK', 'FactAccountEstablishment', 'GatheringLog', 'PurchasingDepartment', 'FactETLInfo', 'DimReceiptAndPaymentGuaranteeType', 'DimSubsidiaryLedger'] rows=0
+2026-08-24 14:49:26,889 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['vwDataSourceConnectionStatus', 'FactAccountEstablishment', 'DimGeographicalLocation', 'DimArrearsKind', 'vwEntitySetRatio', 'DimBusinessPolicy', 'vwManualScript', 'DimBasculePaper'] rows=0
+2026-08-24 14:51:23,837 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['vwDataSourceConnectionStatus', 'DimLogisticStep', 'DimPaymentStep', 'DimArrearsKind', 'DimProductionStep', 'FactAccountEstablishment', 'DimBusinessPolicy', 'DimPurchasingAgent'] rows=6
+2026-08-24 14:53:45,915 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['DimMachine', 'FactInventoryReserve', 'DimBusinessPolicy', 'DimProductionStep', 'DimShift', 'FactPartUnitConversion', 'vwDataSourceConnectionStatus', 'vwCompanyBasedEntity'] rows=1
+2026-08-24 14:59:56,637 INFO    chat.ask — ask ok db=shaka_dw llm=9router default tables=['DimMachine', 'FactInventoryReserve', 'DimBusinessPolicy', 'DimProductionStep', 'DimShift', 'FactPartUnitConversion', 'vwDataSourceConnectionStatus', 'vwCompanyBasedEntity'] rows=1

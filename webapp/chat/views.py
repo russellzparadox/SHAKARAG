@@ -92,7 +92,7 @@ def chat_send(request, pk):
     user_msg = ChatMessage.objects.create(session=session, role=ChatMessage.Role.USER, content=question)
 
     try:
-        result = rag_service.run_ask(session.database, session.llm, question)
+        result = rag_service.run_ask(session.database, session.llm, question, answer_language=session.language)
     except Exception as exc:
         result = {"answer": f"Request failed: {exc}", "error": str(exc)}
 
@@ -106,6 +106,19 @@ def chat_send(request, pk):
         },
     )
     return JsonResponse({"user": _msg_json(user_msg), "assistant": _msg_json(assistant_msg)})
+
+
+@login_required
+def chat_language(request, pk):
+    session = get_object_or_404(ChatSession.objects.filter(user=request.user), pk=pk)
+    if request.method == "POST":
+        lang = request.POST.get("language", "auto")
+        valid = [c[0] for c in ChatSession.Language.choices]
+        if lang in valid:
+            session.language = lang
+            session.save(update_fields=["language"])
+            messages.success(request, "Answer language updated.")
+    return redirect("chat:detail", pk=session.pk)
 
 
 def _msg_json(msg: ChatMessage) -> dict:

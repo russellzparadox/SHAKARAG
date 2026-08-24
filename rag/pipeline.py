@@ -31,6 +31,20 @@ Structure your answer as:
 If there are no rows, say so plainly and suggest what to check or query next."""
 
 
+ANSWER_LANGUAGES = {
+    "auto": "",
+    "en": "English",
+    "fa": "Persian (Farsi / فارسی)",
+    "ar": "Arabic",
+    "de": "German",
+    "fr": "French",
+    "es": "Spanish",
+    "tr": "Turkish",
+    "zh": "Simplified Chinese",
+    "ru": "Russian",
+}
+
+
 @dataclass
 class RagResult:
     question: str
@@ -133,7 +147,7 @@ class RagPipeline:
     def run_sql(self, sql: str) -> tuple[list[str], list[list], bool]:
         return self.dialect.execute_readonly(sql, self.settings.max_rows)
 
-    def synthesize_answer(self, question: str, sql: str, columns: list[str], rows: list[list], truncated: bool) -> str:
+    def synthesize_answer(self, question: str, sql: str, columns: list[str], rows: list[list], truncated: bool, answer_language: str = "auto") -> str:
         if self.llm is None:
             raise LLMError("No LLM configured for answer synthesis.")
 
@@ -153,9 +167,17 @@ class RagPipeline:
             f"QUESTION: {question}\n\nEXECUTED SQL:\n{sql}\n\n"
             f"RESULT ({len(rows)} rows):\n{chr(10).join(lines)}\n\nAnswer now."
         )
+        system = render_answer_system(self.dialect.label)
+        language_name = ANSWER_LANGUAGES.get((answer_language or "auto").lower())
+        if language_name and answer_language != "auto":
+            system += (
+                f"\n\nIMPORTANT: Write your ENTIRE answer in {language_name}, including the "
+                "'Query used' and 'Notes' sections. Keep SQL keywords, table names and column "
+                "names unchanged. Use proper locale conventions for numbers and dates."
+            )
         return self.llm.chat(
             [
-                {"role": "system", "content": render_answer_system(self.dialect.label)},
+                {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ]
         )
@@ -166,6 +188,7 @@ class RagPipeline:
         execute: bool = True,
         dry_run: bool = False,
         top_k: int | None = None,
+        answer_language: str = "auto",
     ) -> RagResult:
         result = RagResult(question=question)
         hits = self.retrieve(question, top_k=top_k)
@@ -195,7 +218,9 @@ class RagPipeline:
         result.truncated = truncated
 
         try:
-            result.answer = self.synthesize_answer(question, result.sql, columns, rows, truncated)
+            result.answer = self.synthesize_answer(
+                question, result.sql, columns, rows, truncated, answer_language=answer_language
+            )
         except LLMError as exc:
             result.answer = None
             result.error = str(exc)

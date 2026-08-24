@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import threading
 
 from rag.config import Settings as RagSettings
@@ -69,11 +70,17 @@ def get_pipeline(dbp, llmp) -> RagPipeline:
     return pipeline
 
 
-def run_ask(dbp, llmp, question: str) -> dict:
+def run_ask(dbp, llmp, question: str, answer_language: str = "auto") -> dict:
+    logger = logging.getLogger("chat.ask")
     try:
         pipeline = get_pipeline(dbp, llmp)
-        result = pipeline.ask(question, execute=True)
+        result = pipeline.ask(question, execute=True, answer_language=answer_language)
+        logger.info(
+            "ask ok db=%s llm=%s tables=%s rows=%s",
+            dbp.name, llmp.name if llmp else "-", result.tables_used, result.row_count,
+        )
     except Exception as exc:
+        logger.exception("ask failed db=%s llm=%s", dbp.name, llmp.name if llmp else "-")
         return {"error": str(exc), "answer": f"Sorry — the request failed: {exc}"}
     answer = result.answer
     if not answer and result.sql and not result.error:
@@ -99,18 +106,23 @@ def start_reindex(dbp) -> None:
 
 
 def _reindex_worker(dbp_id: int) -> None:
+    import logging
     import time
+    import traceback
 
     from django.db import close_old_connections
+    from django.utils import timezone
 
     from chat.models import DatabaseProfile
 
+    logger = logging.getLogger("chat.indexing")
     close_old_connections()
     try:
         dbp = DatabaseProfile.objects.get(pk=dbp_id)
         dbp.index_status = DatabaseProfile.IndexStatus.INDEXING
         dbp.index_error = ""
         dbp.save(update_fields=["index_status", "index_error"])
+        logger.info("Indexing started for %s (pk=%s)", dbp.name, dbp.pk)
 
         from scripts.ingest import run_ingest
 
@@ -120,15 +132,22 @@ def _reindex_worker(dbp_id: int) -> None:
         dbp.refresh_from_db()
         dbp.index_status = DatabaseProfile.IndexStatus.READY
         dbp.indexed_vectors = stats["vectors_indexed"]
-        dbp.indexed_at = time.time()
+        dbp.indexed_at = timezone.now()
         dbp.index_error = ""
         dbp.save(update_fields=["index_status", "indexed_vectors", "indexed_at", "index_error"])
+        logger.info(
+            "Indexing finished for %s: %s tables, %s vectors in %.1fs",
+            dbp.name, stats["tables"], stats["vectors_indexed"], time.time() - t0,
+        )
     except Exception as exc:
+        logger.error(
+            "Indexing failed for pk=%s: %s\n%s", dbp_id, exc, traceback.format_exc()
+        )
         close_old_connections()
         try:
             dbp = DatabaseProfile.objects.get(pk=dbp_id)
             dbp.index_status = DatabaseProfile.IndexStatus.ERROR
-            dbp.index_error = str(exc)[:2000]
+            dbp.index_error = f"{exc}\n\n{traceback.format_exc()}"[:4000]
             dbp.save(update_fields=["index_status", "index_error"])
         except Exception:
-            pass
+            logger.critical("Could not persist index error state for pk=%s", dbp_id, exc_info=True)

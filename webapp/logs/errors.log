@@ -1,0 +1,29 @@
+2026-08-24 14:18:35,434 ERROR   chat.ask — ask failed db=Odoo shaka (Postgres) llm=9router default
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 77, in run_ask
+    result = pipeline.ask(question, execute=True, answer_language=answer_language)
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 194, in ask
+    hits = self.retrieve(question, top_k=top_k)
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 76, in retrieve
+    return self.store.query_text(question, top_k=k)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/store.py", line 72, in query_text
+    n_results=min(top_k, max(self.count, 1)),
+                             ^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/store.py", line 41, in count
+    return self.collection.count()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/chromadb/api/models/Collection.py", line 55, in count
+    return self._client._count(
+           ~~~~~~~~~~~~~~~~~~~^
+        collection_id=self.id,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        read_level=read_level,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/chromadb/api/rust.py", line 397, in _count
+    return self.bindings.count(str(collection_id), tenant, database)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+chromadb.errors.NotFoundError: Collection [4c8cb5cf-9d58-483c-a0b7-c34a8969922a] does not exist.

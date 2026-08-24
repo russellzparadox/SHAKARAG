@@ -109,6 +109,10 @@ button.linklike { font-size: inherit; }
 .side-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
 .side-card h3 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; color: var(--muted); letter-spacing: .8px; }
 .side-card p { margin: 0 0 6px; font-weight: 600; }
+.side-card select {
+  width: 100%; padding: 8px 10px; background: var(--panel-2);
+  border: 1px solid var(--border); color: var(--text); border-radius: 8px; font-size: 13.5px;
+}
 
 .chat-main { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
 .messages-list { flex: 1; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
