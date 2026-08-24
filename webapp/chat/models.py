@@ -89,6 +89,8 @@ class ChatSession(models.Model):
     database = models.ForeignKey(DatabaseProfile, on_delete=models.PROTECT, related_name="sessions")
     llm = models.ForeignKey(LLMProfile, on_delete=models.PROTECT, related_name="sessions")
     language = models.CharField(max_length=8, choices=Language.choices, default=Language.AUTO)
+    auto_clarify = models.BooleanField(default=True)
+    pending_question = models.TextField(blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

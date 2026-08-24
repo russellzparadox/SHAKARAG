@@ -99,3 +99,23 @@ chromadb.errors.NotFoundError: Collection [4c8cb5cf-9d58-483c-a0b7-c34a8969922a]
 2026-08-24 16:37:55,519 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 tables=['FactBankAccountOpeningBalance', 'DimBank', 'DimReceiptAndPaymentCause', 'DimBankAccount', 'FactBankAccountTransaction', 'FactCustomerBalance', 'FactAccountEstablishment', 'DimFinancialVoucherKind'] rows=1
 2026-08-24 16:42:51,973 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 tables=['DimPaymentItem', 'DimPayableNote', 'FactAccountBalance', 'FactBankAccountOpeningBalance', 'DimCashFlowFactor', 'FactCustomerBalance', 'FactBankAccountTransaction', 'DimBankAccount'] rows=0
 2026-08-24 16:43:05,393 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['DimPaymentItem', 'DimPayableNote', 'FactAccountBalance', 'FactBankAccountOpeningBalance', 'DimCashFlowFactor', 'FactCustomerBalance', 'FactBankAccountTransaction', 'DimBankAccount'] rows=1
+2026-08-24 16:48:45,561 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super tables=['FactSales', 'DimSalesSystem', 'DimSalesStep', 'DimSales', 'DimSalesType', 'DimSalesCenter', 'DimSalesPreOrderItem', 'DimSalesRequestItem'] rows=0
+2026-08-24 17:00:08,594 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-24 17:00:09,080 WARNING django.request — Not Found: /chat/1/send/
+2026-08-24 17:00:53,398 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-24 17:00:53,878 WARNING django.request — Not Found: /chat/1/send/
+2026-08-24 17:01:26,186 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-24 17:01:26,669 WARNING django.request — Not Found: /chat/1/send/
+2026-08-24 17:04:37,890 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=True tables=['FactLogisticControl', 'vwFactCollectionPeriod', 'FactDepreciation', 'FactPartPrice_Pre', 'DimDepreciationState', 'DimPricingSource'] rows=0
+2026-08-24 17:05:09,832 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['FactLogisticControl', 'FactPartPrice_Pre', 'FactSales', 'FactMiscellaneousCost', 'FactDepreciation'] rows=1
+2026-08-24 17:07:40,809 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 17:08:24,878 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimShift', 'DimMachine', 'DimBusinessPolicy', 'DimSupplier', 'DimCompany', 'DimSubsidiaryLedger', 'DimProductionStep', 'DimDirectDeliveryReceiptItem'] rows=1
+2026-08-24 17:09:56,903 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 17:09:58,629 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 17:10:15,484 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 17:12:11,965 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 17:13:59,247 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 17:14:38,053 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=True tables=['vwCategory', 'DimSalesAccount', 'FactAccountBalance', 'vwUserAccess', 'vwGenerateDWStructre', 'vwFactCollectionPeriod', 'DimBatch', 'FactInventoryReserve'] rows=0
+2026-08-24 17:17:39,423 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimSalesAccount', 'DimSalesItemDiscountMode', 'DimAccountDebitCreditStatementItem', 'DimSalesDocumentStatus', 'DimSalesPreOrderItem', 'DimSales', 'DimSalesOrderItem', 'DimSalesContractItem'] rows=1
+2026-08-24 17:17:39,701 INFO    chat.ask — ask ok db=shaka_dw llm=9router default clarify=True tables=['vwCategory', 'DimSalesAccount', 'FactAccountBalance', 'vwUserAccess', 'vwGenerateDWStructre', 'vwFactCollectionPeriod', 'DimBatch', 'FactInventoryReserve'] rows=0
+2026-08-24 17:18:18,038 INFO    chat.ask — ask ok db=shaka_dw llm=9router default clarify=False tables=['DimSalesAccount', 'DimSalesItemDiscountMode', 'DimSalesDocumentStatus', 'DimSalesPreOrderItem', 'vwUserAccess', 'DimSalesOrderItem', 'DimSales', 'DimAccountDebitCreditStatementItem'] rows=1

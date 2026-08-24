@@ -61,6 +61,24 @@ class RagResult:
     context: str | None = None
     answer: str | None = None
     error: str | None = None
+    needs_clarification: bool = False
+    clarify_question: str | None = None
+    options: list[str] = field(default_factory=list)
+
+
+SYSTEM_CLARIFY = """You are a careful analytics gatekeeper standing between the user and a database.
+Given the user's QUESTION and the most relevant candidate tables found in the schema, decide if the request can be queried confidently.
+
+Output ONLY JSON, one of:
+{"action": "proceed"}
+{"action": "clarify", "question": "<ONE short clarifying question>", "options": ["<option 1>", "<option 2>", "<option 3>"]}
+
+Ask a clarifying question ONLY when ambiguity would materially change the query, such as:
+- several plausible tables for the same business entity
+- an unclear measure (amount vs quantity vs count)
+- an unspecified time window that changes the result
+- a term matching multiple unrelated columns
+Never ask about things visible in the schema; never be pedantic. Maximum 3 short options."""
 
 
 class RagPipeline:
@@ -240,6 +258,34 @@ class RagPipeline:
             ]
         )
 
+    def _clarify_decision(self, question: str, hits: list[dict]) -> dict | None:
+        if self.llm is None or not hits:
+            return None
+        lines = []
+        for h in hits[:12]:
+            m = h.get("metadata") or {}
+            label = f" — {m['label']}" if m.get("label") else ""
+            role = f" [{m['wh_role']}]" if m.get("wh_role") else ""
+            lines.append(f"- {m.get('schema','')}.{m.get('table','')}{label}{role}")
+        try:
+            parsed = self.llm.chat_json(
+                [
+                    {"role": "system", "content": SYSTEM_CLARIFY},
+                    {
+                        "role": "user",
+                        "content": f"CANDIDATE TABLES:\n" + "\n".join(lines)
+                        + f"\n\nQUESTION: {question}",
+                    },
+                ],
+                max_tokens=400,
+            )
+        except LLMError:
+            return None
+        if isinstance(parsed, dict) and parsed.get("action") == "clarify" and parsed.get("question"):
+            options = [str(o) for o in (parsed.get("options") or [])][:4]
+            return {"question": str(parsed["question"]), "options": options}
+        return None
+
     def ask(
         self,
         question: str,
@@ -247,6 +293,7 @@ class RagPipeline:
         dry_run: bool = False,
         top_k: int | None = None,
         answer_language: str = "auto",
+        clarify: bool = False,
     ) -> RagResult:
         result = RagResult(question=question)
         hits = self.retrieve(question, top_k=top_k)
@@ -256,6 +303,14 @@ class RagPipeline:
 
         if dry_run:
             return result
+
+        if clarify and not self._few_shot_block(question):
+            decision = self._clarify_decision(question, hits)
+            if decision:
+                result.needs_clarification = True
+                result.clarify_question = decision["question"]
+                result.options = decision["options"]
+                return result
 
         gen = self.generate_sql(question, context)
         result.sql = gen["sql"]

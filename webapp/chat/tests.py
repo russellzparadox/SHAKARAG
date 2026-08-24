@@ -180,6 +180,45 @@ class ChatSendTests(TestCase):
         session.refresh_from_db()
         self.assertEqual(session.language, "auto")
 
+    @patch("chat.rag_service.run_ask")
+    def test_clarify_flow_saves_pending_and_meta(self, mock_ask):
+        mock_ask.return_value = {
+            "clarify": True, "clarify_question": "Which total do you mean?",
+            "options": ["Amount", "Quantity"], "sql": None, "explanation": None,
+            "columns": [], "rows": [], "row_count": 0, "truncated": False,
+            "tables_used": [], "answer": None, "error": None,
+        }
+        session = self._mk_session()
+        resp = self.client.post(
+            f"/chat/{session.pk}/send/", data='{"question":"show totals"}', content_type="application/json"
+        )
+        data = resp.json()
+        session.refresh_from_db()
+        self.assertTrue(data["assistant"]["meta"]["type"] == "clarify")
+        self.assertEqual(session.pending_question, "show totals")
+        self.assertEqual(mock_ask.call_args.kwargs.get("allow_clarify"), True)
+
+    @patch("chat.rag_service.run_ask")
+    def test_answer_after_clarify_combines_questions(self, mock_ask):
+        session = self._mk_session()
+        session.pending_question = "show totals"
+        session.save(update_fields=["pending_question"])
+        mock_ask.return_value = {
+            "clarify": False, "clarify_question": "", "options": [],
+            "sql": "SELECT SUM(x) FROM t", "explanation": None,
+            "columns": ["s"], "rows": [[5]], "row_count": 1, "truncated": False,
+            "tables_used": ["t"], "answer": "Total is 5.", "error": None,
+        }
+        self.client.post(
+            f"/chat/{session.pk}/send/", data='{"question":"amount"}', content_type="application/json"
+        )
+        kwargs = mock_ask.call_args
+        self.assertIn("show totals", kwargs.args[2])
+        self.assertIn("(User's clarification: amount)", kwargs.args[2])
+        self.assertEqual(kwargs.kwargs.get("allow_clarify"), False)
+        session.refresh_from_db()
+        self.assertEqual(session.pending_question, "")
+
     def test_other_users_session_forbidden(self):
         other = User.objects.create_user("mallory", password="pw12345!!")
         session = ChatSession.objects.create(user=other, database=self.dbp, llm=self.llm)

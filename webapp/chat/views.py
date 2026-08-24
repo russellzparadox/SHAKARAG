@@ -91,19 +91,44 @@ def chat_send(request, pk):
 
     user_msg = ChatMessage.objects.create(session=session, role=ChatMessage.Role.USER, content=question)
 
+    pending = session.pending_question
+    if pending:
+        question_for_rag = f"{pending}\n(User's clarification: {question})"
+        session.pending_question = ""
+        session.save(update_fields=["pending_question"])
+    else:
+        question_for_rag = question
+
     try:
-        result = rag_service.run_ask(session.database, session.llm, question, answer_language=session.language)
+        result = rag_service.run_ask(
+            session.database,
+            session.llm,
+            question_for_rag,
+            answer_language=session.language,
+            allow_clarify=session.auto_clarify and not bool(pending),
+        )
     except Exception as exc:
         result = {"answer": f"Request failed: {exc}", "error": str(exc)}
+
+    is_clarify = bool(result.get("clarify"))
+    if is_clarify:
+        session.pending_question = question_for_rag
+        session.save(update_fields=["pending_question"])
+
+    assistant_meta: dict = {
+        "type": "clarify" if is_clarify else "answer",
+        "options": result.get("options") or [],
+    }
+    for key in ("sql", "explanation", "columns", "rows", "row_count", "truncated", "tables_used", "error"):
+        assistant_meta[key] = result.get(key)
 
     assistant_msg = ChatMessage.objects.create(
         session=session,
         role=ChatMessage.Role.ASSISTANT,
-        content=result.get("answer") or "(no answer)",
-        meta={
-            k: result.get(k)
-            for k in ("sql", "explanation", "columns", "rows", "row_count", "truncated", "tables_used", "error")
-        },
+        content=(result.get("clarify_question") or result.get("answer") or "(no answer)")
+        if is_clarify
+        else (result.get("answer") or "(no answer)"),
+        meta=assistant_meta,
     )
     return JsonResponse({"user": _msg_json(user_msg), "assistant": _msg_json(assistant_msg)})
 
@@ -116,8 +141,9 @@ def chat_language(request, pk):
         valid = [c[0] for c in ChatSession.Language.choices]
         if lang in valid:
             session.language = lang
-            session.save(update_fields=["language"])
-            messages.success(request, "Answer language updated.")
+        session.auto_clarify = request.POST.get("auto_clarify") == "on"
+        session.save(update_fields=["language", "auto_clarify"])
+        messages.success(request, "Chat settings updated.")
     return redirect("chat:detail", pk=session.pk)
 
 

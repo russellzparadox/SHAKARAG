@@ -16,15 +16,20 @@
       <small class="muted">{{ object.llm.model }}</small>
     </div>
     <div class="side-card">
-      <h3>Answer language</h3>
+      <h3>Chat settings</h3>
       <form method="post" action="{% url 'chat:language' object.pk %}">
         {% csrf_token %}
+        <label class="side-label">Answer language</label>
         <select name="language" onchange="this.form.submit()">
           {% for code, label in object.Language.choices %}
             <option value="{{ code }}" {% if object.language == code %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
-        <noscript><button class="btn small" type="submit">Set</button></noscript>
+        <label class="check-row">
+          <input type="checkbox" name="auto_clarify" {% if object.auto_clarify %}checked{% endif %} onchange="this.form.submit()">
+          <span>Ask me when unsure</span>
+        </label>
+        <noscript><button class="btn small" type="submit">Save</button></noscript>
       </form>
     </div>
   </aside>
@@ -34,7 +39,12 @@
       {% for m in object.messages.all %}
         <div class="bubble {{ m.role }}">
           <div class="bubble-text">{{ m.content|linebreaksbr }}</div>
-          {% if m.role == 'assistant' and m.meta %}
+          {% if m.role == 'assistant' and m.meta.type == 'clarify' %}
+            <div class="clarify-options">
+              {% for opt in m.meta.options %}<span class="chip chip-option">{{ opt }}</span>{% endfor %}
+              <small class="muted">(answered above)</small>
+            </div>
+          {% elif m.role == 'assistant' and m.meta %}
             <div class="meta-block">
               {% if m.meta.sql %}
                 <details><summary>SQL</summary><pre>{{ m.meta.sql }}</pre></details>

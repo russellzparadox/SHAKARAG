@@ -47,10 +47,32 @@
     return html + "</div>";
   }
 
+  function clarifyBlock(meta) {
+    let html = `<div class="clarify-live"><p class="clarify-q">🤔 ${esc(meta.clarify_question || "")}</p>`;
+    if (meta.options && meta.options.length) {
+      html += '<div class="chips">';
+      for (const o of meta.options) {
+        html += `<button class="chip chip-option" data-opt="${esc(o)}">${esc(o)}</button>`;
+      }
+      html += "</div>";
+    }
+    html += '<small class="muted">pick an option or type your own answer</small></div>';
+    return html;
+  }
+
+  function wireClarify(root) {
+    root.querySelectorAll(".chip-option").forEach((el) => {
+      el.addEventListener("click", () => {
+        input.value = el.dataset.opt;
+        form.dispatchEvent(new Event("submit", { cancelable: true }));
+      });
+    });
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const question = input.value.trim();
-    if (!question) return;
+    if (!question || btn.disabled) return;
     bubble("user", esc(question));
     input.value = "";
     btn.disabled = true;
@@ -64,11 +86,17 @@
       });
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || resp.statusText);
-      pending.innerHTML =
-        esc(data.assistant.content).replace(/\n/g, "<br>") +
-        resultBlock(data.assistant.meta || {}) +
-        feedbackBlock(data.assistant.id);
-      wireFeedback(pending);
+      const a = data.assistant;
+      if (a.meta && a.meta.type === "clarify") {
+        pending.innerHTML = esc(a.content).replace(/\n/g, "<br>") + clarifyBlock(a.meta || {});
+        wireClarify(pending);
+      } else {
+        pending.innerHTML =
+          esc(a.content).replace(/\n/g, "<br>") +
+          resultBlock(a.meta || {}) +
+          feedbackBlock(a.id);
+        wireFeedback(pending);
+      }
     } catch (err) {
       pending.innerHTML = `⚠️ ${esc(err.message)}`;
     } finally {

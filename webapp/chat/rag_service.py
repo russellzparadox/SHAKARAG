@@ -73,14 +73,20 @@ def get_pipeline(dbp, llmp) -> RagPipeline:
     return pipeline
 
 
-def run_ask(dbp, llmp, question: str, answer_language: str = "auto") -> dict:
+def run_ask(dbp, llmp, question: str, answer_language: str = "auto", allow_clarify: bool = False) -> dict:
     logger = logging.getLogger("chat.ask")
     try:
         pipeline = get_pipeline(dbp, llmp)
-        result = pipeline.ask(question, execute=True, answer_language=answer_language)
+        result = pipeline.ask(
+            question, execute=True, answer_language=answer_language, clarify=allow_clarify
+        )
         logger.info(
-            "ask ok db=%s llm=%s tables=%s rows=%s",
-            dbp.name, llmp.name if llmp else "-", result.tables_used, result.row_count,
+            "ask ok db=%s llm=%s clarify=%s tables=%s rows=%s",
+            dbp.name,
+            llmp.name if llmp else "-",
+            result.needs_clarification,
+            result.tables_used,
+            result.row_count,
         )
     except Exception as exc:
         logger.exception("ask failed db=%s llm=%s", dbp.name, llmp.name if llmp else "-")
@@ -91,6 +97,9 @@ def run_ask(dbp, llmp, question: str, answer_language: str = "auto") -> dict:
     elif not answer and result.error:
         answer = f"Request failed: {result.error}"
     return {
+        "clarify": result.needs_clarification,
+        "clarify_question": result.clarify_question or "",
+        "options": result.options,
         "sql": result.sql,
         "explanation": result.explanation,
         "columns": result.columns,
