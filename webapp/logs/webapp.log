@@ -119,3 +119,14 @@ chromadb.errors.NotFoundError: Collection [4c8cb5cf-9d58-483c-a0b7-c34a8969922a]
 2026-08-24 17:17:39,423 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimSalesAccount', 'DimSalesItemDiscountMode', 'DimAccountDebitCreditStatementItem', 'DimSalesDocumentStatus', 'DimSalesPreOrderItem', 'DimSales', 'DimSalesOrderItem', 'DimSalesContractItem'] rows=1
 2026-08-24 17:17:39,701 INFO    chat.ask — ask ok db=shaka_dw llm=9router default clarify=True tables=['vwCategory', 'DimSalesAccount', 'FactAccountBalance', 'vwUserAccess', 'vwGenerateDWStructre', 'vwFactCollectionPeriod', 'DimBatch', 'FactInventoryReserve'] rows=0
 2026-08-24 17:18:18,038 INFO    chat.ask — ask ok db=shaka_dw llm=9router default clarify=False tables=['DimSalesAccount', 'DimSalesItemDiscountMode', 'DimSalesDocumentStatus', 'DimSalesPreOrderItem', 'vwUserAccess', 'DimSalesOrderItem', 'DimSales', 'DimAccountDebitCreditStatementItem'] rows=1
+2026-08-24 17:46:13,814 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 17:46:34,605 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 17:46:48,770 WARNING django.request — Not Found: /favicon.ico
+2026-08-24 17:50:07,645 INFO    chat.feedback — example removed for db=shaka_dw
+2026-08-24 17:50:21,231 INFO    chat.ask — ask ok db=shaka_dw llm=9router default clarify=True tables=['vwCategory', 'DimSalesAccount', 'FactAccountBalance', 'vwUserAccess', 'vwGenerateDWStructre', 'vwFactCollectionPeriod', 'DimBatch', 'FactInventoryReserve'] rows=0
+2026-08-24 17:51:08,470 INFO    chat.ask — ask ok db=shaka_dw llm=9router default clarify=False tables=['DimSalesAccount', 'DimSalesDocumentStatus', 'DimChildCount', 'vwUserAccess', 'DimSalesPreOrderItem', 'DimSalesItemDiscountMode', 'DimSalesOrderItem', 'DimQuotation'] rows=100
+2026-08-24 17:51:48,015 WARNING django.request — Not Found: /llm/1/edit/
+2026-08-24 17:51:51,187 WARNING django.request — Not Found: /llm/2/edit/
+2026-08-24 17:51:52,503 WARNING django.request — Not Found: /llm/3/edit/
+2026-08-24 17:52:19,230 INFO    chat.ask — ask ok db=shaka_dw llm=9router default clarify=False tables=['vwCategory', 'DimSalesAccount', 'FactAccountBalance', 'vwUserAccess', 'vwGenerateDWStructre', 'vwFactCollectionPeriod', 'DimBatch', 'FactInventoryReserve'] rows=1
+2026-08-24 17:52:51,104 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimSalesAccount', 'DimSalesPreOrderItem', 'DimSupplier', 'DimSalesDocumentStatus', 'DimSales', 'DimSalesOrderItem', 'DimUnloadingOrderItem', 'DimLoadingPoint'] rows=100
