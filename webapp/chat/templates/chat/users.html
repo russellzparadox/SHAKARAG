@@ -1,0 +1,61 @@
+{% extends "chat/base.html" %}
+{% block title %}Users{% endblock %}
+{% block nav_users %}active{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="panel-head">
+    <h2>User access</h2>
+  </div>
+  <p class="muted small">
+    Everyone can chat with all databases and LLMs. Here you control who may
+    <b>manage</b> them (add, edit, delete, index). Superusers always can.
+  </p>
+
+  {% for u in users %}
+  <div class="user-card">
+    <div class="user-head">
+      <div>
+        <b>{{ u.username }}</b>
+        <small class="muted">{{ u.email|default:"—" }}
+          {% if u.is_superuser %}<span class="badge st-ready">superuser</span>{% endif %}
+          {% if not u.is_active %}<span class="badge st-error">disabled</span>{% endif %}
+        </small>
+      </div>
+      {% if u != request.user %}
+      <form method="post" action="{% url 'chat:user_toggle_active' u.pk %}" class="inline-form">{% csrf_token %}
+        <button class="btn small ghost">{{ u.is_active|yesno:"Disable,Enable" }}</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <form method="post" action="{% url 'chat:user_access_save' u.pk %}" class="access-flags-row">
+      {% csrf_token %}
+      {% with access=u.access %}
+      <label class="check-row">
+        <input type="checkbox" name="can_edit_databases" {% if u.access and u.access.can_edit_databases %}checked{% endif %}>
+        <span>Can manage databases</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" name="can_edit_llms" {% if u.access and u.access.can_edit_llms %}checked{% endif %}>
+        <span>Can manage LLMs</span>
+      </label>
+      <button type="submit" class="btn small">Save</button>
+      {% endwith %}
+    </form>
+  </div>
+  {% empty %}
+  <p class="muted">No users yet.</p>
+  {% endfor %}
+</section>
+
+<section class="panel" style="margin-top:20px">
+  <h2>Create user</h2>
+  <form method="post" action="{% url 'chat:user_create' %}" class="create-user-grid">
+    {% csrf_token %}
+    <input type="text" name="username" placeholder="username" required minlength="3">
+    <input type="email" name="email" placeholder="email (optional)">
+    <input type="password" name="password" placeholder="password (8+ chars)" required minlength="8">
+    <button class="btn">Create</button>
+  </form>
+</section>
+{% endblock %}

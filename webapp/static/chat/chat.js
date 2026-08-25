@@ -28,17 +28,16 @@
       html += `<details><summary>SQL</summary><pre>${esc(meta.sql)}</pre></details>`;
     }
     if (meta.columns && meta.columns.length) {
-      const cap = Math.min(meta.rows.length, 25);
       html += `<details open><summary>Results (${meta.row_count} rows)</summary><div class="table-scroll"><table><thead><tr>`;
       for (const c of meta.columns) html += `<th>${esc(c)}</th>`;
       html += "</tr></thead><tbody>";
-      for (const row of meta.rows.slice(0, cap)) {
+      for (const row of meta.rows) {
         html += "<tr>";
         for (const v of row) html += `<td>${v === null ? "NULL" : esc(String(v).slice(0, 80))}</td>`;
         html += "</tr>";
       }
       html += "</tbody></table></div>";
-      if (meta.truncated) html += "<small>results capped</small>";
+      if (meta.truncated) html += `<small>result capped at server limit — refine the query for more</small>`;
       html += "</details>";
     }
     if (meta.tables_used && meta.tables_used.length) {

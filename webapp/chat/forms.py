@@ -26,7 +26,7 @@ class DatabaseProfileForm(forms.ModelForm):
 
     class Meta:
         model = DatabaseProfile
-        fields = [
+        fields = [  # noqa: RUF012
             "name", "dialect", "host", "port", "db_user", "db_name", "db_url",
             "collection_name",
         ]
@@ -86,6 +86,8 @@ class SessionCreateForm(forms.ModelForm):
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["database"].queryset = DatabaseProfile.objects.all()
-        self.fields["llm"].queryset = LLMProfile.objects.all()
+        from chat.views import visible_profiles
+
+        self.fields["database"].queryset = visible_profiles(user, DatabaseProfile)
+        self.fields["llm"].queryset = visible_profiles(user, LLMProfile)
         self.fields["title"].required = False

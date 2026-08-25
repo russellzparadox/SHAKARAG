@@ -22,4 +22,8 @@ urlpatterns = [
     path("llm/new/", views.LlmProfileCreateView.as_view(), name="llm_new"),
     path("llm/<int:pk>/edit/", views.LlmProfileUpdateView.as_view(), name="llm_edit"),
     path("llm/<int:pk>/delete/", views.LlmProfileDeleteView.as_view(), name="llm_delete"),
+    path("users/", views.user_admin, name="user_admin"),
+    path("users/<int:pk>/access/", views.user_access_save, name="user_access_save"),
+    path("users/create/", views.user_create, name="user_create"),
+    path("users/<int:pk>/toggle-active/", views.user_toggle_active, name="user_toggle_active"),
 ]

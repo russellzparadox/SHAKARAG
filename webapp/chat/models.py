@@ -71,6 +71,15 @@ class LLMProfile(models.Model):
         return self.name
 
 
+class UserAccess(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="access")
+    can_edit_databases = models.BooleanField(default=False)
+    can_edit_llms = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f"Access({self.user.username})"
+
+
 class ChatSession(models.Model):
     class Language(models.TextChoices):
         AUTO = "auto", "Auto"

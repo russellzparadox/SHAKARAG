@@ -54,12 +54,12 @@
                   <div class="table-scroll"><table>
                     <thead><tr>{% for c in m.meta.columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
                     <tbody>
-                    {% for row in m.meta.rows|slice:":25" %}
+                    {% for row in m.meta.rows %}
                       <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
                     {% endfor %}
                     </tbody>
                   </table></div>
-                  {% if m.meta.truncated %}<small>results capped</small>{% endif %}
+                  {% if m.meta.truncated %}<small>result capped at server limit — refine the query for more</small>{% endif %}
                 </details>
               {% endif %}
               {% if m.meta.tables_used %}

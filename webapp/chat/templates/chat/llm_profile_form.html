@@ -6,8 +6,10 @@
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn">Save</button>
-    <a class="btn ghost" href="{% url 'chat:llm_list' %}">Cancel</a>
+    <div class="form-actions">
+      <button type="submit" class="btn">Save</button>
+      <a class="btn ghost" href="{% url 'chat:llm_list' %}">Cancel</a>
+    </div>
   </form>
   <p class="muted small">Any OpenAI-compatible endpoint works: 9Router (http://localhost:20128/v1), Ollama, LM Studio, OpenAI, Groq…</p>
 </div>

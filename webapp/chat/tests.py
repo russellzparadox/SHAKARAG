@@ -56,6 +56,9 @@ class ProfileAccessTests(TestCase):
         self.client.force_login(self.user)
 
     def test_create_db_profile_encrypts_password(self):
+        from chat.models import UserAccess
+
+        UserAccess.objects.create(user=self.user, can_edit_databases=True)
         resp = self.client.post(
             "/db/new/",
             {
@@ -96,6 +99,98 @@ class ProfileAccessTests(TestCase):
         DatabaseProfile.objects.create(name="shared", collection_name="shared_c", owner=None)
         resp = self.client.get("/db/")
         self.assertContains(resp, "shared")
+
+
+class PermissionTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user("boss", password="pw12345!!", is_superuser=True)
+        self.editor = User.objects.create_user("editor", password="pw12345!!")
+        self.plain = User.objects.create_user("plain", password="pw12345!!")
+        from chat.models import UserAccess
+
+        UserAccess.objects.create(user=self.editor, can_edit_databases=True)
+        self.dbp = DatabaseProfile.objects.create(
+            name="Odoo shaka (Postgres)", collection_name="cd1", owner=self.admin
+        )
+
+    def test_no_add_button_without_permission(self):
+        self.client.force_login(self.plain)
+        resp = self.client.get("/db/")
+        self.assertNotContains(resp, "+ Add database")
+
+    def test_add_button_with_permission(self):
+        self.client.force_login(self.editor)
+        resp = self.client.get("/db/")
+        self.assertContains(resp, "+ Add database")
+
+    def test_superuser_sees_management(self):
+        self.client.force_login(self.admin)
+        resp = self.client.get("/db/")
+        self.assertContains(resp, "+ Add database")
+        self.assertContains(resp, "Edit")
+
+    def test_plain_user_cannot_open_create_form(self):
+        self.client.force_login(self.plain)
+        resp = self.client.get("/db/new/", follow=True)
+        self.assertContains(resp, "permission to manage databases")
+
+    def test_editor_manages_any_but_plain_cannot(self):
+        self.client.force_login(self.editor)
+        resp = self.client.get(f"/db/{self.dbp.pk}/edit/")
+        self.assertEqual(resp.status_code, 200)
+        self.client.force_login(self.plain)
+        resp = self.client.get(f"/db/{self.dbp.pk}/edit/")
+        self.assertEqual(resp.status_code, 404)
+
+    def test_owner_can_edit_own(self):
+        self.client.force_login(self.admin)
+        resp = self.client.get(f"/db/{self.dbp.pk}/edit/")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_all_profiles_visible_to_plain_users(self):
+        DatabaseProfile.objects.create(
+            name="Warehouse", dialect="mssql", collection_name="dw1", owner=self.admin
+        )
+        self.client.force_login(self.plain)
+        resp = self.client.get("/db/")
+        self.assertContains(resp, "Warehouse")
+        self.assertContains(resp, "Odoo shaka (Postgres)")
+
+    def test_public_profile_visible_to_all(self):
+        DatabaseProfile.objects.create(name="PublicDB", collection_name="pub", owner=None)
+        self.client.force_login(self.plain)
+        resp = self.client.get("/db/")
+        self.assertContains(resp, "PublicDB")
+
+
+class UserAdminTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user("rootx", password="pw12345!!", is_superuser=True)
+        self.plain = User.objects.create_user("norm", password="pw12345!!")
+
+    def test_admin_page_requires_superuser(self):
+        self.client.force_login(self.plain)
+        resp = self.client.get("/users/", follow=True)
+        self.assertContains(resp, "Admin access required.")
+
+    def test_admin_page_lists_users_and_saves_flags(self):
+        self.client.force_login(self.admin)
+        resp = self.client.get("/users/")
+        self.assertContains(resp, "norm")
+        resp = self.client.post(
+            f"/users/{self.plain.pk}/access/",
+            {"can_edit_llms": "on"},
+        )
+        self.plain.refresh_from_db()
+        self.assertTrue(self.plain.access.can_edit_llms)
+        self.assertFalse(self.plain.access.can_edit_databases)
+
+    def test_create_user_via_admin(self):
+        self.client.force_login(self.admin)
+        resp = self.client.post(
+            "/users/create/", {"username": "newbie", "password": "LongEnough9!", "email": ""}
+        )
+        self.assertTrue(User.objects.filter(username="newbie").exists())
 
 
 def _fake_result(**kw):

@@ -130,3 +130,34 @@ chromadb.errors.NotFoundError: Collection [4c8cb5cf-9d58-483c-a0b7-c34a8969922a]
 2026-08-24 17:51:52,503 WARNING django.request — Not Found: /llm/3/edit/
 2026-08-24 17:52:19,230 INFO    chat.ask — ask ok db=shaka_dw llm=9router default clarify=False tables=['vwCategory', 'DimSalesAccount', 'FactAccountBalance', 'vwUserAccess', 'vwGenerateDWStructre', 'vwFactCollectionPeriod', 'DimBatch', 'FactInventoryReserve'] rows=1
 2026-08-24 17:52:51,104 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimSalesAccount', 'DimSalesPreOrderItem', 'DimSupplier', 'DimSalesDocumentStatus', 'DimSales', 'DimSalesOrderItem', 'DimUnloadingOrderItem', 'DimLoadingPoint'] rows=100
+2026-08-24 18:09:17,568 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-24 18:09:18,086 WARNING django.request — Not Found: /chat/1/send/
+2026-08-24 18:09:20,346 WARNING django.request — Not Found: /db/1/edit/
+2026-08-24 18:11:10,588 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-24 18:11:11,069 WARNING django.request — Not Found: /chat/1/send/
+2026-08-24 18:11:13,268 WARNING django.request — Not Found: /db/1/edit/
+2026-08-25 09:26:18,628 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-25 09:26:19,120 WARNING django.request — Not Found: /chat/1/send/
+2026-08-25 09:29:21,449 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-25 09:29:21,946 WARNING django.request — Not Found: /chat/1/send/
+2026-08-25 09:31:41,517 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-25 09:31:42,008 WARNING django.request — Not Found: /chat/1/send/
+2026-08-25 09:31:44,930 WARNING django.request — Not Found: /db/1/edit/
+2026-08-25 10:01:10,183 WARNING django.request — Not Found: /favicon.ico
+2026-08-25 10:03:58,415 WARNING django.request — Not Found: /favicon.ico
+2026-08-25 10:07:15,651 WARNING django.request — Not Found: /favicon.ico
+2026-08-25 10:11:11,055 WARNING django.request — Not Found: /favicon.ico
+2026-08-25 10:12:48,986 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=True tables=['DimService', 'DimDirectDeliveryReceiptItem', 'DimLogisticStep', 'DimPaymentGateway', 'DimTrackingFactor', 'DimContractType', 'DimPaymentStep', 'DimShippingPoint'] rows=0
+2026-08-25 10:13:18,025 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimDeliveryItem', 'DimShippingPoint', 'DimLogisticStep', 'DimShippingOrderItem', 'DimTrackingFactor', 'DimSalesDeliveryPoint', 'FactLogisticControl', 'FactShippingOrder'] rows=0
+2026-08-25 10:14:00,613 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimService', 'DimSubsidiaryLedger', 'FactBridgeLogisticPayment', 'DimBusinessPolicy', 'DimLogisticStep', 'DimPaymentGateway', 'DimMachine', 'DimDeliveryItem'] rows=0
+2026-08-25 10:15:06,610 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=True tables=['DimService', 'DimDirectDeliveryReceiptItem', 'DimPaymentGateway', 'DimLogisticStep', 'DimContractType', 'DimPaymentStep', 'DimBasculeType', 'DimContractState'] rows=0
+2026-08-25 10:15:26,646 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimService', 'DimLogisticStep', 'DimBusinessPolicy', 'DimSubsidiaryLedger', 'DimDeliveryItem', 'DimContractType', 'DimDirectDeliveryReceiptItem', 'DimPaymentStep'] rows=0
+2026-08-25 10:16:25,353 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimSalesPreOrderItem', 'DimSalesDocumentStatus', 'DimSalesAccount', 'DimSales', 'DimSupplier', 'DimSalesAgent', 'DimDepreciationState', 'DimSalesOrderItem'] rows=100
+2026-08-25 10:17:17,777 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=True tables=['DimRecipient', 'DimPaymentAgreement', 'DimReceiptAndPaymentCause', 'DimPurchasingAgent', 'DimBank', 'DimDeliveryItem', 'DimAge', 'DimContractState'] rows=0
+2026-08-25 10:18:25,961 WARNING django.request — Not Found: /favicon.ico
+2026-08-25 10:19:20,136 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimReceiptAndPaymentCause', 'DimBusinessPolicy', 'DimSalesDocumentStatus', 'DimSubsidiaryLedger', 'DimBank', 'DimPurchasingAgent', 'DimRecipient', 'FactBusinessPolicy'] rows=0
+2026-08-25 10:20:33,155 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=True tables=['FactLogisticControl', 'PurchasingDepartment', 'DimSalesItemDiscountMode', 'FactSales', 'DimPartPrice', 'DimCharacteristic', 'DimSalesContractItem'] rows=0
+2026-08-25 10:21:41,672 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimSalesDocumentStatus', 'DimSalesItemDiscountMode', 'DimMiscellaneousCostItem', 'FactSales', 'DimSales', 'DimSalesDeliveryPoint', 'DimMachine', 'DimPurchasingAgent'] rows=0
+2026-08-25 10:22:52,655 INFO    chat.feedback — example removed for db=shaka_dw
+2026-08-25 10:23:20,278 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=True tables=['PurchasingDepartment', 'DimPartPrice', 'FactLogisticControl', 'DimCharacteristic', 'DimSalesContractItem', 'DimExportInvoiceType', 'DimSalesItemDiscountMode', 'sysdiagrams'] rows=0
+2026-08-25 10:26:01,359 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['PurchasingDepartment', 'DimPurchasingAgent', 'DimCharacteristic', 'DimMachine', 'DimSalesItemDiscountMode', 'sysdiagrams', 'DimSalesDocumentStatus', 'DimPartPrice'] rows=0

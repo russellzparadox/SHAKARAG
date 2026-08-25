@@ -20,10 +20,35 @@ from .models import ChatMessage, ChatSession, DatabaseProfile, LLMProfile
 from . import rag_service
 
 
-def _editable(user, model):
+def _access(user):
+    from .models import UserAccess
+
+    if not user.is_authenticated:
+        return None
+    access, _ = UserAccess.objects.get_or_create(user=user)
+    return access
+
+
+def visible_profiles(user, model):
+    """All authenticated users may see and chat with every profile.
+    Permissions only gate management (add/edit/delete/index)."""
+    return model.objects.all()
+
+
+def can_edit_profiles(user, model) -> bool:
     if user.is_superuser:
-        return model.objects.all()
-    return model.objects.filter(Q(owner=user) | Q(owner__isnull=True))
+        return True
+    access = _access(user)
+    if model is DatabaseProfile:
+        return bool(access and access.can_edit_databases)
+    return bool(access and access.can_edit_llms)
+
+
+def _editable(user, model):
+    qs = visible_profiles(user, model)
+    if can_edit_profiles(user, model):
+        return qs
+    return qs.filter(owner=user)
 
 
 def home(request):
@@ -221,7 +246,13 @@ class DbProfileListView(LoginRequiredMixin, ListView):
     template_name = "chat/db_profiles.html"
 
     def get_queryset(self):
-        return DatabaseProfile.objects.all()
+        return visible_profiles(self.request.user, DatabaseProfile)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["can_edit"] = can_edit_profiles(self.request.user, DatabaseProfile)
+        ctx["editable_ids"] = set(_editable(self.request.user, DatabaseProfile).values_list("pk", flat=True))
+        return ctx
 
 
 class DbProfileCreateView(LoginRequiredMixin, CreateView):
@@ -229,6 +260,12 @@ class DbProfileCreateView(LoginRequiredMixin, CreateView):
     form_class = DatabaseProfileForm
     template_name = "chat/db_profile_form.html"
     success_url = reverse_lazy("chat:db_list")
+
+    def dispatch(self, request, *args, **kwargs):
+        if not can_edit_profiles(request.user, DatabaseProfile):
+            messages.error(request, "You don't have permission to manage databases.")
+            return redirect("chat:db_list")
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -256,12 +293,12 @@ class DbProfileDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("chat:db_list")
 
     def get_queryset(self):
-        return DatabaseProfile.objects.filter(owner=self.request.user)
+        return _editable(self.request.user, DatabaseProfile)
 
 
 @login_required
 def db_reindex(request, pk):
-    dbp = get_object_or_404(DatabaseProfile.objects.all(), pk=pk)
+    dbp = get_object_or_404(visible_profiles(request.user, DatabaseProfile), pk=pk)
     if request.method == "POST":
         if dbp.index_status == DatabaseProfile.IndexStatus.INDEXING:
             messages.warning(request, "Indexing already running.")
@@ -273,7 +310,7 @@ def db_reindex(request, pk):
 
 @login_required
 def db_status(request, pk):
-    dbp = get_object_or_404(DatabaseProfile.objects.all(), pk=pk)
+    dbp = get_object_or_404(visible_profiles(request.user, DatabaseProfile), pk=pk)
     return JsonResponse(
         {
             "status": dbp.index_status,
@@ -289,7 +326,13 @@ class LlmProfileListView(LoginRequiredMixin, ListView):
     template_name = "chat/llm_profiles.html"
 
     def get_queryset(self):
-        return LLMProfile.objects.all()
+        return visible_profiles(self.request.user, LLMProfile)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["can_edit"] = can_edit_profiles(self.request.user, LLMProfile)
+        ctx["editable_ids"] = set(_editable(self.request.user, LLMProfile).values_list("pk", flat=True))
+        return ctx
 
 
 class LlmProfileCreateView(LoginRequiredMixin, CreateView):
@@ -297,6 +340,12 @@ class LlmProfileCreateView(LoginRequiredMixin, CreateView):
     form_class = LLMProfileForm
     template_name = "chat/llm_profile_form.html"
     success_url = reverse_lazy("chat:llm_list")
+
+    def dispatch(self, request, *args, **kwargs):
+        if not can_edit_profiles(request.user, LLMProfile):
+            messages.error(request, "You don't have permission to manage LLMs.")
+            return redirect("chat:llm_list")
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -319,8 +368,82 @@ class LlmProfileDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("chat:llm_list")
 
     def get_queryset(self):
-        return LLMProfile.objects.filter(owner=self.request.user)
+        return _editable(self.request.user, LLMProfile)
 
 
 class AppLogoutView(LogoutView):
     next_page = reverse_lazy("login")
+
+
+def _require_admin(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not (request.user.is_authenticated and request.user.is_superuser):
+            messages.error(request, "Admin access required.")
+            return redirect("chat:sessions")
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+
+@_require_admin
+def user_admin(request):
+    from django.contrib.auth.models import User
+
+    from .models import DatabaseProfile, LLMProfile, UserAccess
+
+    users = (
+        User.objects.select_related("access")
+        .order_by("username")
+    )
+    context = {"users": users}
+    return render(request, "chat/users.html", context)
+
+
+@_require_admin
+def user_access_save(request, pk):
+    from django.contrib.auth.models import User
+
+    from .models import UserAccess
+
+    user = get_object_or_404(User, pk=pk)
+    if request.method == "POST":
+        access, _ = UserAccess.objects.get_or_create(user=user)
+        access.can_edit_databases = request.POST.get("can_edit_databases") == "on"
+        access.can_edit_llms = request.POST.get("can_edit_llms") == "on"
+        access.save()
+        messages.success(request, f"Access updated for {user.username}.")
+    return redirect("chat:user_admin")
+
+
+@_require_admin
+def user_create(request):
+    from django.contrib.auth.models import User
+
+    if request.method == "POST":
+        username = (request.POST.get("username") or "").strip()
+        password = request.POST.get("password") or ""
+        email = (request.POST.get("email") or "").strip()
+        if len(username) < 3 or len(password) < 8:
+            messages.error(request, "Username needs 3+ chars, password 8+.")
+            return redirect("chat:user_admin")
+        if User.objects.filter(username=username).exists():
+            messages.error(request, f"User '{username}' already exists.")
+            return redirect("chat:user_admin")
+        User.objects.create_user(username=username, email=email, password=password)
+        messages.success(request, f"User '{username}' created.")
+    return redirect("chat:user_admin")
+
+
+@_require_admin
+def user_toggle_active(request, pk):
+    from django.contrib.auth.models import User
+
+    user = get_object_or_404(User, pk=pk)
+    if request.method == "POST" and user != request.user:
+        user.is_active = not user.is_active
+        user.save(update_fields=["is_active"])
+        messages.success(
+            request,
+            f"{user.username} {'enabled' if user.is_active else 'disabled'}.",
+        )
+    return redirect("chat:user_admin")
