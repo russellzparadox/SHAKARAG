@@ -206,12 +206,14 @@ class SQLServerDialect(BaseDialect):
     name = "sqlserver"
     label = "SQL Server (T-SQL)"
 
-    def _connect(self):
+    def _connect(self, query_timeout: int | None = None):
         try:
             import pymssql
         except ImportError as exc:
             raise self.missing_driver("pymssql") from exc
         s = self.settings
+        if query_timeout is None:
+            query_timeout = max(int(s.statement_timeout_ms / 1000), 1)
         return pymssql.connect(
             server=s.db_host,
             port=str(s.db_port),
@@ -219,12 +221,14 @@ class SQLServerDialect(BaseDialect):
             password=s.db_password,
             database=s.db_name,
             login_timeout=10,
-            timeout=max(int(s.statement_timeout_ms / 1000), 1),
+            timeout=query_timeout,
             as_dict=True,
         )
 
     def introspect(self) -> dict[tuple[str, str], TableRecord]:
-        conn = self._connect()
+        # Catalog queries over large warehouses can run well past the per-query
+        # statement timeout — allow up to 5 minutes for introspection.
+        conn = self._connect(query_timeout=300)
         try:
             with conn.cursor() as cur:
                 cur.execute(TABLES_SQL)
