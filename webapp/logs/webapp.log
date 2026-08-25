@@ -161,3 +161,32 @@ chromadb.errors.NotFoundError: Collection [4c8cb5cf-9d58-483c-a0b7-c34a8969922a]
 2026-08-25 10:22:52,655 INFO    chat.feedback — example removed for db=shaka_dw
 2026-08-25 10:23:20,278 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=True tables=['PurchasingDepartment', 'DimPartPrice', 'FactLogisticControl', 'DimCharacteristic', 'DimSalesContractItem', 'DimExportInvoiceType', 'DimSalesItemDiscountMode', 'sysdiagrams'] rows=0
 2026-08-25 10:26:01,359 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['PurchasingDepartment', 'DimPurchasingAgent', 'DimCharacteristic', 'DimMachine', 'DimSalesItemDiscountMode', 'sysdiagrams', 'DimSalesDocumentStatus', 'DimPartPrice'] rows=0
+2026-08-25 10:37:05,659 INFO    chat.ask — empty result — asking model to reconsider (tables tried elsewhere)
+2026-08-25 10:37:29,363 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['PurchasingDepartment', 'DimPartPrice', 'FactLogisticControl', 'DimCharacteristic', 'DimSalesContractItem', 'DimExportInvoiceType', 'DimSalesItemDiscountMode', 'sysdiagrams'] rows=0
+2026-08-25 10:52:13,411 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimSupplier', 'DimProductPack', 'DimLogisticStep', 'DimPurchasingDepartment', 'DimDeliveryItem', 'DimInventoryVoucherItem', 'DimSubsidiaryLedger', 'DimProductionStep'] rows=100
+2026-08-25 10:52:44,813 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=True tables=['sysdiagrams', 'PurchasingDepartment', 'DimCharacteristic', 'DimReceiptAndPaymentGuaranteeType', 'DimCustomerDetailedLedger', 'DimReceiptMoment', 'DimPurchasingAgent', 'DimSalesItemDiscountMode'] rows=0
+2026-08-25 10:53:44,974 INFO    chat.ask — empty result — asking model to reconsider (tables tried elsewhere)
+2026-08-25 10:54:23,948 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimCharacteristic', 'DimPurchasingAgent', 'sysdiagrams', 'DimSalesAgent', 'DimMachine', 'DimMiscellaneousCostItem', 'DimInventoryVoucherKind', 'FactBatchCharacteristic'] rows=0
+2026-08-25 10:57:55,000 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=True tables=['DimSalesContractItem', 'DimCustomerDetailedLedger', 'DimCharacteristic', 'DimSalesSystem', 'DimPartPrice', 'DimDirectDeliveryReceiptItem', 'DimTransporter', 'DimSalesStep'] rows=0
+2026-08-25 10:58:11,846 INFO    chat.ask — empty result — asking model to reconsider (tables tried elsewhere)
+2026-08-25 10:58:24,321 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimCustomerDetailedLedger', 'DimSalesDeliveryPoint', 'DimCharacteristic', 'DimPurchasingAgent', 'DimSalesItemDiscountMode', 'DimDirectDeliveryReceiptItem', 'DimSalesContractItem', 'DimTransporter'] rows=0
+2026-08-25 11:01:05,428 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimSalesReturnWasteStatus', 'DimMissionType', 'PurchasingDepartment', 'DimService', 'DimPartPrice', 'DimExportInvoiceType', 'DimRouting', 'DimSystem'] rows=1
+2026-08-25 11:25:04,504 INFO    chat.ask — empty result — asking model to reconsider (tables tried elsewhere)
+2026-08-25 11:25:31,776 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['PurchasingDepartment', 'DimPartPrice', 'FactLogisticControl', 'DimCharacteristic', 'DimSalesContractItem', 'DimExportInvoiceType', 'DimSalesItemDiscountMode', 'sysdiagrams'] rows=100
+2026-08-25 11:50:19,237 INFO    chat.ask — empty result — asking model to reconsider (tables tried elsewhere)
+2026-08-25 12:17:13,671 WARNING django.request — Bad Request: /chat/9/send/
+2026-08-25 12:18:53,221 INFO    chat.ask — empty result — asking model to reconsider (tables tried elsewhere)
+2026-08-25 12:19:28,980 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['PurchasingDepartment', 'DimPartPrice', 'FactLogisticControl', 'DimCharacteristic', 'DimSalesContractItem', 'DimExportInvoiceType', 'DimSalesItemDiscountMode', 'sysdiagrams'] rows=1
+2026-08-25 12:31:38,536 INFO    chat.ask — query expanded for schema vocabulary: give me suplier info of Xperial supplier
+2026-08-25 12:31:52,932 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-25 12:31:53,409 WARNING django.request — Not Found: /chat/1/send/
+2026-08-25 12:31:56,317 WARNING django.request — Not Found: /db/1/edit/
+2026-08-25 12:32:14,267 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-25 12:32:14,759 WARNING django.request — Not Found: /chat/1/send/
+2026-08-25 12:32:17,649 WARNING django.request — Not Found: /db/1/edit/
+2026-08-25 12:32:47,487 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-25 12:32:47,969 WARNING django.request — Not Found: /chat/1/send/
+2026-08-25 12:32:50,884 WARNING django.request — Not Found: /db/1/edit/
+2026-08-25 12:33:34,391 INFO    chat.ask — query expanded for schema vocabulary: give me suplier info of Xperial supplier
+2026-08-25 12:33:51,700 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['FactLogisticControl', 'DimSupplier', 'DimOrderItem', 'PurchasingDepartment', 'DimPricingSource', 'DimInventoryVoucherItem', 'DimPurchasingDepartment'] rows=1
+2026-08-25 12:34:27,038 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimSupplier', 'FactLogisticControl', 'DimInventoryVoucherItem', 'DimDeliveryItem', 'DimInventoryVoucherKind', 'DimSubsidiaryLedger', 'DimPurchaseRequestItem', 'DimMachine'] rows=1

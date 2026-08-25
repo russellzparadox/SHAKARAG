@@ -162,7 +162,8 @@ DW_PROMPT_BLOCK = """- Data-warehouse guidance: tables marked FACT hold transact
   Aggregate measures on the fact table, put filters on joined dimension columns, and join strictly via the shown FKs.
   Respect the stated grain of the fact before aggregating; prefer SUM/COUNT on facts over pulling raw rows.
   Join tables marked relation/bridge connect many-to-many pairs.
-- When the user asks "how many X are there" or wants a list of entities, count/list the DIMENSION table named after that entity (e.g. DimCompany for "companies") — never an ETL/staging/audit view."""
+- When the user asks "how many X are there" or wants a list of entities, count/list the DIMENSION table named after that entity (e.g. DimCompany for "companies") — never an ETL/staging/audit view.
+- When the user names a specific item ("info of Xperial", "orders of Acme"), find the DIMENSION whose name matches the entity word (supplier→*Supplier*, customer→*Customer*), and filter its human-readable columns (Title, Name, Description, Code) with LIKE '%stem%' using a word stem of the item, trying alternate stems if needed. Do not switch to unrelated tables."""
 
 
 def warehouse_hints_block() -> str:

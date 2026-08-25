@@ -11,6 +11,9 @@ class FakeStore:
     def query_text(self, text, top_k):
         return []
 
+    def all_table_metas(self):
+        return []
+
 
 class FakeExamples:
     def __init__(self, hits):
@@ -114,6 +117,41 @@ def test_few_shot_examples_injected_into_prompt(tmp_path):
     user_content = first_call[1]["content"]
     assert "VERIFIED QUERY EXAMPLES" in user_content
     assert "SUM(amount_total)" in user_content
+
+
+def test_empty_result_retries_alternative_table(tmp_path):
+    first = '{"sql": "SELECT Title FROM dw.DimPurchasingAgent WHERE Title LIKE \'%xperial%\'", "explanation": "guess"}'
+    second = '{"sql": "SELECT SupplierID, Title FROM dw.DimSupplier WHERE Title LIKE \'%xperial%\'", "explanation": "better"}'
+    p = _pipeline(
+        tmp_path,
+        llm_responses=[first, second],
+        dialect_results=[
+            (["Title"], [], False),
+            (["SupplierID", "Title"], [[3, "Xperial Ltd"]], False),
+        ],
+    )
+    result = p.ask("give me supplier info of Xperial", execute=True)
+    assert result.rows == [[3, "Xperial Ltd"]]
+    assert "DimSupplier" in result.sql
+    assert len(p.llm.calls) == 2
+    retry_msg = p.llm.calls[1][-1]["content"]
+    assert "ZERO rows" in retry_msg
+
+
+def test_empty_result_kept_when_model_says_no_candidate(tmp_path):
+    only = '{"sql": "SELECT Title FROM dw.DimAgent", "explanation": ""}'
+    decline = '{"sql": "SELECT Title FROM dw.DimAgent", "explanation": "no better candidate"}'
+    p = _pipeline(
+        tmp_path,
+        llm_responses=[only, decline],
+        dialect_results=[
+            (["Title"], [], False),
+            (["Title"], [], False),
+        ],
+    )
+    result = p.ask("find it", execute=True)
+    assert result.rows == []
+    assert result.error is None
 
 
 def test_no_examples_no_block(tmp_path):

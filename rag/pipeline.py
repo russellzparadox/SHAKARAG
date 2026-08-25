@@ -4,7 +4,6 @@ import json
 import logging
 from dataclasses import dataclass, field
 
-from .chunking import Chunk
 from .config import Settings
 from .llm import LLMClient, LLMError
 from .sqlguard import SQLGuardError, validate_sql
@@ -73,12 +72,17 @@ Output ONLY JSON, one of:
 {"action": "proceed"}
 {"action": "clarify", "question": "<ONE short clarifying question>", "options": ["<option 1>", "<option 2>", "<option 3>"]}
 
-Ask a clarifying question ONLY when ambiguity would materially change the query, such as:
-- several plausible tables for the same business entity
-- an unclear measure (amount vs quantity vs count)
-- an unspecified time window that changes the result
-- a term matching multiple unrelated columns
-Never ask about things visible in the schema; never be pedantic. Maximum 3 short options."""
+Default to {"action": "proceed"}. When in doubt, DO NOT ask.
+
+Ask ONLY when two or more genuinely different INTERPRETATIONS exist and picking wrong would produce a materially different answer - for example the entity name matches several unrelated tables (customer vs supplier), or a shared column name means totally different measures.
+
+NEVER ask when:
+- the user already named what they want ("supplier info of Xperial", "sales per month") - just query it
+- the answer would be a subset of what they asked anyway ("which fields?", "everything?" is never real ambiguity)
+- one candidate table clearly matches the entity mentioned
+- the missing detail is visible in the schema context
+
+Options must name concrete alternative interpretations (table or measure names), never vague words."""
 
 
 class RagPipeline:
@@ -93,10 +97,21 @@ class RagPipeline:
         self.dialect = dialect
 
     def retrieve(self, question: str, top_k: int | None = None) -> list[dict]:
-        from .rerank import rerank_hits
+        from .rerank import _name_tokens_for, expand_question, rerank_hits
 
         k = top_k or self.settings.top_k
-        hits = self.store.query_text(question, top_k=max(k * 3, 12))
+        try:
+            vocab_tokens: set[str] = set()
+            for meta in self.store.all_table_metas():
+                vocab_tokens |= _name_tokens_for({"metadata": meta})
+        except Exception:
+            vocab_tokens = set()
+        expanded = expand_question(question, vocab_tokens) if vocab_tokens else question
+        if expanded != question:
+            logging.getLogger("chat.ask").info(
+                "query expanded for schema vocabulary: %s", expanded
+            )
+        hits = self.store.query_text(expanded, top_k=max(k * 3, 12))
         return rerank_hits(hits, question)[:k]
 
     def build_context(self, hits: list[dict]) -> tuple[str, list[str]]:
@@ -220,6 +235,64 @@ class RagPipeline:
             raise SQLGuardError("Repair attempt returned no SQL.")
         return {"sql": validate_sql(sql), "explanation": (parsed or {}).get("explanation")}
 
+    def _name_tokens_for(hit: dict) -> set[str]:
+        from .rerank import _name_tokens_for
+
+        return _name_tokens_for(hit)
+
+    def _table_inventory(self) -> list[str]:
+        lines: list[str] = []
+        try:
+            for m in self.store.all_table_metas():
+                role = f" [{m.get('wh_role')}]" if m.get("wh_role") else ""
+                label = f" — {m['label']}" if m.get("label") else ""
+                lines.append(
+                    f"- {m.get('schema','')}.{m.get('table','')}{role}{label}"
+                )
+        except Exception:
+            pass
+        return lines[:250] or ["(inventory unavailable)"]
+
+    def _retry_empty(self, question: str, context: str, empty_sql: str):
+        logging.getLogger("chat.ask").info(
+            "empty result — asking model to reconsider (tables tried elsewhere)"
+        )
+        messages = [
+            {
+                "role": "system",
+                "content": render_sql_system(
+                    self.dialect.label, self.dialect.prompt_hints(), self.settings.max_rows
+                ),
+            },
+            {"role": "user", "content": f"CONTEXT:\n{context}\n\nQUESTION: {question}"},
+            {"role": "assistant", "content": json.dumps({"sql": empty_sql})},
+            {
+                "role": "user",
+                "content": "That query executed fine but returned ZERO rows. The entity the user "
+                "named may live in a DIFFERENT table, or in another human-readable column, or "
+                "under a different spelling.\n"
+                "Here is EVERY table in this database — pick the one whose name truly matches "
+                "the entity the user mentioned:\n"
+                + "\n".join(self._table_inventory())
+                + "\n\nRewrite the query against that table/column using wildcard matching on a "
+                'word stem. If nothing could contain it, return {"sql": "'
+                + empty_sql.replace('"', "")
+                + '", "explanation": "no better candidate"}. '
+                "Respond with ONLY the JSON object.",
+            },
+        ]
+        parsed = self.llm.chat_json(messages)
+        sql = (parsed or {}).get("sql") if isinstance(parsed, dict) else None
+        if not sql:
+            return None
+        validated = validate_sql(sql)
+        if not validated or validated.strip() == empty_sql.strip():
+            return None
+        explanation = (parsed or {}).get("explanation") or ""
+        if "no better candidate" in explanation.lower():
+            return None
+        return {"sql": validated, "explanation": explanation}
+
     def run_sql(self, sql: str) -> tuple[list[str], list[list], bool]:
         return self.dialect.execute_readonly(sql, self.settings.max_rows)
 
@@ -273,7 +346,7 @@ class RagPipeline:
                     {"role": "system", "content": SYSTEM_CLARIFY},
                     {
                         "role": "user",
-                        "content": f"CANDIDATE TABLES:\n" + "\n".join(lines)
+                        "content": "CANDIDATE TABLES:\n" + "\n".join(lines)
                         + f"\n\nQUESTION: {question}",
                     },
                 ],
@@ -323,7 +396,18 @@ class RagPipeline:
         for attempt in range(1, max_exec_attempts + 1):
             try:
                 columns, rows, truncated = self.run_sql(result.sql)
-                break
+                if rows:
+                    break
+                if attempt == max_exec_attempts or self.llm is None or not columns:
+                    break
+                try:
+                    alt = self._retry_empty(question, context, result.sql)
+                except Exception:
+                    break
+                if not alt:
+                    break
+                result.sql = alt["sql"]
+                result.explanation = alt.get("explanation") or result.explanation
             except Exception as exc:
                 if attempt == max_exec_attempts or self.llm is None:
                     result.error = f"SQL execution failed: {exc}"
@@ -379,9 +463,9 @@ def render_answer_system(label: str) -> str:
 
 
 def make_pipeline(settings: Settings) -> RagPipeline:
+    from .dialects import get_dialect
     from .embeddings import get_embedder
     from .store import VectorStore as VS
-    from .dialects import get_dialect
 
     dialect = get_dialect(settings)
     embedder = get_embedder(settings)

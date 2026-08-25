@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import difflib
 import re
 from typing import Any
 
@@ -57,6 +58,14 @@ def _question_words(question: str) -> list[str]:
     return [w for w in raw if w not in STOPWORDS]
 
 
+def _fuzzy_in(word: str, tokens: set[str]) -> bool:
+    if word in tokens:
+        return True
+    if len(word) >= 5:
+        return bool(difflib.get_close_matches(word, tokens, n=1, cutoff=0.8))
+    return False
+
+
 def _name_tokens_for(hit: dict[str, Any]) -> set[str]:
     meta = hit.get("metadata") or {}
     parts = [
@@ -68,6 +77,23 @@ def _name_tokens_for(hit: dict[str, Any]) -> set[str]:
     for p in parts:
         out |= _tokens(p)
     return out
+
+
+def expand_question(question: str, vocab_tokens: set[str]) -> str:
+    """Append schema-vocabulary corrections for likely typos so embeddings match."""
+    words = _question_words(question)
+    vocab = {v.lower() for v in vocab_tokens if len(v) >= 4}
+    added: list[str] = []
+    for w in words:
+        if w in vocab or _singular(w) in vocab:
+            continue
+        if len(w) >= 5:
+            close = difflib.get_close_matches(_singular(w), vocab, n=1, cutoff=0.84)
+            if close:
+                added.append(close[0])
+    if not added:
+        return question
+    return question + " " + " ".join(sorted(set(added)))
 
 
 def rerank_hits(hits: list[dict[str, Any]], question: str) -> list[dict[str, Any]]:
@@ -86,7 +112,7 @@ def rerank_hits(hits: list[dict[str, Any]], question: str) -> list[dict[str, Any
         matches = 0
         for w in qwords:
             variants = {w, _singular(w)}
-            if variants & name_tokens:
+            if variants & name_tokens or _fuzzy_in(_singular(w), name_tokens):
                 matches += 1
         if matches:
             boost += min(MAX_NAME_BOOST, 0.11 * matches)

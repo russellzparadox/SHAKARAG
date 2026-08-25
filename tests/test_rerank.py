@@ -46,6 +46,24 @@ def test_plural_and_singular_matching():
     assert out[0]["metadata"]["table"] == "DimCustomer"
 
 
+def test_expand_question_corrects_schema_typos():
+    from rag.rerank import expand_question
+
+    vocab = {"dim", "supplier", "company", "sales", "logistic"}
+    out = expand_question("give me suplier info of xperial", vocab)
+    assert "supplier" in out
+    assert out.startswith("give me suplier info of xperial")
+
+
+def test_fuzzy_misspelling_still_matches_entity():
+    hits = [
+        _hit("DimPurchasingAgent", 0.52, role="dimension"),
+        _hit("DimSupplier", 0.58, role="dimension"),
+    ]
+    out = rerank_hits(hits, "give me suplier info of Xperial")
+    assert out[0]["metadata"]["table"] == "DimSupplier"
+
+
 def test_no_boost_without_signal():
     hits = [_hit("Aaa", 0.5), _hit("Bbb", 0.7)]
     out = rerank_hits(hits, "zzz qqq")

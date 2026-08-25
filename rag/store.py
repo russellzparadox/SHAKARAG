@@ -88,6 +88,18 @@ class VectorStore:
             )
         return hits
 
+    def all_table_metas(self) -> list[dict[str, Any]]:
+        if getattr(self, "_table_metas", None) is not None:
+            return self._table_metas
+        got = self.collection.get(include=["metadatas"])
+        seen: dict[tuple[str, str], dict[str, Any]] = {}
+        for m in got.get("metadatas") or []:
+            key = (str(m.get("schema") or ""), str(m.get("table") or ""))
+            if key != ("", "") and key not in seen:
+                seen[key] = m
+        self._table_metas = list(seen.values())
+        return self._table_metas
+
     def peek_tables(self, limit: int = 20) -> list[str]:
         got = self.collection.get(limit=limit, include=["metadatas"])
         names = []
