@@ -190,3 +190,31 @@ chromadb.errors.NotFoundError: Collection [4c8cb5cf-9d58-483c-a0b7-c34a8969922a]
 2026-08-25 12:33:34,391 INFO    chat.ask — query expanded for schema vocabulary: give me suplier info of Xperial supplier
 2026-08-25 12:33:51,700 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['FactLogisticControl', 'DimSupplier', 'DimOrderItem', 'PurchasingDepartment', 'DimPricingSource', 'DimInventoryVoucherItem', 'DimPurchasingDepartment'] rows=1
 2026-08-25 12:34:27,038 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimSupplier', 'FactLogisticControl', 'DimInventoryVoucherItem', 'DimDeliveryItem', 'DimInventoryVoucherKind', 'DimSubsidiaryLedger', 'DimPurchaseRequestItem', 'DimMachine'] rows=1
+2026-08-25 12:46:42,375 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-25 12:46:42,855 WARNING django.request — Not Found: /chat/1/send/
+2026-08-25 12:46:45,761 WARNING django.request — Not Found: /db/1/edit/
+2026-08-25 12:49:00,691 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimEmployee', 'DimWorkElement', 'DimProductionStep', 'DimDetailedLedger', 'DimFinancialVoucherKind', 'DimAsset', 'DimPaymentItem', 'DimBOM'] rows=5
+2026-08-25 12:53:41,506 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-25 12:53:42,148 WARNING django.request — Not Found: /chat/1/send/
+2026-08-25 12:53:48,167 WARNING django.request — Not Found: /db/1/edit/
+2026-08-25 12:54:55,340 INFO    chat.ask — follow-up detected — contextual retrieval query: and their codes? how many suppliers do we have ok now show me the first 5 of them with their names
+2026-08-25 12:55:04,109 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=True tables=['DimSupplier', 'DimPurchasingAgent', 'DimInventoryVoucherKind', 'DimSubsidiaryLedger', 'FactLogisticControl', 'DimLogisticStep', 'DimMachine', 'DimPurchasingDepartment'] rows=0
+2026-08-25 12:57:15,885 INFO    chat.ask — follow-up detected — contextual retrieval query: and their codes?
+(User's clarification: how many customers do we have) ok now show me the first 5 of them with their names and their codes?
+2026-08-25 12:58:10,580 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimPurchasingAgent', 'DimInventoryVoucherKind', 'DimCustomer', 'DimFinancialVoucherKind', 'DimSubsidiaryLedger', 'DimMachine', 'DimPurchaseRequestItem', 'DimCustomerDetailedLedger'] rows=1
+2026-08-25 12:58:10,709 INFO    chat.ask — follow-up detected — contextual retrieval query: and how many of them are active? and their codes? how many customers do we have
+2026-08-25 12:59:20,076 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimInventoryVoucherKind', 'DimPurchasingAgent', 'DimMachine', 'DimSubsidiaryLedger', 'DimService', 'DimCustomerDetailedLedger', 'DimSalesDocumentStatus', 'DimSalesAgent'] rows=1
+2026-08-25 12:59:56,489 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimSupplier', 'DimInventoryVoucherItem', 'DimDeliveryItem', 'DimPurchaseRequestItem', 'DimInventoryVoucherKind', 'DimPurchasingDepartment', 'DimLogisticStep', 'DimPurchasingAgent'] rows=3
+2026-08-25 13:00:32,545 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['FactSales', 'FactLogisticControl', 'FactBridgeTrackingFactor', 'FactDebitCreditStatement', 'DimPayableNote', 'DimWorkElement', 'DimInventoryVoucherKind', 'DimSalesDocumentStatus'] rows=3
+2026-08-25 13:01:48,719 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-25 13:01:49,201 WARNING django.request — Not Found: /chat/1/send/
+2026-08-25 13:01:52,150 WARNING django.request — Not Found: /db/1/edit/
+2026-08-25 13:02:59,953 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=True tables=['DimSupplier', 'DimInventoryVoucherItem', 'DimDeliveryItem', 'DimPurchaseRequestItem', 'DimInventoryVoucherKind', 'DimPurchasingDepartment', 'DimLogisticStep', 'DimPurchasingAgent'] rows=0
+2026-08-25 13:03:12,266 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimInventoryVoucherItem', 'DimSupplier', 'DimPurchaseRequestItem', 'DimDeliveryItem', 'DimInventoryVoucherKind', 'DimPurchasingAgent', 'DimPurchasingDepartment', 'DimMachine'] rows=1
+2026-08-25 13:04:10,333 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimDeliveryItem', 'FactLogisticControl', 'FactSales', 'DimPurchaseRequestItem', 'vwCategory', 'DimPaymentAgreement', 'DimStorageCenter'] rows=3
+2026-08-25 13:05:16,611 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-25 13:05:17,094 WARNING django.request — Not Found: /chat/1/send/
+2026-08-25 13:05:19,995 WARNING django.request — Not Found: /db/1/edit/
+2026-08-25 13:06:28,144 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimSupplier', 'DimInventoryVoucherItem', 'DimDeliveryItem', 'DimPurchaseRequestItem', 'DimInventoryVoucherKind', 'DimPurchasingDepartment', 'DimLogisticStep', 'DimPurchasingAgent'] rows=3
+2026-08-25 13:06:28,219 INFO    chat.ask — follow-up detected — contextual retrieval query: now with their codes too any 3 show me 3 suppliers
+2026-08-25 13:07:04,986 INFO    chat.ask — ask ok db=shaka_dw llm=nemo3-super clarify=False tables=['DimSupplier', 'FactLogisticControl', 'DimPurchasingAgent', 'DimPurchasingDepartment', 'DimSubsidiaryLedger', 'DimInventoryVoucherKind'] rows=3

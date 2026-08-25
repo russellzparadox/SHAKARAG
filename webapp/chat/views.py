@@ -116,11 +116,29 @@ def chat_send(request, pk):
 
     user_msg = ChatMessage.objects.create(session=session, role=ChatMessage.Role.USER, content=question)
 
+    # Conversation memory: last N turns (excluding the message just created) so
+    # follow-up questions like "now show their codes" resolve against prior context.
+    prior = (
+        ChatMessage.objects.filter(session=session, id__lt=user_msg.id)
+        .order_by("-id")
+        .values("id", "role", "content", "meta")[:10]
+    )
+    history = [
+        {"role": m["role"], "content": m["content"]}
+        for m in reversed(list(prior))
+        if (m.get("meta") or {}).get("type") != "clarify"
+    ]
+
     pending = session.pending_question
     if pending:
         question_for_rag = f"{pending}\n(User's clarification: {question})"
+        # The pending question is the real entity anchor for a clarified turn —
+        # make sure it leads the history so contextual retrieval resolves against it.
         session.pending_question = ""
         session.save(update_fields=["pending_question"])
+        history = [{"role": "user", "content": pending}] + [
+            h for h in history if h["content"] != pending
+        ]
     else:
         question_for_rag = question
 
@@ -131,6 +149,7 @@ def chat_send(request, pk):
             question_for_rag,
             answer_language=session.language,
             allow_clarify=session.auto_clarify and not bool(pending),
+            history=history,
         )
     except Exception as exc:
         result = {"answer": f"Request failed: {exc}", "error": str(exc)}

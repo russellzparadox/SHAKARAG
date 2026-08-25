@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from dataclasses import dataclass, field
 
 from .config import Settings
@@ -21,6 +22,7 @@ Rules:
 - For counts/aggregates use GROUP BY and ORDER BY the aggregate DESC when ranking.
 - Add a row LIMIT (<= __MAX_ROWS__) for row-level listings unless the user asks for totals.
 - If the CONTEXT does not contain what you need, still produce your best-effort query from related tables you do see and explain the gap in "explanation".
+- RECENT CONVERSATION: if the question contains pronouns or ellipsis ("them", "their names", "those", "also show..."), resolve them against the most recent USER and ASSISTANT turns — the entity discussed there (e.g. suppliers) is what the user means. Do not switch to a different entity unless the current question names one explicitly.
 __HINTS__
 - __DW_BLOCK__"""
 
@@ -30,7 +32,8 @@ Structure your answer as:
 1. A direct answer to the question (1-3 short paragraphs or bullets).
 2. A line starting with "Query used:" summarizing in words what was queried (do not paste SQL).
 3. A line starting with "Notes:" listing caveats (approximations like row estimates, archived-record assumptions, truncated results, related tables worth checking next).
-If there are no rows, say so plainly and suggest what to check or query next."""
+If there are no rows, say so plainly and suggest what to check or query next.
+IMPORTANT: Describe ONLY the data in the RESULT section of this request. RECENT CONVERSATION is context for understanding the question — never quote entities or rows from it; if the results contradict earlier turns, report the current results."""
 
 
 ANSWER_LANGUAGES = {
@@ -78,11 +81,24 @@ Ask ONLY when two or more genuinely different INTERPRETATIONS exist and picking 
 
 NEVER ask when:
 - the user already named what they want ("supplier info of Xperial", "sales per month") - just query it
+- the question is a follow-up whose pronouns ("their codes", "them", "those") resolve from RECENT CONVERSATION - just resolve and query
 - the answer would be a subset of what they asked anyway ("which fields?", "everything?" is never real ambiguity)
 - one candidate table clearly matches the entity mentioned
 - the missing detail is visible in the schema context
 
 Options must name concrete alternative interpretations (table or measure names), never vague words."""
+
+
+FOLLOWUP_PATTERN = re.compile(
+    r"\b(them|their|they|it|its|those|these|that one|the same|also|too|again|"
+    r"same (ones?|table)|more (of|detail)|show (me )?(also|them))\b",
+    re.IGNORECASE,
+)
+
+
+def _is_followup(question: str) -> bool:
+    """Heuristic: the question refers back to prior turns instead of naming an entity."""
+    return bool(FOLLOWUP_PATTERN.search(question or ""))
 
 
 class RagPipeline:
@@ -106,8 +122,19 @@ class RagPipeline:
                 vocab_tokens |= _name_tokens_for({"metadata": meta})
         except Exception:
             vocab_tokens = set()
-        expanded = expand_question(question, vocab_tokens) if vocab_tokens else question
-        if expanded != question:
+
+        # Contextual retrieval: for pronoun/ellipsis questions ("show their codes"),
+        # blend entity words from the last user turns into the embedding query.
+        search_query = question
+        if getattr(self, "_history", None) and _is_followup(question):
+            recent_user = [m["content"] for m in self._history if m["role"] == "user"][-2:]
+            search_query = question + " " + " ".join(recent_user)
+            logging.getLogger("chat.ask").info(
+                "follow-up detected — contextual retrieval query: %s", search_query
+            )
+
+        expanded = expand_question(search_query, vocab_tokens) if vocab_tokens else search_query
+        if expanded != search_query:
             logging.getLogger("chat.ask").info(
                 "query expanded for schema vocabulary: %s", expanded
             )
@@ -167,6 +194,16 @@ class RagPipeline:
             "(imitate their join paths, table usage and value formatting):\n" + "\n".join(parts)
         )
 
+    def _history_block(self) -> str:
+        """Render recent conversation turns for context continuity."""
+        if not getattr(self, "_history", None):
+            return ""
+        lines = ["RECENT CONVERSATION (for reference; the current request is the LAST message):"]
+        for m in self._history[-8:]:
+            role = "USER" if m["role"] == "user" else "ASSISTANT"
+            lines.append(f"{role}: {m['content'][:600]}")
+        return "\n".join(lines) + "\n\n"
+
     def generate_sql(self, question: str, context: str) -> dict:
         if self.llm is None:
             raise LLMError(
@@ -182,7 +219,7 @@ class RagPipeline:
             },
             {
                 "role": "user",
-                "content": f"CONTEXT:\n{context}\n\nQUESTION: {question}"
+                "content": f"CONTEXT:\n{context}\n\n{self._history_block()}QUESTION: {question}"
                 + self._few_shot_block(question),
             },
         ]
@@ -264,7 +301,7 @@ class RagPipeline:
                     self.dialect.label, self.dialect.prompt_hints(), self.settings.max_rows
                 ),
             },
-            {"role": "user", "content": f"CONTEXT:\n{context}\n\nQUESTION: {question}"},
+            {"role": "user", "content": f"CONTEXT:\n{context}\n\n{self._history_block()}QUESTION: {question}"},
             {"role": "assistant", "content": json.dumps({"sql": empty_sql})},
             {
                 "role": "user",
@@ -313,7 +350,7 @@ class RagPipeline:
             lines.append(f"(result capped at {self.settings.max_rows} rows)")
 
         user = (
-            f"QUESTION: {question}\n\nEXECUTED SQL:\n{sql}\n\n"
+            f"QUESTION: {question}\n\n{self._history_block()}EXECUTED SQL:\n{sql}\n\n"
             f"RESULT ({len(rows)} rows):\n{chr(10).join(lines)}\n\nAnswer now."
         )
         system = render_answer_system(self.dialect.label)
@@ -347,7 +384,7 @@ class RagPipeline:
                     {
                         "role": "user",
                         "content": "CANDIDATE TABLES:\n" + "\n".join(lines)
-                        + f"\n\nQUESTION: {question}",
+                        + f"\n\n{self._history_block()}QUESTION: {question}",
                     },
                 ],
                 max_tokens=400,
@@ -367,8 +404,12 @@ class RagPipeline:
         top_k: int | None = None,
         answer_language: str = "auto",
         clarify: bool = False,
+        history: list[dict[str, str]] | None = None,
     ) -> RagResult:
         result = RagResult(question=question)
+        self._history: list[dict[str, str]] = [
+            m for m in (history or []) if m.get("role") in ("user", "assistant") and m.get("content")
+        ]
         hits = self.retrieve(question, top_k=top_k)
         context, tables = self.build_context(hits)
         result.tables_used = tables

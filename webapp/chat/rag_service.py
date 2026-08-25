@@ -73,12 +73,23 @@ def get_pipeline(dbp, llmp) -> RagPipeline:
     return pipeline
 
 
-def run_ask(dbp, llmp, question: str, answer_language: str = "auto", allow_clarify: bool = False) -> dict:
+def run_ask(
+    dbp,
+    llmp,
+    question: str,
+    answer_language: str = "auto",
+    allow_clarify: bool = False,
+    history: list[dict] | None = None,
+) -> dict:
     logger = logging.getLogger("chat.ask")
     try:
         pipeline = get_pipeline(dbp, llmp)
         result = pipeline.ask(
-            question, execute=True, answer_language=answer_language, clarify=allow_clarify
+            question,
+            execute=True,
+            answer_language=answer_language,
+            clarify=allow_clarify,
+            history=history,
         )
         logger.info(
             "ask ok db=%s llm=%s clarify=%s tables=%s rows=%s",
