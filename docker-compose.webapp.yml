@@ -11,12 +11,14 @@ services:
     environment:
       DJANGO_DEBUG: "0"
       DJANGO_ALLOWED_HOSTS: "*"          # tighten to your server name in prod
-      CHROMA_DIR: /data/chroma           # shared index storage inside container
+      # CHROMA_DIR comes from .env (e.g. .chroma_Shaka), resolved against /app
+      LLM_BASE_URL: ${LLM_BASE_URL_DOCKER:-http://host.docker.internal:20128/v1}  # localhost inside container = itself
     ports:
       - "${SHAKARAG_PORT:-8111}:8111"
     volumes:
       - shakarag_web_data:/app/webapp    # sqlite db (users, profiles, chat history)
-      - shakarag_chroma:/data/chroma     # schema vector index
+      - ./.chroma_Shaka:/app/.chroma_Shaka        # schema vector index (host-built)
+      - shakarag_chroma:/data/chroma              # default chroma location if CHROMA_DIR unset
       - shakarag_logs:/app/webapp/logs
     extra_hosts:
       - "host.docker.internal:host-gateway"   # lets DB_HOST=host.docker.internal reach LAN servers
