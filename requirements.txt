@@ -11,3 +11,4 @@ cryptography>=42
 Django>=5.1
 pytest>=8.0
 debugpy>=1.8
+whitenoise>=6.7

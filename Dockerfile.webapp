@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt pymssql onnxruntime
+RUN pip install --no-cache-dir -r requirements.txt pymssql onnxruntime whitenoise
 
 COPY rag/ ./rag/
 COPY scripts/ ./scripts/
@@ -14,9 +14,9 @@ COPY api/ ./api/
 COPY webapp/ ./webapp/
 
 ENV CHROMA_DIR=/data/chroma
-VOLUME ["/data/chroma"]
+VOLUME ["/data"]
 
 EXPOSE 8111
 
 WORKDIR /app/webapp
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8111"]
+CMD ["sh", "-c", "mkdir -p /data/db /data/logs && python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8111"]

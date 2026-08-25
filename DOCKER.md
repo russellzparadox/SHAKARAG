@@ -29,14 +29,37 @@ SHAKARAG_PORT=8112 docker compose -f docker-compose.webapp.yml up -d
 ## Volumes
 | Volume | Container path | Purpose |
 |---|---|---|
-| `shakarag_web_data` | /app/webapp | sqlite db: users, profiles, chat history |
-| `shakarag_chroma` | /data/chroma | default chroma dir when CHROMA_DIR unset |
+| `shakarag_data` | /data | sqlite db (`/data/db/db.sqlite3`), logs (`/data/logs/`) |
 | bind mount `./.chroma_Shaka` | /app/.chroma_Shaka | the host-built schema index referenced by .env |
-| `shakarag_logs` | /app/webapp/logs | webapp.log / errors.log |
 
-The sqlite DB ships inside the image on first run (copied from repo), so users/profiles/chats
-carry over from your dev environment. Afterwards it lives only in the volume — **back up
-`shakarag_web_data`** or you lose accounts and chat memory.
+Persistent state lives in `/data` (via `DJANGO_DB_PATH` / `DJANGO_LOGS_DIR` env), NOT inside
+the code tree — so `docker compose build && up -d` picks up new code without losing data.
+The sqlite DB starts empty on a fresh volume; bootstrap it:
+
+```bash
+docker exec -w /app/webapp shakarag_web sh -c "
+  DJANGO_DEBUG=0 python manage.py shell -c \"
+from django.contrib.auth.models import User
+User.objects.create_superuser('admin', '', 'YOUR_PASSWORD')
+\" && DJANGO_DEBUG=0 python manage.py seed_defaults"
+```
+
+Then fix profile hosts (container can't use localhost) and set real DB passwords via the
+Databases page or:
+
+```bash
+docker exec -w /app/webapp shakarag_web sh -c "
+  DJANGO_DEBUG=0 python manage.py shell -c \"
+from chat.models import LLMProfile, DatabaseProfile
+for p in LLMProfile.objects.all():
+    p.base_url = p.base_url.replace('localhost', 'host.docker.internal')
+    p.save()
+for d in DatabaseProfile.objects.all():
+    if d.host in ('localhost', '127.0.0.1'):
+        d.host = 'host.docker.internal'
+        d.save()
+\""
+```
 
 ## Networking (important)
 Inside a container, `localhost` is the container itself. The compose file adds:
