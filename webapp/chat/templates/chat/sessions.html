@@ -1,27 +1,35 @@
 {% extends "chat/base.html" %}
-{% block title %}Chats{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Chats" %}{% endblock %}
 {% block nav_chat %}active{% endblock %}
 {% block content %}
 <div class="grid-2">
   <section class="panel">
-    <h2>Your chats</h2>
+    <div class="panel-head">
+      <h2>{% trans "Your chats" %}</h2>
+      <span class="mono-eyebrow">{{ sessions|length }} {% trans "sessions" %}</span>
+    </div>
     {% for s in sessions %}
       <a class="row-link" href="{% url 'chat:detail' s.pk %}">
-        <span>{{ s.title }}</span>
-        <small>{{ s.database.name }} · {{ s.llm.name }} · {{ s.created_at|date:"M d H:i" }}</small>
+        <span class="row-title">{{ s.title }}</span>
+        <small>
+          <span class="chip">{{ s.database.name }}</span>
+          <span class="chip">{{ s.llm.name }}</span>
+          <span class="muted">{{ s.created_at|date:"M d H:i" }}</span>
+        </small>
       </a>
     {% empty %}
-      <p class="muted">No chats yet. Create one on the right →</p>
+      <p class="muted">{% trans "No chats yet. Create one on the side →" %}</p>
     {% endfor %}
   </section>
   <section class="panel">
-    <h2>New chat</h2>
-    <form method="post">
+    <div class="panel-head"><h2>{% trans "New chat" %}</h2></div>
+    <form method="post" class="stacked-form">
       {% csrf_token %}
       {{ form.as_p }}
-      <button type="submit" class="btn">Start chatting</button>
+      <button type="submit" class="btn wide" style="margin-top:18px">{% trans "Start chatting" %}</button>
     </form>
-    <p class="muted">Pick an indexed database and an LLM profile.</p>
+    <p class="muted small">{% trans "Pick an indexed database and an LLM profile." %}</p>
   </section>
 </div>
 {% endblock %}

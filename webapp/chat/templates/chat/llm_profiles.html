@@ -1,35 +1,39 @@
 {% extends "chat/base.html" %}
+{% load i18n %}
 {% block title %}LLMs{% endblock %}
 {% block nav_llm %}active{% endblock %}
 {% block content %}
 <section class="panel">
   <div class="panel-head">
-    <h2>LLM profiles</h2>
-    {% if can_edit %}<a class="btn" href="{% url 'chat:llm_new' %}">+ Add LLM</a>{% endif %}
+    <h2>{% trans "LLM profiles" %}</h2>
+    {% if can_edit %}<a class="btn" href="{% url 'chat:llm_new' %}">{% trans "+ Add LLM" %}</a>{% endif %}
   </div>
+  <div class="table-scroll">
   <table class="tbl">
-    <thead><tr><th>Name</th><th>Endpoint</th><th>Model</th><th></th></tr></thead>
+    <thead><tr><th>{% trans "Name" %}</th><th>{% trans "Endpoint" %}</th><th>{% trans "Model" %}</th><th></th></tr></thead>
     <tbody>
     {% for p in object_list %}
       <tr>
-        <td>{{ p.name }}</td>
-        <td><small>{{ p.base_url }}</small></td>
+        <td class="cell-strong">{{ p.name }}</td>
+        <td><small class="muted mono">{{ p.base_url }}</small></td>
         <td><code>{{ p.model }}</code></td>
         {% if p.pk in editable_ids %}
         <td class="actions">
           {% if p.pk in editable_ids or p.owner == user %}
-            <a class="btn small ghost" href="{% url 'chat:llm_edit' p.pk %}">Edit</a>
+            <a class="btn small ghost" href="{% url 'chat:llm_edit' p.pk %}">{% trans "Edit" %}</a>
           {% endif %}
           {% if p.pk in editable_ids %}
-            <a class="btn small danger" href="{% url 'chat:llm_delete' p.pk %}">Delete</a>
+            <a class="btn small danger" href="{% url 'chat:llm_delete' p.pk %}">{% trans "Delete" %}</a>
           {% endif %}
         </td>
         {% endif %}
       </tr>
     {% empty %}
-      <tr><td colspan="4" class="muted">No LLM profiles yet — add one (e.g. your 9Router endpoint).</td></tr>
+      <tr><td colspan="4" class="muted">{% trans "No LLM profiles yet — add one (e.g. your 9Router endpoint)." %}</td></tr>
     {% endfor %}
     </tbody>
   </table>
+  </div>
+  <p class="muted small tip-row">{% trans "Any OpenAI-compatible endpoint works: 9Router, Ollama, LM Studio, OpenAI, Groq…" %}</p>
 </section>
 {% endblock %}

@@ -1,24 +1,30 @@
 {% extends "chat/base.html" %}
-{% block title %}Databases{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Databases" %}{% endblock %}
 {% block nav_db %}active{% endblock %}
 {% block content %}
 <section class="panel">
   <div class="panel-head">
-    <h2>Databases</h2>
-    {% if can_edit %}<a class="btn" href="{% url 'chat:db_new' %}">+ Add database</a>{% endif %}
+    <h2>{% trans "Databases" %}</h2>
+    {% if can_edit %}<a class="btn" href="{% url 'chat:db_new' %}">{% trans "+ Add database" %}</a>{% endif %}
   </div>
+  <div class="table-scroll">
   <table class="tbl">
-    <thead><tr><th>Name</th><th>Dialect</th><th>Target</th><th>Collection</th><th>Index</th><th></th></tr></thead>
+    <thead><tr>
+      <th>{% trans "Name" %}</th><th>{% trans "Dialect" %}</th><th>{% trans "Target" %}</th>
+      <th>{% trans "Collection" %}</th><th>{% trans "Index" %}</th><th></th>
+    </tr></thead>
     <tbody data-status-poll="1">
     {% for p in object_list %}
       <tr data-pk="{{ p.pk }}">
-        <td>{{ p.name }}</td>
+        <td class="cell-strong">{{ p.name }}</td>
         <td>{{ p.get_dialect_display }}</td>
-        <td><small>{{ p.db_url|default_if_none:'' }}{% if not p.db_url %}{{ p.db_user }}@{{ p.host }}:{{ p.port }}/{{ p.db_name }}{% endif %}</small></td>
+        <td><small class="muted mono">{{ p.db_url|default_if_none:'' }}{% if not p.db_url %}{{ p.db_user }}@{{ p.host }}:{{ p.port }}/{{ p.db_name }}{% endif %}</small></td>
         <td><code>{{ p.collection_name }}</code></td>
-        <td><span class="badge st-{{ p.index_status }}" data-role="status">{{ p.get_index_status_display }}</span>
-            <small data-role="vectors">{% if p.indexed_vectors %}{{ p.indexed_vectors }} vecs{% endif %}</small>
-            {% if p.index_error %}<div class="err-small">{{ p.index_error|truncatechars:120 }}</div>{% endif %}
+        <td>
+          <span class="badge st-{{ p.index_status }}" data-role="status">{{ p.get_index_status_display }}</span>
+          <small class="muted" data-role="vectors">{% if p.indexed_vectors %}{{ p.indexed_vectors }} vecs{% endif %}</small>
+          {% if p.index_error %}<div class="err-small">{{ p.index_error|truncatechars:120 }}</div>{% endif %}
         </td>
         {% if p.pk in editable_ids %}
 
@@ -26,28 +32,31 @@
           {% if can_edit %}
             {% if p.index_status != 'indexing' %}
               <form method="post" action="{% url 'chat:db_reindex' p.pk %}" class="inline-form">{% csrf_token %}
-                <button class="btn small">Index</button>
+                <button class="btn small">{% trans "Index" %}</button>
               </form>
             {% else %}
-              <span class="badge st-indexing">working…</span>
+              <span class="badge st-indexing">{% trans "working…" %}</span>
             {% endif %}
           {% endif %}
           {% if p.pk in editable_ids or p.owner == user %}
-            <a class="btn small ghost" href="{% url 'chat:db_edit' p.pk %}">Edit</a>
+            <a class="btn small ghost" href="{% url 'chat:db_edit' p.pk %}">{% trans "Edit" %}</a>
           {% endif %}
           {% if p.pk in editable_ids %}
-            <a class="btn small danger" href="{% url 'chat:db_delete' p.pk %}">Delete</a>
+            <a class="btn small danger" href="{% url 'chat:db_delete' p.pk %}">{% trans "Delete" %}</a>
           {% endif %}
         </td>
         {% endif %}
 
       </tr>
     {% empty %}
-      <tr><td colspan="6" class="muted">No database profiles yet.</td></tr>
+      <tr><td colspan="6" class="muted">{% trans "No database profiles yet." %}</td></tr>
     {% endfor %}
     </tbody>
   </table>
-  <p class="muted small">Tip: create the profile, then press <b>Index</b> once — it introspects the schema and builds the vector index (can take a minute on big schemas).</p>
+  </div>
+  <p class="muted small tip-row">{% blocktrans trimmed %}
+    Tip: create the profile, then press Index once — it introspects the schema and builds
+    the vector index (can take a minute on big schemas).{% endblocktrans %}</p>
 </section>
 {% endblock %}
 {% block scripts %}<script src="/static/chat/poll.js"></script>{% endblock %}

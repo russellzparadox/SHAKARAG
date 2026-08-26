@@ -1,0 +1,315 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: SHAKARAG\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fa\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# --- nav / global ---
+msgid "Chats"
+msgstr "گفتگوها"
+
+msgid "Databases"
+msgstr "پایگاه‌های داده"
+
+msgid "Users"
+msgstr "کاربران"
+
+msgid "Switch language"
+msgstr "تغییر زبان"
+
+msgid "Log out"
+msgstr "خروج"
+
+msgid "read-only SQL intelligence"
+msgstr "هوش SQL فقط-خواندنی"
+
+# --- auth ---
+msgid "Log in"
+msgstr "ورود"
+
+msgid "Sign up"
+msgstr "ثبت‌نام"
+
+msgid "Ask your database in plain language."
+msgstr "به زبان ساده از پایگاه داده‌تان بپرسید."
+
+msgid "Get verified, read-only SQL answers."
+msgstr "پاسخ‌های SQL تاییدشده و فقط-خواندنی بگیرید."
+
+msgid "Schema-aware retrieval across every table"
+msgstr "بازیابی آگاه از اسکیما در همه جدول‌ها"
+
+msgid "Queries executed in read-only sandboxes"
+msgstr "اجرای کوئری‌ها در محیط ایزوله فقط-خواندنی"
+
+msgid "Learns from your feedback over time"
+msgstr "با بازخورد شما یاد می‌گیرد"
+
+msgid "Welcome back"
+msgstr "خوش آمدید"
+
+msgid "Sign in to continue to your chats."
+msgstr "برای ادامه به گفتگوها وارد شوید."
+
+msgid "Invalid username or password."
+msgstr "نام کاربری یا رمز عبور نامعتبر است."
+
+msgid "Username"
+msgstr "نام کاربری"
+
+msgid "Password"
+msgstr "رمز عبور"
+
+msgid "No account?"
+msgstr "حساب ندارید؟"
+
+msgid "Create one"
+msgstr "بسازید"
+
+msgid "Create account"
+msgstr "ساخت حساب"
+
+msgid "Create an account to start"
+msgstr "برای شروع حساب بسازید و"
+
+msgid "querying your data conversationally."
+msgstr "به صورت گفتگو با داده‌هایتان کار کنید."
+
+msgid "Pick any indexed database to explore"
+msgstr "هر پایگاه داده ایندکس‌شده را برای کاوش انتخاب کنید"
+
+msgid "Answers in your language — including Persian"
+msgstr "پاسخ‌ها به زبان شما — از جمله فارسی"
+
+msgid "Clarifying questions when your intent matters"
+msgstr "وقتی نیت شما مهم است، سوال شفاف‌سازی می‌پرسیم"
+
+msgid "Takes less than a minute."
+msgstr "کمتر از یک دقیقه طول می‌کشد."
+
+msgid "Please fix the errors below."
+msgstr "لطفاً خطاهای زیر را برطرف کنید."
+
+msgid "Already registered?"
+msgstr "قبلاً ثبت‌نام کرده‌اید؟"
+
+# --- sessions ---
+msgid "Your chats"
+msgstr "گفتگوهای شما"
+
+msgid "sessions"
+msgstr "جلسه"
+
+msgid "No chats yet. Create one on the side →"
+msgstr "هنوز گفتگویی نیست. از کنار بسازید ←"
+
+msgid "New chat"
+msgstr "گفتگوی جدید"
+
+msgid "Start chatting"
+msgstr "شروع گفتگو"
+
+msgid "Pick an indexed database and an LLM profile."
+msgstr "یک پایگاه داده ایندکس‌شده و یک پروفایل LLM انتخاب کنید."
+
+# --- databases ---
+msgid "+ Add database"
+msgstr "+ افزودن پایگاه داده"
+
+msgid "Name"
+msgstr "نام"
+
+msgid "Dialect"
+msgstr "گونه SQL"
+
+msgid "Target"
+msgstr "مقصد"
+
+msgid "Collection"
+msgstr "کالکشن"
+
+msgid "Index"
+msgstr "ایندکس"
+
+msgid "working…"
+msgstr "در حال کار…"
+
+msgid "Edit"
+msgstr "ویرایش"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "Save"
+msgstr "ذخیره"
+
+msgid "Cancel"
+msgstr "انصراف"
+
+msgid "No database profiles yet."
+msgstr "هنوز پروفایلی برای پایگاه داده نیست."
+
+msgid ""
+"\n"
+"    Tip: create the profile, then press Index once — it introspects the schema and builds\n"
+"    the vector index (can take a minute on big schemas)."
+msgstr ""
+"\n"
+"    نکته: پروفایل را بسازید، سپس یک بار ایندکس را بزنید — اسکیما خوانده شده و ایندکس برداری ساخته می‌شود\n"
+"    (روی اسکیماهای بزرگ ممکن است یک دقیقه طول بکشد)."
+
+# --- llm ---
+msgid "+ Add LLM"
+msgstr "+ افزودن LLM"
+
+msgid "Endpoint"
+msgstr "آدرس سرویس"
+
+msgid "Model"
+msgstr "مدل"
+
+msgid "No LLM profiles yet — add one (e.g. your 9Router endpoint)."
+msgstr "هنوز پروفایل LLM نیست — یکی اضافه کنید (مثلاً آدرس 9Router شما)."
+
+msgid "Any OpenAI-compatible endpoint works: 9Router, Ollama, LM Studio, OpenAI, Groq…"
+msgstr "هر سرویس سازگار با OpenAI کار می‌کند: 9Router، Ollama، LM Studio، OpenAI، Groq…"
+
+# --- forms ---
+msgid "Editing profile"
+msgstr "ویرایش پروفایل"
+
+msgid "New profile"
+msgstr "پروفایل جدید"
+
+msgid "Add"
+msgstr "افزودن"
+
+msgid "database"
+msgstr "پایگاه داده"
+
+msgid "LLM profile"
+msgstr "پروفایل LLM"
+
+msgid "Indexed:"
+msgstr "ایندکس‌شده:"
+
+msgid "vectors at"
+msgstr "بردار در"
+
+msgid "Re-index after schema changes."
+msgstr "بعد از تغییر اسکیما دوباره ایندکس کنید."
+
+msgid "Destructive action"
+msgstr "اقدام مخرب"
+
+msgid "Sessions using it will stop working. The vector collection is kept on disk."
+msgstr "گفتگوهایی که از آن استفاده می‌کنند متوقف می‌شوند. کالکشن برداری روی دیسک باقی می‌ماند."
+
+msgid "Chats using this model will need to pick another one."
+msgstr "گفتگوهایی که از این مدل استفاده می‌کنند باید مدل دیگری انتخاب کنند."
+
+msgid "Yes, delete"
+msgstr "بله، حذف شود"
+
+msgid "Database profile"
+msgstr "پروفایل پایگاه داده"
+
+msgid "Delete database"
+msgstr "حذف پایگاه داده"
+
+msgid "Delete LLM"
+msgstr "حذف LLM"
+
+# --- users ---
+msgid "User access"
+msgstr "دسترسی کاربران"
+
+msgid "users"
+msgstr "کاربر"
+
+msgid ""
+"\n"
+"    Everyone can chat with all databases and LLMs. Here you control who may\n"
+"    manage them (add, edit, delete, index). Superusers always can."
+msgstr ""
+"\n"
+"    همه می‌توانند با تمام پایگاه‌های داده و LLMها گفتگو کنند. اینجا تعیین می‌کنید چه کسی\n"
+"    می‌تواند آن‌ها را مدیریت کند (افزودن، ویرایش، حذف، ایندکس). ابرکاربران همیشه می‌توانند."
+
+msgid "superuser"
+msgstr "ابرکاربر"
+
+msgid "disabled"
+msgstr "غیرفعال"
+
+msgid "Can manage databases"
+msgstr "می‌تواند پایگاه‌های داده را مدیریت کند"
+
+msgid "Can manage LLMs"
+msgstr "می‌تواند LLMها را مدیریت کند"
+
+msgid "No users yet."
+msgstr "هنوز کاربری نیست."
+
+msgid "Create user"
+msgstr "ساخت کاربر"
+
+msgid "username"
+msgstr "نام کاربری"
+
+msgid "email (optional)"
+msgstr "ایمیل (اختیاری)"
+
+msgid "password (8+ chars)"
+msgstr "رمز عبور (۸+ نویسه)"
+
+# --- chat page ---
+msgid "All chats"
+msgstr "همه گفتگوها"
+
+msgid "Chat settings"
+msgstr "تنظیمات گفتگو"
+
+msgid "Answer language"
+msgstr "زبان پاسخ"
+
+msgid "Ask me when unsure"
+msgstr "در صورت عدم قطعیت بپرس"
+
+msgid "You"
+msgstr "شما"
+
+msgid "system"
+msgstr "سیستم"
+
+msgid "answered above"
+msgstr "بالا پاسخ داده شد"
+
+msgid "Results"
+msgstr "نتایج"
+
+msgid "rows"
+msgstr "ردیف"
+
+msgid "result capped at server limit — refine the query for more"
+msgstr "نتیجه به سقف سرور رسید — برای بیشتر کوئری را محدودتر کنید"
+
+msgid "Good answer — remember this query"
+msgstr "پاسخ خوب — این کوئری را به خاطر بسپار"
+
+msgid "Wrong — forget this query"
+msgstr "اشتباه بود — این کوئری را فراموش کن"
+
+msgid ""
+"Ask anything about the connected database — I'll write and run read-only SQL for you."
+msgstr ""
+"هر چیزی درباره پایگاه داده متصل بپرسید — من SQL فقط-خواندنی می‌نویسم و اجرا می‌کنم."
+
+msgid "Ask your data…"
+msgstr "از داده‌هایتان بپرسید…"
+
+msgid "Send"
+msgstr "ارسال"

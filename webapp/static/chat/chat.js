@@ -3,6 +3,7 @@
   const form = document.getElementById("chat-form");
   if (!form || !list) return;
 
+  const main = document.getElementById("chat-main");
   const input = document.getElementById("question-input");
   const btn = document.getElementById("send-btn");
   const csrf = form.querySelector("[name=csrfmiddlewaretoken]").value;
@@ -20,17 +21,25 @@
   function md(text) {
     const raw = String(text ?? "");
     if (!window.marked || !window.DOMPurify) return esc(raw).replace(/\n/g, "<br>");
-    const html = marked.parse(raw);
-    return DOMPurify.sanitize(html, { ADD_ATTR: ["target"] });
+    return DOMPurify.sanitize(marked.parse(raw), { ADD_ATTR: ["target"] });
   }
+
+  function scrollDown() { list.scrollTop = list.scrollHeight; }
 
   function bubble(cls, html) {
     const div = document.createElement("div");
     div.className = "bubble " + cls;
     div.innerHTML = html;
     list.appendChild(div);
-    list.scrollTop = list.scrollHeight;
+    scrollDown();
     return div;
+  }
+
+  function eyebrow(role, timeStr) {
+    const label =
+      role === "user" ? "<b>You</b>" :
+      role === "assistant" ? "<b>ShakaRAG</b>" : "system";
+    return `<div class="msg-eyebrow">${label}<span>${esc(timeStr || "")}</span></div>`;
   }
 
   function resultBlock(meta) {
@@ -83,10 +92,17 @@
     e.preventDefault();
     const question = input.value.trim();
     if (!question || btn.disabled) return;
-    bubble("user", esc(question));
+    bubble("user", eyebrow("user", nowHM()) +
+      '<div class="bubble-text md">' + md(question) + "</div>");
     input.value = "";
     btn.disabled = true;
-    const pending = bubble("assistant", "<em>thinking…</em>");
+    if (main) main.classList.add("thinking");
+    const pending = bubble(
+      "assistant",
+      eyebrow("assistant") +
+        '<div class="bubble-text"><span class="typing-dots"><i></i><i></i><i></i></span></div>'
+    );
+    scrollDown();
 
     try {
       const resp = await fetch(list.dataset.sendUrl, {
@@ -98,23 +114,37 @@
       if (!resp.ok) throw new Error(data.error || resp.statusText);
       const a = data.assistant;
       if (a.meta && a.meta.type === "clarify") {
-        pending.innerHTML = md(a.content) + clarifyBlock(a.meta || {});
+        pending.innerHTML = eyebrow("assistant") +
+          '<div class="bubble-text md">' + md(a.content) + "</div>" +
+          clarifyBlock(a.meta || {});
         wireClarify(pending);
+      } else if (a.meta && a.meta.error) {
+        pending.classList.add("error");
+        pending.innerHTML = eyebrow("assistant") +
+          '<div class="bubble-text">⚠️ ' + esc(a.content || a.meta.error) + "</div>";
       } else {
-        pending.innerHTML =
+        pending.innerHTML = eyebrow("assistant") +
           '<div class="bubble-text md">' + md(a.content) + "</div>" +
           resultBlock(a.meta || {}) +
           feedbackBlock(a.id);
         wireFeedback(pending);
       }
     } catch (err) {
-      pending.innerHTML = `⚠️ ${esc(err.message)}`;
+      pending.classList.add("error");
+      pending.innerHTML = eyebrow("assistant") +
+        '<div class="bubble-text">⚠️ ' + esc(err.message) + "</div>";
     } finally {
       btn.disabled = false;
+      if (main) main.classList.remove("thinking");
       input.focus();
-      list.scrollTop = list.scrollHeight;
+      scrollDown();
     }
   });
+
+  function nowHM() {
+    const d = new Date();
+    return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
 
   function feedbackBlock(mid) {
     return `<div class="fb" data-mid="${mid}">

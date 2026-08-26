@@ -12,6 +12,7 @@ COPY rag/ ./rag/
 COPY scripts/ ./scripts/
 COPY api/ ./api/
 COPY webapp/ ./webapp/
+COPY locale/ ./locale/
 
 ENV CHROMA_DIR=/data/chroma
 VOLUME ["/data"]

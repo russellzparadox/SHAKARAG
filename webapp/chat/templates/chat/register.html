@@ -1,13 +1,30 @@
 {% extends "chat/base.html" %}
-{% block title %}Sign up{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Sign up" %}{% endblock %}
+{% block page_class %}auth-page{% endblock %}
 {% block content %}
-<div class="auth-card">
-  <h1>Create account</h1>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn wide">Sign up</button>
-  </form>
-  <p class="muted">Already registered? <a href="{% url 'login' %}">Log in</a>.</p>
+<div class="auth-shell">
+  <div class="auth-hero">
+    <div class="brand-lockup">SHAKA<span>RAG</span></div>
+    <p class="auth-tag">{% trans "Create an account to start" %}<br>{% trans "querying your data conversationally." %}</p>
+    <ul class="auth-points">
+      <li><i>◈</i> {% trans "Pick any indexed database to explore" %}</li>
+      <li><i>◈</i> {% trans "Answers in your language — including Persian" %}</li>
+      <li><i>◈</i> {% trans "Clarifying questions when your intent matters" %}</li>
+    </ul>
+  </div>
+  <div class="auth-card">
+    <h1>{% trans "Create account" %}</h1>
+    <p class="muted small" style="margin-top:0">{% trans "Takes less than a minute." %}</p>
+    {% if form.errors %}
+      <div class="msg error">{% trans "Please fix the errors below." %}</div>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn wide" style="margin-top:20px">{% trans "Sign up" %}</button>
+    </form>
+    <p class="muted auth-alt">{% trans "Already registered?" %} <a href="{% url 'login' %}">{% trans "Log in" %}</a>.</p>
+  </div>
 </div>
 {% endblock %}

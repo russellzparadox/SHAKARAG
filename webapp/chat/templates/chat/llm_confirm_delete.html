@@ -1,10 +1,17 @@
 {% extends "chat/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Delete LLM" %}{% endblock %}
+{% block page_class %}form-page{% endblock %}
 {% block content %}
-<div class="auth-card">
-  <h1>Delete “{{ object.name }}”?</h1>
-  <form method="post">{% csrf_token %}
-    <button type="submit" class="btn danger">Yes, delete</button>
-    <a class="btn ghost" href="{% url 'chat:llm_list' %}">Cancel</a>
-  </form>
+<div class="auth-card confirm-card">
+  <span class="mono-eyebrow danger-text">{% trans "Destructive action" %}</span>
+  <h1>{% trans "Delete" %} “{{ object.name }}”?</h1>
+  <p class="muted">{% trans "Chats using this model will need to pick another one." %}</p>
+  <div class="form-actions">
+    <form method="post" style="margin:0">{% csrf_token %}
+      <button type="submit" class="btn danger">{% trans "Yes, delete" %}</button>
+    </form>
+    <a class="btn ghost" href="{% url 'chat:llm_list' %}">{% trans "Cancel" %}</a>
+  </div>
 </div>
 {% endblock %}

@@ -1,25 +1,26 @@
 {% extends "chat/base.html" %}
+{% load i18n %}
 {% block title %}{{ object.title }}{% endblock %}
 {% block content %}
 <div class="chat-wrap">
   <aside class="chat-side">
-    <a class="btn ghost wide" href="{% url 'chat:sessions' %}">← All chats</a>
-    <div class="side-card">
-      <h3>Database</h3>
+    <a class="btn ghost wide" href="{% url 'chat:sessions' %}">{% if LANGUAGE_CODE == 'fa' %}→{% else %}←{% endif %} {% trans "All chats" %}</a>
+    <div class="meta-group">
+      <h3>{% trans "Database" %}</h3>
       <p>{{ object.database.name }}</p>
       <span class="badge st-{{ object.database.index_status }}">{{ object.database.get_index_status_display }}
         {% if object.database.indexed_vectors %}· {{ object.database.indexed_vectors }} vecs{% endif %}</span>
     </div>
-    <div class="side-card">
-      <h3>LLM</h3>
+    <div class="meta-group">
+      <h3>{% trans "Model" %}</h3>
       <p>{{ object.llm.name }}</p>
-      <small class="muted">{{ object.llm.model }}</small>
+      <small>{{ object.llm.model }}</small>
     </div>
-    <div class="side-card">
-      <h3>Chat settings</h3>
+    <div class="meta-group">
+      <h3>{% trans "Chat settings" %}</h3>
       <form method="post" action="{% url 'chat:language' object.pk %}">
         {% csrf_token %}
-        <label class="side-label">Answer language</label>
+        <label class="side-label">{% trans "Answer language" %}</label>
         <select name="language" onchange="this.form.submit()">
           {% for code, label in object.Language.choices %}
             <option value="{{ code }}" {% if object.language == code %}selected{% endif %}>{{ label }}</option>
@@ -27,22 +28,26 @@
         </select>
         <label class="check-row">
           <input type="checkbox" name="auto_clarify" {% if object.auto_clarify %}checked{% endif %} onchange="this.form.submit()">
-          <span>Ask me when unsure</span>
+          <span>{% trans "Ask me when unsure" %}</span>
         </label>
-        <noscript><button class="btn small" type="submit">Save</button></noscript>
+        <noscript><button class="btn small" type="submit">{% trans "Save" %}</button></noscript>
       </form>
     </div>
   </aside>
 
-  <section class="chat-main">
+  <section class="chat-main" id="chat-main">
     <div id="messages" class="messages-list" data-send-url="{% url 'chat:send' object.pk %}">
       {% for m in object.messages.all %}
         <div class="bubble {{ m.role }}">
+          <div class="msg-eyebrow">
+            {% if m.role == 'assistant' %}<b>ShakaRAG</b>{% elif m.role == 'user' %}<b>{% trans "You" %}</b>{% else %}{% trans "system" %}{% endif %}
+            <span>{{ m.created_at|date:"H:i" }}</span>
+          </div>
           <div class="bubble-text md" data-raw-md>{{ m.content }}</div>
           {% if m.role == 'assistant' and m.meta.type == 'clarify' %}
             <div class="clarify-options">
               {% for opt in m.meta.options %}<span class="chip chip-option">{{ opt }}</span>{% endfor %}
-              <small class="muted">(answered above)</small>
+              <small class="muted">({% trans "answered above" %})</small>
             </div>
           {% elif m.role == 'assistant' and m.meta %}
             <div class="meta-block">
@@ -50,7 +55,7 @@
                 <details><summary>SQL</summary><pre>{{ m.meta.sql }}</pre></details>
               {% endif %}
               {% if m.meta.columns %}
-                <details><summary>Results ({{ m.meta.row_count }} rows)</summary>
+                <details open><summary>{% trans "Results" %} ({{ m.meta.row_count }} {% trans "rows" %})</summary>
                   <div class="table-scroll"><table>
                     <thead><tr>{% for c in m.meta.columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
                     <tbody>
@@ -59,7 +64,7 @@
                     {% endfor %}
                     </tbody>
                   </table></div>
-                  {% if m.meta.truncated %}<small>result capped at server limit — refine the query for more</small>{% endif %}
+                  {% if m.meta.truncated %}<small>{% trans "result capped at server limit — refine the query for more" %}</small>{% endif %}
                 </details>
               {% endif %}
               {% if m.meta.tables_used %}
@@ -67,21 +72,21 @@
               {% endif %}
               {% if m.meta.sql %}
                 <div class="fb" data-mid="{{ m.pk }}">
-                  <button class="fb-btn" data-value="up" title="Good answer — remember this query">👍</button>
-                  <button class="fb-btn" data-value="down" title="Wrong — forget this query">👎</button>
+                  <button class="fb-btn" data-value="up" title="{% trans 'Good answer — remember this query' %}">👍</button>
+                  <button class="fb-btn" data-value="down" title="{% trans 'Wrong — forget this query' %}">👎</button>
                 </div>
               {% endif %}
             </div>
           {% endif %}
         </div>
       {% empty %}
-        <div class="bubble system">Ask anything about the connected database — I'll write and run read-only SQL for you.</div>
+        <div class="bubble system">{% trans "Ask anything about the connected database — I'll write and run read-only SQL for you." %}</div>
       {% endfor %}
     </div>
-    <form id="chat-form" autocomplete="off">
+    <form id="chat-form" autocomplete="off" class="composer">
       {% csrf_token %}
-      <input type="text" id="question-input" placeholder="e.g. how many orders per status?" maxlength="2000" autofocus>
-      <button type="submit" class="btn" id="send-btn">Send</button>
+      <input type="text" id="question-input" placeholder="{% trans 'Ask your data…' %}" maxlength="2000" autofocus>
+      <button type="submit" class="btn" id="send-btn">{% trans "Send" %}</button>
     </form>
   </section>
 </div>
