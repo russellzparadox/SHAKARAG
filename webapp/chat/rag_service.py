@@ -195,6 +195,11 @@ def record_feedback(dbp, question: str, sql: str, notes: str = "", helpful: bool
 
 
 def start_reindex(dbp) -> None:
+    # reindex drops + rebuilds the collection: drop any cached stores/pipelines that
+    # would hold stale collection handles.
+    _schema_store_cache.pop(dbp.pk, None)
+    for key in [k for k in _pipeline_cache if k[0] == dbp.pk]:
+        _pipeline_cache.pop(key, None)
     thread = threading.Thread(target=_reindex_worker, args=(dbp.pk,), daemon=True)
     thread.start()
 

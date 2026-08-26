@@ -179,6 +179,9 @@ def test_document_answer_cites_sources(tmp_path):
         def __init__(self):
             self.last_system = ""
 
+        def chat_json(self, messages, max_tokens=8192):
+            return {"route": "document"}
+
         def chat(self, messages, max_tokens=8192):
             self.last_system = messages[0]["content"]
             return "The delivery term is 30 days [contract.docx]."

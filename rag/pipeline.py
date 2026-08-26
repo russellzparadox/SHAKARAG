@@ -23,6 +23,7 @@ Rules:
 - Add a row LIMIT (<= __MAX_ROWS__) for row-level listings unless the user asks for totals.
 - If the CONTEXT does not contain what you need, still produce your best-effort query from related tables you do see and explain the gap in "explanation".
 - RECENT CONVERSATION: if the question contains pronouns or ellipsis ("them", "their names", "those", "also show..."), resolve them against the most recent USER and ASSISTANT turns — the entity discussed there (e.g. suppliers) is what the user means. Do not switch to a different entity unless the current question names one explicitly.
+- REPORTS & MULTI-TABLE ANALYSIS: for business reports (breakdowns, per-period trends, per-entity summaries), prefer CTEs (WITH clauses): stage filtered base data first, then aggregate. Join facts to dimensions strictly via the JOIN MAP conditions. Include ALL requested dimensions as GROUP BY columns, order results meaningfully (by period, then by measure DESC), and pick human-readable label columns from dimensions alongside IDs.
 __HINTS__
 - __DW_BLOCK__"""
 
@@ -98,9 +99,21 @@ FOLLOWUP_PATTERN = re.compile(
 )
 
 
+REPORT_INTENT = re.compile(
+    r"\b(report|summary|breakdown|break down|per month|monthly|per week|weekly|per supplier|"
+    r"per customer|per category|per product|by month|by year|by supplier|by customer|"
+    r"trend|comparison|compare|over time|dashboard|kpi|top \d+|business review)\b",
+    re.IGNORECASE,
+)
+
+
 def _is_followup(question: str) -> bool:
     """Heuristic: the question refers back to prior turns instead of naming an entity."""
     return bool(FOLLOWUP_PATTERN.search(question or ""))
+
+
+def _is_report_request(question: str) -> bool:
+    return bool(REPORT_INTENT.search(question or ""))
 
 
 class RagPipeline:
@@ -153,7 +166,7 @@ class RagPipeline:
         ordered = sorted(hits, key=lambda h: h["distance"])
         for hit in ordered:
             table = (hit.get("metadata") or {}).get("table", "")
-            if table not in seen_tables:
+            if table and table not in seen_tables:
                 seen_tables.add(table)
                 tables_order.append(table)
 
@@ -164,8 +177,123 @@ class RagPipeline:
             parts.append(text)
             used += len(text)
 
+        expanded_parts, expanded_tables = self._expand_join_neighbors(
+            parts, tables_order, budget - used
+        )
+        if expanded_parts:
+            parts = expanded_parts + parts
+            used += sum(len(x) for x in expanded_parts)
+            for t in reversed(expanded_tables):
+                if t not in seen_tables:
+                    tables_order.insert(0, t)
+
         context = "\n\n---\n\n".join(parts)
+        join_map = self._join_map(tables_order, context)
+        if join_map:
+            context = join_map + "\n\n" + context
         return context, tables_order
+
+    def _expand_join_neighbors(
+        self, parts: list[str], tables: list[str], remaining_budget: int
+    ) -> tuple[list[str], list[str]]:
+        """1-hop FK expansion: pull schema chunks of referenced tables that retrieval
+        missed, so multi-table questions have complete join targets. Budget-capped."""
+        if remaining_budget <= 200:
+            return [], []
+        fk_re = re.compile(r"\[FK->([A-Za-z_][A-Za-z0-9_]*)\(")
+        joined_text = "\n".join(parts)
+        referenced: set[str] = set()
+        for m in fk_re.finditer(joined_text):
+            referenced.add(m.group(1))
+        have_bare = {t.split(".")[-1] for t in tables}
+        missing = sorted(referenced - have_bare)[:4]  # cap expansion
+        new_parts: list[str] = []
+        new_tables: list[str] = []
+        added_budget = 0
+        per_table_cap = max(remaining_budget // max(len(missing), 1), 0) if missing else 0
+        try:
+            collection = self.store.collection
+        except Exception:
+            return [], []
+        for table_name in missing:
+            if added_budget >= remaining_budget:
+                break
+            try:
+                got = collection.get(
+                    where={"table": table_name},
+                    include=["documents", "metadatas"],
+                    limit=2,
+                )
+            except Exception:
+                continue
+            docs = got.get("documents") or []
+            metas = got.get("metadatas") or []
+            # prefer the stats/overview chunk (first one) — smallest useful summary
+            for doc, meta in zip(docs, metas):
+                if len(doc) > per_table_cap and new_parts:
+                    continue
+                qualified = (
+                    f"{(meta or {}).get('schema', '')}.{table_name}"
+                    if (meta or {}).get("schema")
+                    else table_name
+                )
+                new_parts.append(doc)
+                if qualified not in new_tables:
+                    new_tables.append(qualified)
+                added_budget += len(doc)
+                break
+        return new_parts, new_tables
+
+    def _join_map(self, tables: list[str], context: str) -> str:
+        """Derive explicit JOIN conditions between retrieved tables from FK annotations
+        in the chunk texts, so multi-table questions get a ready join plan."""
+        if len(tables) < 2:
+            return ""
+
+        # both qualified ("BI.DimX") and bare names must resolve
+        by_bare = {}
+        for t in tables:
+            by_bare[t.split(".")[-1]] = t
+
+        fk_re = re.compile(r"\[FK->([A-Za-z_][A-Za-z0-9_]*)\(([A-Za-z0-9_, ]+)\)\]")
+        header_re = re.compile(
+            r"^\s*([A-Za-z_][\w.]*\.[A-Za-z_][A-Za-z0-9_]*)\s+\(?(table|view)"
+        )
+        col_re = re.compile(r"^\s*-\s*\[?(\w+)")
+
+        lines: list[str] = []
+        seen: set[tuple[str, str, str]] = set()
+        current_table = None
+        for raw_line in context.splitlines():
+            tm = header_re.match(raw_line)
+            if tm:
+                full = tm.group(1)
+                current_table = by_bare.get(full.split(".")[-1], full)
+                continue
+            if current_table is None or "-" not in raw_line[:3]:
+                continue
+            cm = col_re.match(raw_line)
+            if not cm:
+                continue
+            col = cm.group(1)
+            for m in fk_re.finditer(raw_line):
+                ref_table, ref_cols = m.group(1), m.group(2).strip()
+                ref_full = by_bare.get(ref_table)
+                if not ref_full or current_table not in by_bare:
+                    continue
+                key = (current_table, col, ref_table)
+                if key in seen:
+                    continue
+                seen.add(key)
+                rc = ", ".join(c.strip() for c in ref_cols.split(","))
+                lines.append(f"- {current_table}.{col} = {ref_full}.{rc}")
+
+        if not lines:
+            return ""
+        return (
+            "JOIN MAP (verified foreign-key relationships between the retrieved tables — "
+            "use these exact conditions):\n" + "\n".join(lines[:25])
+        )
 
     def _example_store(self):
         if getattr(self, "_examples", None) is None:
@@ -240,14 +368,16 @@ class RagPipeline:
         if not hits:
             return "sql"
 
-        # Clear document signals (routing doesn't need the LLM for this)
-        if has_docs and not has_schema:
+        # Doc-only retrieval is not proof by itself: data-flavored questions
+        # (count/sum/list/how many) should stay on SQL even when a document mentions
+        # the entity. Arbitrate when both signals could apply.
+        if has_docs and self.llm is None:
             return "document"
 
         if self.llm is None:
             return "sql"
-        if has_docs and has_schema:
-            # mixed retrieval — let the LLM arbitrate with compact evidence
+        if has_docs:
+            # mixed or doc-only retrieval with an LLM available — arbitrate with evidence
             return self._arbitrate_route(question, doc_hits, schema_hits)
 
         q = question.strip()
@@ -268,7 +398,9 @@ class RagPipeline:
                             "You route user questions. Answer ONLY JSON:\n"
                             '{"route": "sql" | "document"}\n'
                             '"sql" = the question asks about data records, counts, '
-                            "aggregates, filtering rows — answerable by querying tables.\n"
+                            "aggregates, filtering rows — answerable by querying tables. "
+                            "Words like how many, total, quantity, list, show strongly "
+                            "indicate sql even if a document mentions the entity.\n"
                             '"document" = the question asks about content of uploaded '
                             "documents/reports/contracts/notes — terms, descriptions, "
                             "explanations, summaries."
@@ -379,17 +511,27 @@ class RagPipeline:
             return ""
         preview_lines: list[str] = []
         seen: set[str] = set()
+        # resolve bare table names to their schema-qualified form when possible
+        schema_by_bare: dict[str, str] = {}
+        try:
+            for meta in self.store.all_table_metas():
+                bare = (meta.get("table") or "").split(".")[-1]
+                if meta.get("schema") and bare:
+                    schema_by_bare[bare] = f'{meta["schema"]}.{bare}'
+        except Exception:
+            pass
+        is_mssql = hasattr(self.dialect, "label") and "SQL Server" in self.dialect.label
         for t in tables[:4]:
             if t in seen:
                 continue
             seen.add(t)
             try:
-                qualified = t if "." in t else f"[{t}]"
-                cols, rows, _trunc = self.run_sql(
-                    f"SELECT TOP 3 * FROM {qualified}"
-                    if hasattr(self.dialect, "label") and "SQL Server" in self.dialect.label
-                    else f'SELECT * FROM {t.replace(".", ".")} LIMIT 3'
-                )
+                qualified = t if "." in t else schema_by_bare.get(t.split(".")[-1], t)
+                if is_mssql:
+                    sql = f"SELECT TOP 3 * FROM {qualified}"
+                else:
+                    sql = f"SELECT * FROM {qualified} LIMIT 3"
+                cols, rows, _trunc = self.run_sql(sql)
                 if not rows:
                     continue
                 shown = [
