@@ -123,9 +123,16 @@
         pending.innerHTML = eyebrow("assistant") +
           '<div class="bubble-text">⚠️ ' + esc(a.content || a.meta.error) + "</div>";
       } else {
+        const m = a.meta || {};
+        let badge = "";
+        if (m.route === "document") {
+          badge = '<span class="route-badge doc">📄 ' +
+            esc((m.doc_sources || []).join(", ") || "documents") + "</span>";
+        }
         pending.innerHTML = eyebrow("assistant") +
           '<div class="bubble-text md">' + md(a.content) + "</div>" +
-          resultBlock(a.meta || {}) +
+          badge +
+          resultBlock(m) +
           feedbackBlock(a.id);
         wireFeedback(pending);
       }

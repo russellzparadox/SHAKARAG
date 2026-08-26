@@ -63,6 +63,8 @@ class RagResult:
     context: str | None = None
     answer: str | None = None
     error: str | None = None
+    route: str = "sql"          # sql | document | chat
+    doc_sources: list[str] = field(default_factory=list)
     needs_clarification: bool = False
     clarify_question: str | None = None
     options: list[str] = field(default_factory=list)
@@ -203,6 +205,212 @@ class RagPipeline:
             role = "USER" if m["role"] == "user" else "ASSISTANT"
             lines.append(f"{role}: {m['content'][:600]}")
         return "\n".join(lines) + "\n\n"
+
+    # ---- intent routing -------------------------------------------------
+
+    def _doc_hits(self, hits: list[dict]) -> list[dict]:
+        return [h for h in hits if (h.get("metadata") or {}).get("kind") == "document"]
+
+    def _looks_conversational(self, question: str) -> bool:
+        q = (question or "").strip().lower()
+        if not q:
+            return True
+        if re.fullmatch(r"[\s hi hello hey سلام درود ?!.,،؟]+", q):
+            return True
+        if re.search(
+            r"^(hi|hello|hey|سلام|درود|thanks|merci|ممنون|چه خبر|خوبی)\b", q
+        ) and len(q.split()) <= 6:
+            return True
+        return False
+
+    def _route_intent(self, question: str, hits: list[dict], context: str) -> str:
+        """Decide between sql / document / chat.
+
+        Heuristics first; LLM arbitration when ambiguous.
+        """
+        doc_hits = self._doc_hits(hits)
+        schema_hits = [h for h in hits if (h.get("metadata") or {}).get("kind") != "document"]
+        has_docs = bool(doc_hits)
+        has_schema = bool(schema_hits)
+
+        # Conversational messages always win, regardless of what retrieval found;
+        # empty retrieval alone does NOT force chat (the schema index may have missed).
+        if self._looks_conversational(question):
+            return "chat"
+        if not hits:
+            return "sql"
+
+        # Clear document signals (routing doesn't need the LLM for this)
+        if has_docs and not has_schema:
+            return "document"
+
+        if self.llm is None:
+            return "sql"
+        if has_docs and has_schema:
+            # mixed retrieval — let the LLM arbitrate with compact evidence
+            return self._arbitrate_route(question, doc_hits, schema_hits)
+
+        q = question.strip()
+        if self._looks_conversational(q):
+            return "chat"
+
+        return "sql"
+
+    def _arbitrate_route(
+        self, question: str, doc_hits: list[dict], schema_hits: list[dict]
+    ) -> str:
+        try:
+            parsed = self.llm.chat_json(
+                [
+                    {
+                        "role": "system",
+                        "content": (
+                            "You route user questions. Answer ONLY JSON:\n"
+                            '{"route": "sql" | "document"}\n'
+                            '"sql" = the question asks about data records, counts, '
+                            "aggregates, filtering rows — answerable by querying tables.\n"
+                            '"document" = the question asks about content of uploaded '
+                            "documents/reports/contracts/notes — terms, descriptions, "
+                            "explanations, summaries."
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": "QUESTION: "
+                        + question
+                        + "\n\nDOCUMENT evidence found:\n"
+                        + "\n".join(
+                            f"- {(h['metadata'] or {}).get('source','?')}: "
+                            + h["text"][:150]
+                            for h in doc_hits[:3]
+                        )
+                        + "\n\nSCHEMA evidence found:\n"
+                        + "\n".join(
+                            "- " + ((h["metadata"] or {}).get("table", "?"))
+                            for h in schema_hits[:5]
+                        ),
+                    },
+                ],
+                max_tokens=40,
+            )
+        except LLMError:
+            return "sql"
+        route = (parsed or {}).get("route")
+        return route if route in ("sql", "document") else "sql"
+
+    def _answer_from_documents(
+        self, question: str, hits: list[dict], result: RagResult, answer_language: str
+    ) -> RagResult:
+        """Answer from document chunks retrieved for the question."""
+        doc_hits = self._doc_hits(hits)
+        sources: list[str] = []
+        blocks: list[str] = []
+        used = 0
+        budget = max(self.settings.context_char_budget // 2, 4000)
+        for h in doc_hits:
+            m = h["metadata"] or {}
+            src = m.get("source", "?")
+            sec = m.get("section") or ""
+            if src not in sources:
+                sources.append(src)
+            block = f"[{src}" + (f" — {sec}]" if sec else "]") + f"\n{h['text']}"
+            if used + len(block) > budget:
+                continue
+            blocks.append(block)
+            used += len(block)
+
+        result.doc_sources = sources
+
+        system = (
+            "You answer questions using ONLY the provided DOCUMENT excerpts.\n"
+            "Cite sources inline like [filename]. If the excerpts don't contain the answer, "
+            "say so plainly and suggest what to check. Do not invent facts."
+        )
+        lang_name = ANSWER_LANGUAGES.get((answer_language or "auto").lower())
+        if lang_name and answer_language != "auto":
+            system += (
+                f"\n\nIMPORTANT: Write your ENTIRE answer in {lang_name}. "
+                "Keep file names unchanged."
+            )
+
+        user = (
+            f"{self._history_block()}QUESTION: {question}\n\n"
+            "DOCUMENT EXCERPTS:\n\n" + "\n\n---\n\n".join(blocks) + "\n\nAnswer now."
+        )
+        result.answer = self.llm.chat(
+            [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        )
+        result.tables_used = sorted({(h["metadata"] or {}).get("source", "?") for h in doc_hits})
+        return result
+
+    def _conversational_answer(
+        self, question: str, tables: list[str], result: RagResult, answer_language: str
+    ) -> RagResult:
+        """Greetings / small talk / capability questions — no SQL."""
+        system = (
+            "You are ShakaRAG, an assistant connected to company databases and documents. "
+            "The user sent a conversational message (greeting, thanks, or a question about "
+            "your abilities). Reply briefly, warmly, in one short paragraph. If relevant, "
+            "mention what they can ask: counts, lists, trends from the database, or search "
+            "their uploaded documents. Do NOT write SQL. Do NOT invent data."
+        )
+        lang_name = ANSWER_LANGUAGES.get((answer_language or "auto").lower())
+        if lang_name and answer_language != "auto":
+            system += f"\n\nIMPORTANT: Write your ENTIRE reply in {lang_name}."
+        ctx_note = ""
+        if tables:
+            ctx_note = (
+                "\n\nConnected database has tables including: "
+                + ", ".join(tables[:10])
+                + "."
+            )
+        user = f"{self._history_block()}MESSAGE: {question}{ctx_note}\n\nReply now."
+        result.answer = self.llm.chat(
+            [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        )
+        return result
+
+    def _data_preview_block(self, tables: list[str], context: str) -> str:
+        """Sample real rows from the top candidate tables to ground the SQL generation.
+
+        Best-effort only; disabled via DATA_PREVIEW=0.
+        """
+        if not getattr(self.settings, "data_preview", True):
+            return ""
+        preview_lines: list[str] = []
+        seen: set[str] = set()
+        for t in tables[:4]:
+            if t in seen:
+                continue
+            seen.add(t)
+            try:
+                qualified = t if "." in t else f"[{t}]"
+                cols, rows, _trunc = self.run_sql(
+                    f"SELECT TOP 3 * FROM {qualified}"
+                    if hasattr(self.dialect, "label") and "SQL Server" in self.dialect.label
+                    else f'SELECT * FROM {t.replace(".", ".")} LIMIT 3'
+                )
+                if not rows:
+                    continue
+                shown = [
+                    " | ".join(str(v)[:30] if v is not None else "NULL" for v in r)
+                    for r in rows
+                ]
+                header = " | ".join(cols[:8])
+                body = "\n".join(shown[:3])
+                preview_lines.append(f"SAMPLE ROWS FROM {t}:\n{header}\n{body}")
+                if len(preview_lines) >= 3:
+                    break
+            except Exception:
+                continue  # preview is best-effort only
+        if not preview_lines:
+            return ""
+        return (
+            "\nREAL DATA PREVIEW (actual current values — match their exact spelling/format):\n"
+            + "\n\n".join(preview_lines)
+            + "\n"
+        )
+
 
     def generate_sql(self, question: str, context: str) -> dict:
         if self.llm is None:
@@ -418,6 +626,19 @@ class RagPipeline:
         if dry_run:
             return result
 
+        # ---- intent routing: documents / chat / sql ------------------------
+        route = self._route_intent(question, hits, context)
+        result.route = route
+        logging.getLogger("chat.ask").info("route=%s", route)
+
+        if route == "document":
+            return self._answer_from_documents(question, hits, result, answer_language)
+        if route == "chat":
+            return self._conversational_answer(
+                question, tables, result, answer_language
+            )
+        # else: fall through to SQL path (with data preview enrichment)
+
         if clarify and not self._few_shot_block(question):
             decision = self._clarify_decision(question, hits)
             if decision:
@@ -426,7 +647,9 @@ class RagPipeline:
                 result.options = decision["options"]
                 return result
 
-        gen = self.generate_sql(question, context)
+        gen = self.generate_sql(
+            question, context + self._data_preview_block(tables, context)
+        )
         result.sql = gen["sql"]
         result.explanation = gen.get("explanation")
 

@@ -23,3 +23,43 @@
 
   poll();
 })();
+
+/* ---- document upload (PDF/Word/Excel) into a database collection ---- */
+(function () {
+  document.querySelectorAll(".doc-upload input[type=file]").forEach((inp) => {
+    inp.addEventListener("change", async () => {
+      const formEl = inp.closest(".doc-upload");
+      const pk = formEl.dataset.pk;
+      const file = inp.files[0];
+      if (!file) return;
+      const label = inp.closest(".doc-upload-label");
+      const oldText = label.textContent;
+      label.textContent = "⏳ …";
+      label.style.pointerEvents = "none";
+
+      const fd = new FormData();
+      fd.append("file", file);
+      try {
+        const resp = await fetch(`/db/${pk}/docs/`, {
+          method: "POST",
+          headers: { "X-CSRFToken": formEl.querySelector("[name=csrfmiddlewaretoken]").value },
+          body: fd,
+        });
+        const data = await resp.json();
+        if (!resp.ok || data.error) {
+          alert(data.error || resp.statusText);
+          label.textContent = oldText;
+        } else {
+          label.textContent = `✓ ${data.chunks}`;
+          setTimeout(() => { location.reload(); }, 1200);
+        }
+      } catch (e) {
+        alert(e.message);
+        label.textContent = oldText;
+      } finally {
+        label.style.pointerEvents = "";
+        inp.value = "";
+      }
+    });
+  });
+})();

@@ -18,6 +18,7 @@ urlpatterns = [
     path("db/<int:pk>/delete/", views.DbProfileDeleteView.as_view(), name="db_delete"),
     path("db/<int:pk>/reindex/", views.db_reindex, name="db_reindex"),
     path("db/<int:pk>/status/", views.db_status, name="db_status"),
+    path("db/<int:pk>/docs/", views.db_upload_doc, name="db_upload_doc"),
     path("llm/", views.LlmProfileListView.as_view(), name="llm_list"),
     path("llm/new/", views.LlmProfileCreateView.as_view(), name="llm_new"),
     path("llm/<int:pk>/edit/", views.LlmProfileUpdateView.as_view(), name="llm_edit"),

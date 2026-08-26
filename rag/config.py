@@ -60,6 +60,7 @@ class Settings:
     sample_values: bool
     value_sample_max_rows: int
     examples_top_k: int
+    data_preview: bool
 
     @property
     def llm_ready(self) -> bool:
@@ -99,4 +100,5 @@ def load_settings() -> Settings:
         sample_values=_env("SAMPLE_VALUES", "1") == "1",
         value_sample_max_rows=_env_int("VALUE_SAMPLE_MAX_ROWS", 200000),
         examples_top_k=_env_int("EXAMPLES_TOP_K", 2),
+        data_preview=os.getenv("DATA_PREVIEW", "1") == "1",
     )

@@ -12,6 +12,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views import View
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from .crypto import decrypt
@@ -163,7 +164,7 @@ def chat_send(request, pk):
         "type": "clarify" if is_clarify else "answer",
         "options": result.get("options") or [],
     }
-    for key in ("sql", "explanation", "columns", "rows", "row_count", "truncated", "tables_used", "error"):
+    for key in ("sql", "explanation", "columns", "rows", "row_count", "truncated", "tables_used", "error", "route", "doc_sources"):
         assistant_meta[key] = result.get(key)
 
     assistant_msg = ChatMessage.objects.create(
@@ -336,6 +337,32 @@ def db_status(request, pk):
             "error": dbp.index_error,
             "vectors": dbp.indexed_vectors,
             "indexed_at": dbp.indexed_at.strftime("%Y-%m-%d %H:%M") if dbp.indexed_at else None,
+        }
+    )
+
+
+@login_required
+@require_POST
+def db_upload_doc(request, pk):
+    """Upload a PDF/Word/Excel file; it gets extracted and indexed into this DB's collection."""
+    dbp = get_object_or_404(visible_profiles(request.user, DatabaseProfile), pk=pk)
+    upload = request.FILES.get("file")
+    if not upload:
+        return JsonResponse({"error": "No file provided."}, status=400)
+    try:
+        stats = rag_service.ingest_document(dbp, upload.name, upload.read())
+    except ValueError as exc:
+        return JsonResponse({"error": str(exc)}, status=400)
+    except Exception as exc:
+        return JsonResponse({"error": f"Indexing failed: {exc}"}, status=500)
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "filename": stats["filename"],
+            "kind": stats["kind"],
+            "chunks": stats["chunks"],
+            "total_vectors": stats["store_count"],
         }
     )
 

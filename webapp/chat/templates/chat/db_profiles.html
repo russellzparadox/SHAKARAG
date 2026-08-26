@@ -37,6 +37,11 @@
             {% else %}
               <span class="badge st-indexing">{% trans "working…" %}</span>
             {% endif %}
+            <form class="inline-form doc-upload" data-pk="{{ p.pk }}">{% csrf_token %}
+              <label class="btn small ghost doc-upload-label">
+                📄 {% trans "Doc" %}<input type="file" accept=".pdf,.docx,.xlsx,.xlsm" hidden>
+              </label>
+            </form>
           {% endif %}
           {% if p.pk in editable_ids or p.owner == user %}
             <a class="btn small ghost" href="{% url 'chat:db_edit' p.pk %}">{% trans "Edit" %}</a>

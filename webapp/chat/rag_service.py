@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import threading
+from typing import Any
 
 from rag.config import Settings as RagSettings
 from rag.config import load_settings as _load_base
@@ -46,6 +47,7 @@ def build_rag_settings(dbp, llmp) -> RagSettings:
         sample_values=base.sample_values,
         value_sample_max_rows=base.value_sample_max_rows,
         examples_top_k=base.examples_top_k,
+        data_preview=base.data_preview,
     )
 
 
@@ -111,6 +113,8 @@ def run_ask(
         "clarify": result.needs_clarification,
         "clarify_question": result.clarify_question or "",
         "options": result.options,
+        "route": result.route,
+        "doc_sources": result.doc_sources,
         "sql": result.sql,
         "explanation": result.explanation,
         "columns": result.columns,
@@ -139,6 +143,40 @@ def example_store(dbp):
 
 
 _example_cache: dict[int, Any] = {}
+_schema_store_cache: dict[int, Any] = {}
+
+
+def schema_store(dbp):
+    """Vector store for the dbp's main collection (schema + documents)."""
+    store = _schema_store_cache.get(dbp.pk)
+    key = (dbp.collection_name, int(dbp.updated_at.timestamp() * 1000))
+    if store is None or getattr(store, "_cache_key", None) != key:
+        from rag.embeddings import get_embedder
+        from rag.store import VectorStore
+
+        settings = build_rag_settings(dbp, None)
+        embedder = get_embedder(settings)
+        store = VectorStore(str(settings.chroma_dir), settings.collection, embedder)
+        store._cache_key = key
+        _schema_store_cache[dbp.pk] = store
+    return store
+
+
+def ingest_document(dbp, filename: str, data: bytes) -> dict:
+    """Extract + index a PDF/Word/Excel document into the dbp's vector collection."""
+    from rag.documents import DocIngestError, ingest_document_bytes
+
+    try:
+        stats = ingest_document_bytes(schema_store(dbp), filename, data)
+        logging.getLogger("chat.docs").info(
+            "document indexed db=%s file=%s chunks=%s",
+            dbp.name,
+            filename,
+            stats["chunks"],
+        )
+        return stats
+    except DocIngestError as exc:
+        raise ValueError(str(exc)) from exc
 
 
 def record_feedback(dbp, question: str, sql: str, notes: str = "", helpful: bool = True) -> str:

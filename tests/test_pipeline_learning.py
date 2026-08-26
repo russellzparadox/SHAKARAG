@@ -63,6 +63,7 @@ def _settings(tmp_path):
         llm_temperature=0.0, top_k=4, context_char_budget=4000,
         max_rows=10, statement_timeout_ms=1000,
         sample_values=True, value_sample_max_rows=100000, examples_top_k=2,
+        data_preview=False,
     )
 
 
