@@ -2,7 +2,9 @@
 __pycache__/
 .idea/
 .zed/
+*.log
 webapp/logs/
+.ua/
 *.pyc
 .env
 .chroma*/

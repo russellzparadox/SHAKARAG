@@ -13,6 +13,17 @@
     }[c]));
   }
 
+  // Markdown rendering: marked + DOMPurify, loaded from local static files.
+  if (window.marked) {
+    marked.setOptions({ gfm: true, breaks: true });
+  }
+  function md(text) {
+    const raw = String(text ?? "");
+    if (!window.marked || !window.DOMPurify) return esc(raw).replace(/\n/g, "<br>");
+    const html = marked.parse(raw);
+    return DOMPurify.sanitize(html, { ADD_ATTR: ["target"] });
+  }
+
   function bubble(cls, html) {
     const div = document.createElement("div");
     div.className = "bubble " + cls;
@@ -87,11 +98,11 @@
       if (!resp.ok) throw new Error(data.error || resp.statusText);
       const a = data.assistant;
       if (a.meta && a.meta.type === "clarify") {
-        pending.innerHTML = esc(a.content).replace(/\n/g, "<br>") + clarifyBlock(a.meta || {});
+        pending.innerHTML = md(a.content) + clarifyBlock(a.meta || {});
         wireClarify(pending);
       } else {
         pending.innerHTML =
-          esc(a.content).replace(/\n/g, "<br>") +
+          '<div class="bubble-text md">' + md(a.content) + "</div>" +
           resultBlock(a.meta || {}) +
           feedbackBlock(a.id);
         wireFeedback(pending);
@@ -137,4 +148,10 @@
   }
 
   wireFeedback(document);
+
+  // Render markdown in history messages (server outputs raw text into [data-raw-md],
+  // Django auto-escapes it so .textContent is the original markdown source).
+  document.querySelectorAll("[data-raw-md]").forEach((el) => {
+    el.innerHTML = md(el.textContent);
+  });
 })();

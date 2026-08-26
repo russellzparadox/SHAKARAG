@@ -38,7 +38,7 @@
     <div id="messages" class="messages-list" data-send-url="{% url 'chat:send' object.pk %}">
       {% for m in object.messages.all %}
         <div class="bubble {{ m.role }}">
-          <div class="bubble-text">{{ m.content|linebreaksbr }}</div>
+          <div class="bubble-text md" data-raw-md>{{ m.content }}</div>
           {% if m.role == 'assistant' and m.meta.type == 'clarify' %}
             <div class="clarify-options">
               {% for opt in m.meta.options %}<span class="chip chip-option">{{ opt }}</span>{% endfor %}
@@ -86,4 +86,8 @@
   </section>
 </div>
 {% endblock %}
-{% block scripts %}<script src="/static/chat/chat.js"></script>{% endblock %}
+{% block scripts %}
+<script src="/static/chat/marked.min.js"></script>
+<script src="/static/chat/purify.min.js"></script>
+<script src="/static/chat/chat.js"></script>
+{% endblock %}
