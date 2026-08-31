@@ -36,6 +36,41 @@ from .icrl_graph import (  # re-exports — paper Alg. A.1 + A.2
     enumerate_traversals as enumerate_traversals_typed,
 )
 
+# Optional SQL parser. Used by `parse_sql` to validate executability of
+# synthetic queries before they're scored. Gracefully degrades to no-op when
+# sqlglot is not installed (we still keep the read-only check via the
+# existing sqlguard).
+try:
+    import sqlglot
+    from sqlglot import exp
+    from sqlglot.errors import ParseError as _SqlglotParseError
+    _HAS_SQLGLOT = True
+except Exception:  # pragma: no cover
+    _HAS_SQLGLOT = False
+    _SqlglotParseError = Exception  # type: ignore[assignment,misc]
+
+
+def parse_sql(sql: str, dialect: str = "") -> bool:
+    """Return True iff `sql` parses as a single statement.
+
+    Uses sqlglot when available; otherwise falls back to a non-validating
+    acceptance (returns True). Errors raise SQLParseError.
+    """
+    if not _HAS_SQLGLOT:
+        return True
+    try:
+        statements = sqlglot.parse(sql, read=dialect or None)
+    except _SqlglotParseError as exc:
+        raise SQLParseError(str(exc)) from exc
+    if not statements or len(statements) != 1:
+        raise SQLParseError(f"expected 1 statement, got {len(statements) if statements else 0}")
+    return True
+
+
+class SQLParseError(Exception):
+    """Raised when sqlglot (or future parser) rejects a candidate query."""
+
+
 logger = logging.getLogger("chat.icrl")
 
 # ---------------------------------------------------------------------------
@@ -332,9 +367,17 @@ class ICRLResult:
 
 
 class ICRLGenerator:
-    def __init__(self, llm: LLMClient, max_iterations: int = 3):
+    def __init__(
+        self,
+        llm: LLMClient,
+        max_iterations: int = 3,
+        plateau_epsilon: float = 0.5,
+        sql_dialect: str = "",
+    ):
         self.llm = llm
         self.max_iterations = max_iterations
+        self.plateau_epsilon = plateau_epsilon
+        self.sql_dialect = sql_dialect
 
     def _generate(self, traversal: Traversal, extra_context: str = "") -> dict:
         messages = [
@@ -393,9 +436,18 @@ class ICRLGenerator:
         validate_sql=None,
         min_reward: float = 6.0,
     ) -> ICRLResult | None:
-        """Run the ICRL loop for one traversal. Returns best result or None."""
+        """Run the ICRL loop for one traversal. Returns best result or None.
+
+        Termination conditions (in order of priority):
+          1. SQL fails sqlglot parse → retry with parse-error feedback
+          2. `validate_sql` rejects the SQL → retry with sqlguard feedback
+          3. reward ≥ `min_reward` → success
+          4. plateau detected (Δ-reward < `plateau_epsilon`) → stop
+          5. reached `max_iterations` → stop
+        """
         context = ""
         best: ICRLResult | None = None
+        best_so_far: float = float("-inf")
         history: list[dict] = []
 
         for it in range(1, self.max_iterations + 1):
@@ -404,7 +456,20 @@ class ICRLGenerator:
             if not q or not sql:
                 continue
 
-            # static validation keeps the KB clean (read-only guarantee)
+            # 1) executability gate (sqlglot) — prevents malformed SQL from
+            #    scoring artificially high by keyword density.
+            try:
+                parse_sql(sql, dialect=self.sql_dialect)
+            except SQLParseError as exc:
+                logger.info("icrl: iteration %d rejected by sqlglot: %s", it, exc)
+                history.append({"iteration": it, "error": "parse_error", "detail": str(exc)})
+                context = (
+                    "FEEDBACK: your SQL did not parse. "
+                    "Write a syntactically correct single SELECT statement."
+                )
+                continue
+
+            # 2) static validation keeps the KB clean (read-only guarantee)
             if validate_sql is not None:
                 try:
                     sql = validate_sql(sql)
@@ -429,7 +494,26 @@ class ICRLGenerator:
                     iterations=it,
                 )
 
-            if reward >= min_reward or it >= self.max_iterations:
+            # 3) success — achieved min reward
+            if reward >= min_reward:
+                break
+
+            # 4) plateau detection — stop when improvement < ε.
+            #    On the first valid iteration, best_so_far is -inf and
+            #    we always have a real improvement, so plateau can only
+            #    fire from iter 2 onwards. If the reward DECREASES below
+            #    what we saw, that's also a plateau (no progress possible).
+            is_plateau = it > 1 and (reward - best_so_far) < self.plateau_epsilon
+            best_so_far = max(best_so_far, reward)
+            if is_plateau:
+                logger.info(
+                    "icrl: plateau detected iter=%d (Δ=%.3f < ε=%.3f)",
+                    it, reward - (best_so_far - reward), self.plateau_epsilon,
+                )
+                break
+
+            # 5) max_iterations is the natural stop
+            if it >= self.max_iterations:
                 break
 
             try:

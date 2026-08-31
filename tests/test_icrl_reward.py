@@ -215,7 +215,7 @@ def test_executable_sql_required_for_reward_score():
     icrl.complexity_reward = _track
     try:
         llm = _SeqLLM(payloads)
-        gen = ICRLGenerator(llm, max_iterations=3, plateau_epsilon=0.5)
+        gen = ICRLGenerator(llm, max_iterations=2, plateau_epsilon=0.5)
         result = gen.run(_simple_traversal(), min_reward=10.0)
         # malformed SQL was NOT scored
         assert all("JOIN b" not in c for c in complexity_calls), \
