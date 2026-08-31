@@ -42,51 +42,89 @@ logger = logging.getLogger("chat.icrl")
 # Complexity reward (paper §A.3)
 # ---------------------------------------------------------------------------
 
-BUCKETS: dict[str, dict[str, int]] = {
+# Multi-word JOIN qualifiers — counted with a single higher-weight pattern
+# and then SUBTRACTED from the bare-JOIN count, so a single SQL "INNER JOIN"
+# contributes INNER_JOIN (weight 3) and NOT the bare-JOIN (weight 2) too.
+_JOIN_QUALIFIERS = ("INNER", "LEFT", "RIGHT", "FULL", "CROSS", "OUTER")
+
+BUCKETS: dict[str, dict[str, tuple[str, int]]] = {
     # B1 data retrieval & filtering
     "retrieval": {
-        "SELECT": 1, "FROM": 1, "JOIN": 2, "INNER JOIN": 3, "LEFT JOIN": 3,
-        "RIGHT JOIN": 3, "FULL JOIN": 3, "ON": 2, "WHERE": 2, "GROUP BY": 3,
-        "HAVING": 3, "ORDER BY": 2, "DISTINCT": 2, "LIMIT": 1, "TOP": 1,
+        r"\bSELECT\b": 1, r"\bFROM\b": 1,
+        r"\bINNER\s+JOIN\b": 3,
+        r"\bLEFT\s+(?:OUTER\s+)?JOIN\b": 3,
+        r"\bRIGHT\s+(?:OUTER\s+)?JOIN\b": 3,
+        r"\bFULL\s+(?:OUTER\s+)?JOIN\b": 3,
+        r"\bCROSS\s+JOIN\b": 2,
+        r"\bJOIN\b": 2,  # bare JOIN (will be neutralised by qualifier matches below)
+        r"\bON\b": 2, r"\bWHERE\b": 2, r"\bGROUP\s+BY\b": 3,
+        r"\bHAVING\b": 3, r"\bORDER\s+BY\b": 2, r"\bDISTINCT\b": 2,
+        r"\bLIMIT\b": 1, r"\bTOP\b": 1, r"\bOFFSET\b": 1,
     },
-    # B2 data modification (discouraged — we only generate read-only)
+    # B2 data modification (penalised — read-only system)
     "modification": {
-        "INSERT": 2, "UPDATE": 3, "DELETE": 4, "DROP": 5, "ALTER": 5,
+        r"\bINSERT\b": 2, r"\bUPDATE\b": 3, r"\bDELETE\b": 4,
+        r"\bDROP\b": 5, r"\bALTER\b": 5, r"\bTRUNCATE\b": 4,
     },
     # B3 conditional logic
     "conditional": {
-        "AND": 1, "OR": 1, "NOT": 1, "IN (": 2, "BETWEEN": 2, "LIKE": 2,
-        "CASE WHEN": 3, "WHEN": 2, "THEN": 2, "ELSE": 2, "EXISTS": 3,
+        r"\bAND\b": 1, r"\bOR\b": 1, r"\bNOT\b": 1,
+        r"\bIN\s*\(": 2, r"\bBETWEEN\b": 2, r"\bLIKE\b": 2,
+        r"\bIS\s+NOT\s+NULL\b": 3, r"\bIS\s+NULL\b": 2,
+        r"\bCASE\s+WHEN\b": 3, r"\bWHEN\b": 2, r"\bTHEN\b": 2, r"\bELSE\b": 2,
+        r"\bEXISTS\b": 3,
     },
     # B4 aggregation & sorting
     "aggregation": {
-        "AVG(": 3, "SUM(": 3, "COUNT(": 3, "MIN(": 3, "MAX(": 3,
-        "ASC": 1, "DESC": 1, "COALESCE": 2, "DATEPART": 2, "YEAR(": 2, "MONTH(": 2,
+        r"\bAVG\s*\(": 3, r"\bSUM\s*\(": 3, r"\bCOUNT\s*\(": 3,
+        r"\bMIN\s*\(": 3, r"\bMAX\s*\(": 3, r"\bCOALESCE\s*\(": 2,
+        r"\bDATEPART\s*\(": 2, r"\bYEAR\s*\(": 2, r"\bMONTH\s*\(": 2,
+        r"\bASC\b": 1, r"\bDESC\b": 1, r"\bCAST\s*\(": 2, r"\bCONVERT\s*\(": 2,
     },
 }
 
 NEGATIVE_REWARD = {"modification"}  # read-only system: DML keywords reduce reward
 
+# compile once at import time
+_BUCKET_PATTERNS: dict[str, dict[re.Pattern, int]] = {
+    bucket: {re.compile(pat, re.IGNORECASE): w for pat, w in keywords.items()}
+    for bucket, keywords in BUCKETS.items()
+}
+
+# pattern that finds each qualified JOIN occurrence (INNER JOIN, LEFT JOIN, …)
+_QUALIFIED_JOIN_RE = re.compile(
+    r"\b(?:" + "|".join(_JOIN_QUALIFIERS) + r")\s+(?:OUTER\s+)?JOIN\b",
+    re.IGNORECASE,
+)
+
 
 def complexity_reward(sql: str) -> tuple[float, dict[str, int]]:
-    """Paper eq. (1)+(2): weighted bucket-frequency reward. Returns (reward, details)."""
-    upper = f" {sql.upper()} "
-    bucket_scores: dict[str, float] = {}
-    counts: dict[str, int] = {}
-
-    total_weighted = 0.0
-    for bucket, keywords in BUCKETS.items():
-        freq = 0
-        for kw, weight in keywords.items():
-            n = upper.count(kw)
+    """Paper eq. (1)+(2): weighted bucket-frequency reward. Returns (reward, counts)."""
+    counts: dict[str, int] = {b: 0 for b in BUCKETS}
+    for bucket, patterns in _BUCKET_PATTERNS.items():
+        for pattern, weight in patterns.items():
+            n = len(pattern.findall(sql))
             if n:
-                freq += n * weight
-        counts[bucket] = freq
-        bucket_scores[bucket] = freq
-        total_weighted += freq
+                counts[bucket] += n * weight
 
+    # The "qualified" patterns (INNER JOIN, LEFT JOIN, …) double-count with
+    # the bare-JOIN pattern. Subtract the bare-JOIN contribution for each
+    # qualified match so the totals reflect the *intent* (one JOIN = weight
+    # of its qualifier, not qualifier+2).
+    if "retrieval" in counts:
+        bare_join_w = _BUCKET_PATTERNS["retrieval"][re.compile(r"\bJOIN\b", re.IGNORECASE)]
+        n_qualified = len(_QUALIFIED_JOIN_RE.findall(sql))
+        if n_qualified:
+            counts["retrieval"] -= n_qualified * bare_join_w
+
+    # no negative values
+    for b, v in counts.items():
+        if v < 0:
+            counts[b] = 0
+
+    total_weighted = sum(counts.values())
     if total_weighted == 0:
-        return 0.0, {k: 0 for k in counts}
+        return 0.0, counts
 
     # normalise each bucket share then apply bucket weights:
     # retrieval & aggregation are desirable; conditional adds complexity;
@@ -94,9 +132,60 @@ def complexity_reward(sql: str) -> tuple[float, dict[str, int]]:
     weights = {"retrieval": 1.0, "conditional": 1.2, "aggregation": 1.5, "modification": -2.0}
     reward = sum(
         weights.get(b, 1.0) * (freq / total_weighted) * total_weighted / 10.0
-        for b, freq in bucket_scores.items()
+        for b, freq in counts.items()
     )
     return round(reward, 3), counts
+
+
+# Paper §A.3 operator-suggestion table: which SQL operators help close a
+# given bucket gap. The coach LLM consults this when its previous question
+# was too simple in a particular dimension.
+OPERATOR_SUGGESTIONS: dict[str, list[str]] = {
+    "retrieval": [
+        "JOIN multiple tables (JOIN, LEFT JOIN, INNER JOIN)",
+        "add ON ... = ... join conditions",
+        "filter with WHERE on at least two columns",
+    ],
+    "conditional": [
+        "use AND / OR to combine predicates",
+        "add IN (...) or BETWEEN ... AND ...",
+        "use CASE WHEN ... THEN ... ELSE ... END for derived columns",
+        "use LIKE '%pattern%' for text search",
+        "use IS NULL / IS NOT NULL",
+    ],
+    "aggregation": [
+        "use GROUP BY with COUNT, SUM, AVG, MIN, or MAX",
+        "add HAVING to filter aggregated groups",
+        "ORDER BY <aggregate> ASC or DESC to rank results",
+        "use COALESCE or CAST to coerce values",
+    ],
+    "modification": [
+        # Should be empty: this bucket is penalised, not encouraged.
+    ],
+}
+
+
+def operator_suggestions(bucket: str) -> list[str]:
+    """Public accessor for the OPERATOR_SUGGESTIONS table (test-friendly)."""
+    return OPERATOR_SUGGESTIONS.get(bucket, [])
+
+
+def bucket_gaps(counts: dict[str, int]) -> list[str]:
+    """Return bucket names ordered by weakness (smallest count first).
+
+    For ties, the read-only system's `modification` bucket is preferred
+    to appear *early* (the coach is told not to lean on DML/DDL).
+    """
+    def sort_key(b: str) -> tuple[int, int]:
+        c = counts.get(b, 0)
+        # modification: even when tied with other zeros, surface it first
+        # so the coach actively avoids DML
+        tiebreak = 0 if b == "modification" else 1
+        return (c, tiebreak)
+
+    return sorted(counts.keys(), key=sort_key)
+
+
 
 
 # ---------------------------------------------------------------------------
