@@ -27,3 +27,1617 @@ Traceback (most recent call last):
     return self.bindings.count(str(collection_id), tenant, database)
            ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 chromadb.errors.NotFoundError: Collection [4c8cb5cf-9d58-483c-a0b7-c34a8969922a] does not exist.
+2026-08-25 15:58:52,385 ERROR   chat.indexing — Indexing failed for pk=3: (20047, b'DB-Lib error message 20003, severity 6:\nAdaptive Server connection timed out\nDB-Lib error message 20047, severity 9:\nDBPROCESS is dead or not enabled\n')
+Traceback (most recent call last):
+  File "src/pymssql/_pymssql.pyx", line 447, in pymssql._pymssql.Cursor.execute
+  File "src/pymssql/_mssql.pyx", line 1145, in pymssql._mssql.MSSQLConnection.execute_query
+  File "src/pymssql/_mssql.pyx", line 1176, in pymssql._mssql.MSSQLConnection.execute_query
+  File "src/pymssql/_mssql.pyx", line 1309, in pymssql._mssql.MSSQLConnection.format_and_run_query
+  File "src/pymssql/_mssql.pyx", line 1886, in pymssql._mssql.check_cancel_and_raise
+  File "src/pymssql/_mssql.pyx", line 1932, in pymssql._mssql.raise_MSSQLDatabaseException
+pymssql._mssql.MSSQLDatabaseException: (20047, b'DB-Lib error message 20003, severity 6:\nAdaptive Server connection timed out\nDB-Lib error message 20047, severity 9:\nDBPROCESS is dead or not enabled\n')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 186, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/sqlserver.py", line 234, in introspect
+    cur.execute(COLUMNS_SQL)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "src/pymssql/_pymssql.pyx", line 465, in pymssql._pymssql.Cursor.execute
+pymssql.exceptions.OperationalError: (20047, b'DB-Lib error message 20003, severity 6:\nAdaptive Server connection timed out\nDB-Lib error message 20047, severity 9:\nDBPROCESS is dead or not enabled\n')
+
+2026-08-25 16:01:53,335 ERROR   chat.indexing — Indexing failed for pk=3: (20047, b'DB-Lib error message 20003, severity 6:\nAdaptive Server connection timed out\nDB-Lib error message 20047, severity 9:\nDBPROCESS is dead or not enabled\n')
+Traceback (most recent call last):
+  File "src/pymssql/_pymssql.pyx", line 447, in pymssql._pymssql.Cursor.execute
+  File "src/pymssql/_mssql.pyx", line 1145, in pymssql._mssql.MSSQLConnection.execute_query
+  File "src/pymssql/_mssql.pyx", line 1176, in pymssql._mssql.MSSQLConnection.execute_query
+  File "src/pymssql/_mssql.pyx", line 1309, in pymssql._mssql.MSSQLConnection.format_and_run_query
+  File "src/pymssql/_mssql.pyx", line 1886, in pymssql._mssql.check_cancel_and_raise
+  File "src/pymssql/_mssql.pyx", line 1932, in pymssql._mssql.raise_MSSQLDatabaseException
+pymssql._mssql.MSSQLDatabaseException: (20047, b'DB-Lib error message 20003, severity 6:\nAdaptive Server connection timed out\nDB-Lib error message 20047, severity 9:\nDBPROCESS is dead or not enabled\n')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 186, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/sqlserver.py", line 234, in introspect
+    cur.execute(COLUMNS_SQL)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "src/pymssql/_pymssql.pyx", line 465, in pymssql._pymssql.Cursor.execute
+pymssql.exceptions.OperationalError: (20047, b'DB-Lib error message 20003, severity 6:\nAdaptive Server connection timed out\nDB-Lib error message 20047, severity 9:\nDBPROCESS is dead or not enabled\n')
+
+2026-08-25 16:03:11,677 ERROR   chat.indexing — Indexing failed for pk=3: (20047, b'DB-Lib error message 20003, severity 6:\nAdaptive Server connection timed out\nDB-Lib error message 20047, severity 9:\nDBPROCESS is dead or not enabled\n')
+Traceback (most recent call last):
+  File "src/pymssql/_pymssql.pyx", line 447, in pymssql._pymssql.Cursor.execute
+  File "src/pymssql/_mssql.pyx", line 1145, in pymssql._mssql.MSSQLConnection.execute_query
+  File "src/pymssql/_mssql.pyx", line 1176, in pymssql._mssql.MSSQLConnection.execute_query
+  File "src/pymssql/_mssql.pyx", line 1309, in pymssql._mssql.MSSQLConnection.format_and_run_query
+  File "src/pymssql/_mssql.pyx", line 1886, in pymssql._mssql.check_cancel_and_raise
+  File "src/pymssql/_mssql.pyx", line 1932, in pymssql._mssql.raise_MSSQLDatabaseException
+pymssql._mssql.MSSQLDatabaseException: (20047, b'DB-Lib error message 20003, severity 6:\nAdaptive Server connection timed out\nDB-Lib error message 20047, severity 9:\nDBPROCESS is dead or not enabled\n')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 186, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/sqlserver.py", line 234, in introspect
+    cur.execute(COLUMNS_SQL)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "src/pymssql/_pymssql.pyx", line 465, in pymssql._pymssql.Cursor.execute
+pymssql.exceptions.OperationalError: (20047, b'DB-Lib error message 20003, severity 6:\nAdaptive Server connection timed out\nDB-Lib error message 20047, severity 9:\nDBPROCESS is dead or not enabled\n')
+
+2026-08-26 10:47:29,572 ERROR   django.request — Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/registration/login.html, {% extends "chat/base.html" %} must be the first tag in 'registration/login.html'.
+2026-08-26 10:47:30,578 ERROR   django.request — Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/registration/login.html, {% extends "chat/base.html" %} must be the first tag in 'registration/login.html'.
+2026-08-26 10:47:31,567 ERROR   django.request — Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/registration/login.html, {% extends "chat/base.html" %} must be the first tag in 'registration/login.html'.
+2026-08-26 10:47:33,259 ERROR   django.request — Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/registration/login.html, {% extends "chat/base.html" %} must be the first tag in 'registration/login.html'.
+2026-08-26 10:49:03,032 ERROR   django.request — Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/registration/login.html, {% extends "chat/base.html" %} must be the first tag in 'registration/login.html'.
+2026-08-26 10:49:04,402 ERROR   django.request — Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/registration/login.html, {% extends "chat/base.html" %} must be the first tag in 'registration/login.html'.
+2026-08-26 10:53:30,081 ERROR   django.request — Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/registration/login.html, {% extends "chat/base.html" %} must be the first tag in 'registration/login.html'.
+2026-08-26 10:53:30,419 ERROR   django.request — Internal Server Error: /chat/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/contrib/auth/mixins.py", line 74, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/home/russellzparadox/work/rag/webapp/chat/views.py", line 78, in get
+    return render(request, self.template_name, {"sessions": sessions, "form": form})
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 27, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/sessions.html, {% extends "chat/base.html" %} must be the first tag in 'chat/sessions.html'.
+2026-08-26 10:53:33,977 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:53:34,729 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:53:35,478 ERROR   django.request — Internal Server Error: /db/1/edit/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profile_form.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profile_form.html'.
+2026-08-26 10:53:36,234 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:53:36,989 ERROR   django.request — Internal Server Error: /db/1/edit/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profile_form.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profile_form.html'.
+2026-08-26 10:53:37,743 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:53:38,496 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:53:39,243 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:53:40,052 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:53:40,562 ERROR   django.request — Internal Server Error: /users/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/russellzparadox/work/rag/webapp/chat/views.py", line 402, in wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/russellzparadox/work/rag/webapp/chat/views.py", line 418, in user_admin
+    return render(request, "chat/users.html", context)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 27, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/users.html, {% extends "chat/base.html" %} must be the first tag in 'chat/users.html'.
+2026-08-26 10:53:41,081 ERROR   django.request — Internal Server Error: /chat/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/contrib/auth/mixins.py", line 74, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/home/russellzparadox/work/rag/webapp/chat/views.py", line 78, in get
+    return render(request, self.template_name, {"sessions": sessions, "form": form})
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 27, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/sessions.html, {% extends "chat/base.html" %} must be the first tag in 'chat/sessions.html'.
+2026-08-26 10:54:01,956 ERROR   django.request — Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/registration/login.html, {% extends "chat/base.html" %} must be the first tag in 'registration/login.html'.
+2026-08-26 10:54:02,263 ERROR   django.request — Internal Server Error: /chat/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/contrib/auth/mixins.py", line 74, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/home/russellzparadox/work/rag/webapp/chat/views.py", line 78, in get
+    return render(request, self.template_name, {"sessions": sessions, "form": form})
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 27, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/sessions.html, {% extends "chat/base.html" %} must be the first tag in 'chat/sessions.html'.
+2026-08-26 10:54:05,672 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:54:06,423 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:54:07,177 ERROR   django.request — Internal Server Error: /db/1/edit/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profile_form.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profile_form.html'.
+2026-08-26 10:54:07,922 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:54:08,671 ERROR   django.request — Internal Server Error: /db/1/edit/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profile_form.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profile_form.html'.
+2026-08-26 10:54:09,422 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:54:10,171 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:54:10,916 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:54:11,729 ERROR   django.request — Internal Server Error: /db/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = response.render()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/db_profiles.html, {% extends "chat/base.html" %} must be the first tag in 'chat/db_profiles.html'.
+2026-08-26 10:54:12,244 ERROR   django.request — Internal Server Error: /users/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/russellzparadox/work/rag/webapp/chat/views.py", line 402, in wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/russellzparadox/work/rag/webapp/chat/views.py", line 418, in user_admin
+    return render(request, "chat/users.html", context)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 27, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/users.html, {% extends "chat/base.html" %} must be the first tag in 'chat/users.html'.
+2026-08-26 10:54:12,749 ERROR   django.request — Internal Server Error: /chat/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/contrib/auth/mixins.py", line 74, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/home/russellzparadox/work/rag/webapp/chat/views.py", line 78, in get
+    return render(request, self.template_name, {"sessions": sessions, "form": form})
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/shortcuts.py", line 27, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 603, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/template/base.py", line 624, in extend_nodelist
+    raise self.error(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Template: /home/russellzparadox/work/rag/webapp/chat/templates/chat/sessions.html, {% extends "chat/base.html" %} must be the first tag in 'chat/sessions.html'.
+2026-08-26 14:30:54,340 ERROR   chat.ask — ask failed db=shaka_dw llm=glm-5.2
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 89, in run_ask
+    result = pipeline.ask(
+        question,
+    ...<3 lines>...
+        history=history,
+    )
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 634, in ask
+    return self._conversational_answer(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        question, tables, result, answer_language
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 365, in _conversational_answer
+    result.answer = self.llm.chat(
+                    ~~~~~~~~~~~~~^
+        [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 97, in chat
+    raise LLMError(f"LLM returned HTTP {response.status_code}: {response.text[:400]}")
+rag.llm.LLMError: LLM returned HTTP 429: {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"z-ai/glm-5.2:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Decart","is_byok":false,"provider_error_code":"upstream_429","limit_source":"upstream_provider_shared_pool","remedy_hint":"Retry sho
+2026-08-26 14:32:55,892 ERROR   chat.ask — ask failed db=shaka_dw llm=dsv4flash
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 89, in run_ask
+    result = pipeline.ask(
+        question,
+    ...<3 lines>...
+        history=history,
+    )
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 634, in ask
+    return self._conversational_answer(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        question, tables, result, answer_language
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 365, in _conversational_answer
+    result.answer = self.llm.chat(
+                    ~~~~~~~~~~~~~^
+        [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 97, in chat
+    raise LLMError(f"LLM returned HTTP {response.status_code}: {response.text[:400]}")
+rag.llm.LLMError: LLM returned HTTP 402: {"error":{"message":"Insufficient credits. This account never purchased credits. Make sure your key is on the correct account or org, and if so, purchase more at https://openrouter.ai/settings/credits","code":402,"metadata":{"limit_source":"openrouter_credits","remedy_hint":"Add credits at https://openrouter.ai/settings/credits, or lower max_tokens / prompt size to fit your remaining balance."}}}
+2026-08-26 14:37:08,472 ERROR   chat.ask — ask failed db=shaka_dw llm=dsv4flash
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 89, in run_ask
+    result = pipeline.ask(
+        question,
+    ...<3 lines>...
+        history=history,
+    )
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 637, in ask
+    return self._conversational_answer(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        question, tables, result, answer_language
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 368, in _conversational_answer
+    result.answer = self.llm.chat(
+                    ~~~~~~~~~~~~~^
+        [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 97, in chat
+    raise LLMError(f"LLM returned HTTP {response.status_code}: {response.text[:400]}")
+rag.llm.LLMError: LLM returned HTTP 402: {"error":{"message":"Insufficient credits. This account never purchased credits. Make sure your key is on the correct account or org, and if so, purchase more at https://openrouter.ai/settings/credits","code":402,"metadata":{"limit_source":"openrouter_credits","remedy_hint":"Add credits at https://openrouter.ai/settings/credits, or lower max_tokens / prompt size to fit your remaining balance."}}}
