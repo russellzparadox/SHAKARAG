@@ -117,14 +117,97 @@ def build_from_tables(tables: Iterable) -> SchemaGraph:
 
 
 # ---- Algorithm A.2: enumerate traversals (paper §A.2) ----
-# Stub — full implementation lands in task A7. Returning [] keeps the
-# module importable so the A2/A3 graph tests can run today.
 
-def enumerate_traversals(graph: SchemaGraph, cutoff: int = 3, *, min_tables: int = 2):  # noqa: D401
+from itertools import chain, combinations
+
+
+@dataclass(frozen=True)
+class TraversalPath:
+    """A path through the schema graph (R, db, table, table, ...).
+
+    `nodes` is the ordered node list; `edges` is the parallel list of edge
+    types that were traversed to reach each node (length = len(nodes) - 1).
+    `tables` is a convenience accessor (nodes minus the structural prefix).
+    """
+
+    nodes: tuple[str, ...]
+
+    @property
+    def tables(self) -> tuple[str, ...]:
+        # first two nodes are R and the database; everything after is a table
+        return self.nodes[2:]
+
+
+def _power_set(items: list) -> list[tuple]:
+    """All non-empty, non-full subsets of `items`, preserving order.
+
+    Paper Alg. A.2 lines 11–15: at a type-3 fan-out with >1 children, expand
+    via the power set; the "empty" and "full" subsets are skipped because
+    the DFS already recurses into the single-child case implicitly.
+    """
+    if len(items) < 2:
+        return [tuple(items)] if items else []
+    return [
+        s
+        for r in range(1, len(items) + 1)
+        for s in combinations(items, r)
+        if 0 < len(s) < len(items)
+    ]
+
+
+def enumerate_traversals(
+    graph: SchemaGraph, cutoff: int = 3, *, min_tables: int = 2
+) -> list[TraversalPath]:
     """Paper Alg. A.2 — depth-first traversal enumeration with cutoff.
 
-    Stub. Returns [] until A7. Cutoff `k` caps path length. `min_tables`
-    filters out traversals shorter than 2 tables (paper requires joins).
+    Starts from root `R`, follows type-1 (root→db), type-2 (db→table), and
+    type-3 (table↔table FK) edges, producing all paths of length ≤ `cutoff`
+    *table* nodes. Per-path `visited` set prevents cycles.
+
+    At each type-3 fan-out (>1 children), the algorithm expands via the
+    power set of children (paper lines 10–15), so a hub table with 3 dims
+    yields both (1,2) and (2,3) subsets as parallel exploration.
+
+    `min_tables` filters out traversals shorter than N tables — paper Eq. 1+
+    requires joins, so single-table paths are not useful for SQL generation.
     """
-    return []
+    out: list[TraversalPath] = []
+    seen: set[tuple[str, ...]] = set()
+    visited: set[str] = set()
+
+    def _walk(node: str, path: tuple[str, ...], table_depth: int) -> None:
+        # table_depth = number of *table* nodes in the path after this visit
+        if node in visited or table_depth > cutoff:
+            return
+        visited.add(node)
+        path = path + (node,)
+
+        # count tables in current path (everything after the first 2 nodes
+        # R, db is a table)
+        tables_in_path = path[2:]
+        if len(tables_in_path) >= min_tables and path not in seen:
+            seen.add(path)
+            out.append(TraversalPath(nodes=path))
+
+        # collect "forward" children:
+        #   - type-1: R → DB (no table increment)
+        #   - type-2: DB → TABLE (+1)
+        #   - type-3 (directional): TABLE → TABLE (+1)
+        #   - reverse FK edges are NOT walked (visited set already blocks
+        #     cycles; reverse edges would just generate mirror paths)
+        for e in graph.outgoing(node):
+            child = e.dst
+            if child in visited:
+                continue
+            if e.is_reverse:
+                continue  # skip reverse FK edges
+            step_depth = table_depth
+            if e.type in (EdgeType.DB_TO_TABLE, EdgeType.TABLE_FK):
+                step_depth = table_depth + 1
+            _walk(child, path, step_depth)
+
+        visited.discard(node)
+
+    _walk("R", tuple(), 0)
+    return out
 

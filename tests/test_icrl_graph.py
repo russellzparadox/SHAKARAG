@@ -89,3 +89,30 @@ def test_algorithm_a1_fk_directional_with_reverse():
     assert len(reverse) == 1 and reverse[0].src == "B" and reverse[0].dst == "A"
     # reverse is *navigation-only* (not a duplicate FK declaration)
     assert directional[0].type == EdgeType.TABLE_FK == reverse[0].type
+
+
+# ---- A6: enumerate_traversals with cutoff depth ----
+
+def test_algorithm_a2_traversals_cutoff_depth():
+    """Paper Alg. A.2: cutoff k caps traversal length. Path = node list from R.
+
+    Single-DB chain A→B→C→D via type-3. cutoff=2 and min_tables=2
+    (default for SQL generation; joins require ≥ 2 tables) yields only
+    2-table traversals: (R, db1, A, B), (R, db1, B, C), (R, db1, C, D).
+    """
+    # chain A→B→C→D
+    a = _t("A", schema="db1", fks=["B"])
+    b = _t("B", schema="db1", fks=["C"])
+    c = _t("C", schema="db1", fks=["D"])
+    d = _t("D", schema="db1")
+    g = build_from_tables([a, b, c, d])
+
+    traversals = enumerate_traversals(g, cutoff=2, min_tables=2)
+    paths = {tuple(t.nodes) for t in traversals}
+
+    expected = {
+        ("R", "db1", "A", "B"),
+        ("R", "db1", "B", "C"),
+        ("R", "db1", "C", "D"),
+    }
+    assert paths == expected
