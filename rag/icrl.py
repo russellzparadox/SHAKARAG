@@ -309,10 +309,12 @@ Rules:
 - Prefer realistic measures, filters, groupings, and ordering."""
 
 FEEDBACK_SYSTEM = """You coach a question generator to produce HARDER, more realistic analyst questions.
-You get the schema, the previous generated question+SQL, and its complexity reward breakdown.
-Write ONE short instruction (max 30 words) describing how to make the next question more
-complex and realistic, e.g.: "add a HAVING filter on the aggregate", "compare two periods",
-"add CASE-based categorisation", "require a LEFT JOIN to include entities with zero rows".
+You get the schema, the previous generated question+SQL, the per-bucket complexity
+counts, and a list of weak buckets with their operator-suggestion tables (paper §A.3).
+Your job: write ONE short instruction (max 30 words) that names the *weakest* bucket
+and suggests a specific operator upgrade from its suggestions list.
+Example: "weakest bucket is aggregation; add a HAVING filter on a SUM group" or
+"weakest is conditional; introduce a CASE WHEN ... THEN ... END to bucket rows".
 Output ONLY JSON: {"feedback": "..."}"""
 
 REFINE_SYSTEM = BASE_GEN_SYSTEM + """
@@ -349,6 +351,25 @@ class ICRLGenerator:
         }
 
     def _feedback(self, traversal: Traversal, question: str, sql: str, counts: dict) -> str:
+        gaps = bucket_gaps(counts)
+        # present the coach with the gaps + per-bucket operator suggestions
+        # for the *weakest* buckets (top 2 by default)
+        weak_block_lines = ["BUCKET GAPS (weakest first):"]
+        for gap_bucket in gaps:
+            count = counts.get(gap_bucket, 0)
+            weak_block_lines.append(f"  - {gap_bucket}: count={count}")
+        weak_block_lines.append("")
+        weak_block_lines.append("OPERATOR SUGGESTIONS for the weakest buckets:")
+        for gap_bucket in gaps[:2]:
+            sugs = OPERATOR_SUGGESTIONS.get(gap_bucket, [])
+            if not sugs:
+                continue
+            weak_block_lines.append(f"  {gap_bucket}:")
+            for s in sugs:
+                weak_block_lines.append(f"    - {s}")
+
+        weak_block = "\n".join(weak_block_lines)
+
         messages = [
             {"role": "system", "content": FEEDBACK_SYSTEM},
             {
@@ -357,8 +378,9 @@ class ICRLGenerator:
                     f"SCHEMAS:\n{traversal.serialize()}\n\n"
                     f"PREVIOUS QUESTION:\n{question}\n\n"
                     f"PREVIOUS SQL:\n{sql}\n\n"
-                    f"COMPLEXITY COUNTS: {json.dumps(counts)}\n"
-                    "Low aggregation/conditional counts mean too simple."
+                    f"COMPLEXITY COUNTS: {json.dumps(counts)}\n\n"
+                    f"{weak_block}\n\n"
+                    "Focus your coaching on the weakest bucket(s)."
                 ),
             },
         ]

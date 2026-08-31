@@ -78,16 +78,14 @@ def test_feedback_prompt_contains_bucket_gaps_and_suggestions():
             captured.append(messages)
             return self.payload
 
-    from rag.icrl import _feedback, FEEDBACK_SYSTEM  # private API for test
-
-    llm = _CaptureLLM({"feedback": "add a HAVING filter and a JOIN"})
-    # two tables for the traversal fixture
     t1 = _table("F", role="fact", fks=["D"])
     t2 = _table("D")
     tr = Traversal(tables=[t1, t2], label="F -> D")
     counts = {"retrieval": 4, "conditional": 0, "aggregation": 1, "modification": 0}
 
-    _feedback(llm, tr, "what is the sum by dim?", "SELECT f.a, SUM(f.b) FROM f GROUP BY f.a", counts)
+    llm = _CaptureLLM({"feedback": "add a HAVING filter and a JOIN"})
+    gen = ICRLGenerator(llm, max_iterations=1)
+    gen._feedback(tr, "what is the sum by dim?", "SELECT f.a, SUM(f.b) FROM f GROUP BY f.a", counts)
 
     user_msg = llm.last_messages[1]["content"]
     # bucket gaps (as JSON) must be present
@@ -97,7 +95,7 @@ def test_feedback_prompt_contains_bucket_gaps_and_suggestions():
     assert "JOIN" in user_msg or "GROUP BY" in user_msg or "HAVING" in user_msg
     # and the suggestion table from paper §A.3 should make at least one
     # operator-level hint appear (e.g. "CASE", "LEFT JOIN", "BETWEEN", "IN")
-    suggestions_blob = " ".join(operator_suggestions.values()).upper()
+    suggestions_blob = " ".join(operator_suggestions("aggregation")).upper()
     assert any(kw in user_msg.upper() for kw in ["JOIN", "GROUP BY", "HAVING", "CASE", "BETWEEN"])
 
 
