@@ -2047,3 +2047,237 @@ rag.llm.LLMError: LLM returned HTTP 402: {"error":{"message":"Insufficient credi
 2026-08-27 02:00:16,429 INFO    chat.icrl — icrl iter=1 reward=4.09 tables=account_invoice_transaction_rel -> account_move -> account_return -> account_tax_unit
 2026-08-27 09:43:21,346 WARNING django.request — Not Found: /v1/models
 2026-08-27 16:21:19,991 WARNING django.request — Not Found: /v1/models
+2026-08-31 11:12:59,758 INFO    chat.ask — route=chat
+2026-08-31 11:12:59,783 ERROR   chat.ask — ask failed db=shaka_dw llm=9router default
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 89, in run_ask
+    result = pipeline.ask(
+        question,
+    ...<3 lines>...
+        history=history,
+    )
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 969, in ask
+    return self._conversational_answer(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        question, tables, result, answer_language
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 690, in _conversational_answer
+    result.answer = self.llm.chat(
+                    ~~~~~~~~~~~~~^
+        [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 103, in chat
+    raise LLMError(f"LLM returned HTTP {response.status_code}: {response.text[:400]}")
+rag.llm.LLMError: LLM returned HTTP 403: {"error":{"message":"[nvidia/nvidia/nemotron-3-ultra-550b-a55b] [403]: <html>\r\n<head><title>403 Forbidden</title></head>\r\n<body>\r\n<center><h1>403 Forbidden</h1></ce (reset after 1m 51s)"}}
+2026-08-31 11:13:26,655 INFO    chat.indexing — Indexing started for shaka_dw (pk=3)
+2026-08-31 11:13:26,711 ERROR   chat.indexing — Indexing failed for pk=3: (20009, b'DB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\nDB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\n')
+Traceback (most recent call last):
+  File "src/pymssql/_pymssql.pyx", line 651, in pymssql._pymssql.connect
+  File "src/pymssql/_mssql.pyx", line 2189, in pymssql._mssql.connect
+  File "src/pymssql/_mssql.pyx", line 722, in pymssql._mssql.MSSQLConnection.__init__
+  File "src/pymssql/_mssql.pyx", line 1915, in pymssql._mssql.maybe_raise_MSSQLDatabaseException
+  File "src/pymssql/_mssql.pyx", line 1932, in pymssql._mssql.raise_MSSQLDatabaseException
+pymssql._mssql.MSSQLDatabaseException: (20009, b'DB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\nDB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\n')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 229, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/sqlserver.py", line 231, in introspect
+    conn = self._connect(query_timeout=300)
+  File "/home/russellzparadox/work/rag/rag/dialects/sqlserver.py", line 217, in _connect
+    return pymssql.connect(
+           ~~~~~~~~~~~~~~~^
+        server=s.db_host,
+        ^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        as_dict=True,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "src/pymssql/_pymssql.pyx", line 660, in pymssql._pymssql.connect
+pymssql.exceptions.OperationalError: (20009, b'DB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\nDB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\n')
+
+2026-08-31 11:13:35,750 INFO    chat.indexing — Indexing started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 11:13:35,784 ERROR   chat.indexing — Indexing failed for pk=1: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 229, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 11:14:18,213 INFO    chat.indexing — Indexing started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 11:14:18,235 ERROR   chat.indexing — Indexing failed for pk=1: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 229, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 11:14:26,324 INFO    chat.indexing — Indexing started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 11:14:26,357 ERROR   chat.indexing — Indexing failed for pk=1: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 229, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 11:14:45,287 INFO    chat.indexing — Indexing started for shaka_dw (pk=3)
+2026-08-31 11:14:45,297 ERROR   chat.indexing — Indexing failed for pk=3: (20009, b'DB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\nDB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\n')
+Traceback (most recent call last):
+  File "src/pymssql/_pymssql.pyx", line 651, in pymssql._pymssql.connect
+  File "src/pymssql/_mssql.pyx", line 2189, in pymssql._mssql.connect
+  File "src/pymssql/_mssql.pyx", line 722, in pymssql._mssql.MSSQLConnection.__init__
+  File "src/pymssql/_mssql.pyx", line 1915, in pymssql._mssql.maybe_raise_MSSQLDatabaseException
+  File "src/pymssql/_mssql.pyx", line 1932, in pymssql._mssql.raise_MSSQLDatabaseException
+pymssql._mssql.MSSQLDatabaseException: (20009, b'DB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\nDB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\n')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 229, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/sqlserver.py", line 231, in introspect
+    conn = self._connect(query_timeout=300)
+  File "/home/russellzparadox/work/rag/rag/dialects/sqlserver.py", line 217, in _connect
+    return pymssql.connect(
+           ~~~~~~~~~~~~~~~^
+        server=s.db_host,
+        ^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        as_dict=True,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "src/pymssql/_pymssql.pyx", line 660, in pymssql._pymssql.connect
+pymssql.exceptions.OperationalError: (20009, b'DB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\nDB-Lib error message 20009, severity 9:\nUnable to connect: Adaptive Server is unavailable or does not exist (192.168.2.11)\nNet-Lib error during Connection refused (111)\n')
+
+2026-08-31 11:16:21,956 INFO    chat.ask — route=chat
+2026-08-31 11:16:22,502 ERROR   chat.ask — ask failed db=shaka_dw llm=dsv4flash
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 89, in run_ask
+    result = pipeline.ask(
+        question,
+    ...<3 lines>...
+        history=history,
+    )
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 969, in ask
+    return self._conversational_answer(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        question, tables, result, answer_language
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 690, in _conversational_answer
+    result.answer = self.llm.chat(
+                    ~~~~~~~~~~~~~^
+        [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 103, in chat
+    raise LLMError(f"LLM returned HTTP {response.status_code}: {response.text[:400]}")
+rag.llm.LLMError: LLM returned HTTP 401: {"error":{"message":"API key expired.","code":401,"metadata":{"headers":{"WWW-Authenticate":"Bearer error=\"invalid_token\", error_description=\"API key expired\""}}}}
+2026-08-31 11:16:42,489 INFO    chat.ask — route=chat
+2026-08-31 11:16:43,481 ERROR   chat.ask — ask failed db=shaka_dw llm=glm-5.2
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 89, in run_ask
+    result = pipeline.ask(
+        question,
+    ...<3 lines>...
+        history=history,
+    )
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 969, in ask
+    return self._conversational_answer(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        question, tables, result, answer_language
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 690, in _conversational_answer
+    result.answer = self.llm.chat(
+                    ~~~~~~~~~~~~~^
+        [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 103, in chat
+    raise LLMError(f"LLM returned HTTP {response.status_code}: {response.text[:400]}")
+rag.llm.LLMError: LLM returned HTTP 429: {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"z-ai/glm-5.2:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Decart","is_byok":false,"provider_error_code":"upstream_429","limit_source":"upstream_provider_shared_pool","remedy_hint":"Retry sho
+2026-08-31 11:17:27,635 INFO    chat.ask — route=chat
+2026-08-31 11:17:29,516 INFO    chat.ask — ask ok db=shaka_dw llm=qwen3.8 clarify=False tables=['DimSalesReturnWasteStatus', 'DimMissionType', 'PurchasingDepartment', 'DimService', 'DimPartPrice', 'DimExportInvoiceType', 'DimRouting', 'DimSystem'] rows=0
