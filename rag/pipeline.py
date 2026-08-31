@@ -138,6 +138,30 @@ class RagPipeline:
         except Exception:
             vocab_tokens = set()
 
+        # ---- ICRL table-router first (paper §4) ---------------------------
+        # The router KB is a tiny, fast index of synthetic (question -> tables)
+        # pairs generated offline. It has no latency cost at ask time and
+        # gives us a strong prior on which tables the user's question is
+        # about. We use it to SEED the embedder search query below so the
+        # embedder knows what vocabulary to look for.
+        router_suggestions: list[str] = []
+        try:
+            from .icrl import retrieve_tables_for_question
+
+            router_suggestions = retrieve_tables_for_question(
+                self.store,
+                question,
+                top_k=5,
+                chroma_dir=str(self.settings.chroma_dir),
+                collection=self.settings.collection,
+            )
+            if router_suggestions:
+                logging.getLogger("chat.ask").info(
+                    "icrl router suggests tables: %s", router_suggestions[:5]
+                )
+        except Exception:
+            pass
+
         # Contextual retrieval: for pronoun/ellipsis questions ("show their codes"),
         # blend entity words from the last user turns into the embedding query.
         search_query = question
@@ -148,6 +172,13 @@ class RagPipeline:
                 "follow-up detected — contextual retrieval query: %s", search_query
             )
 
+        # Seed the search query with router-suggested table names so the
+        # embedder has explicit vocabulary to match on (paper §4: LLM-aided
+        # schema pooling starts from a router KB, not raw text).
+        if router_suggestions:
+            table_terms = " ".join(t.split(".")[-1] for t in router_suggestions)
+            search_query = f"{search_query} {table_terms}"
+
         expanded = expand_question(search_query, vocab_tokens) if vocab_tokens else search_query
         if expanded != search_query:
             logging.getLogger("chat.ask").info(
@@ -156,30 +187,17 @@ class RagPipeline:
         hits = self.store.query_text(expanded, top_k=max(k * 3, 12))
         ranked = rerank_hits(hits, question)
 
-        # ICRL table-router (paper §4): synthetic QA pairs vote for tables; boost those.
-        try:
-            from .icrl import retrieve_tables_for_question
-
-            suggested = retrieve_tables_for_question(
-                self.store,
-                question,
-                top_k=5,
-                chroma_dir=str(self.settings.chroma_dir),
-                collection=self.settings.collection,
-            )
-            if suggested:
-                logging.getLogger("chat.ask").info(
-                    "icrl router suggests tables: %s", suggested[:5]
-                )
-                suggested_set = {t.split(".")[-1].lower() for t in suggested}
-                for h in ranked:
-                    m = h.get("metadata") or {}
-                    bare = (m.get("table") or "").split(".")[-1].lower()
-                    if bare in suggested_set:
-                        h["distance"] = max(0.0, h["distance"] - 0.06)
-                ranked.sort(key=lambda x: x.get("distance", 1.0))
-        except Exception:
-            pass
+        # Use the router suggestions to also boost hits whose table name
+        # matches (defence in depth — the embedder may still rank the right
+        # table below an irrelevant one if the question wording is unusual).
+        if router_suggestions:
+            suggested_set = {t.split(".")[-1].lower() for t in router_suggestions}
+            for h in ranked:
+                m = h.get("metadata") or {}
+                bare = (m.get("table") or "").split(".")[-1].lower()
+                if bare in suggested_set:
+                    h["distance"] = max(0.0, h["distance"] - 0.06)
+            ranked.sort(key=lambda x: x.get("distance", 1.0))
 
         # LLM-aided schema pooling (paper §4): a fast LLM pass selects the
         # most relevant tables from the ranked candidates; keep fallback.
@@ -196,9 +214,13 @@ class RagPipeline:
         if self.llm is None or not ranked:
             return ranked
 
+        # paper-faithful window: small top-k, not the whole ranked list.
+        # Default to settings.top_k (which is already small) or 8, whichever
+        # is larger so we always give the LLM enough context.
+        window = min(len(ranked), max(8, self.settings.top_k))
         # distinct candidate tables with one-line summaries
         cand: dict[str, dict] = {}
-        for h in ranked[:24]:
+        for h in ranked[:window]:
             m = h.get("metadata") or {}
             table = m.get("table") or ""
             if not table:
@@ -236,19 +258,47 @@ class RagPipeline:
                 timeout=15.0,
             )
             idxs = (parsed or {}).get("tables") or []
-            picks = [cand[list(cand.keys())[i - 1]]["table"].split(".")[-1].lower()
+            picks = [list(cand.keys())[i - 1]
                      for i in idxs if isinstance(i, int) and 1 <= i <= len(cand)]
-            picks = {p for p in picks}
-            if not picks:
+            picks_set = {p for p in picks}
+
+            # multi-round fallback (D8): if the LLM is unsure and returned
+            # an empty list, retry once with a hint to pick top-N by name
+            # similarity. This handles LLM behaviour when the prompt is
+            # ambiguous.
+            if not picks_set:
+                retry_prompt = (
+                    f"User question: {question}\n\n"
+                    f"Candidate tables:\n" + "\n".join(lines) + "\n\n"
+                    "You previously returned no picks. If you are unsure, "
+                    "fall back to the top 3 candidates by name similarity to "
+                    "the question. Respond with JSON: {'tables': [1, 2, 3]}"
+                )
+                try:
+                    parsed2 = self.llm.chat_json(
+                        [
+                            {"role": "system", "content":
+                             "You are a database schema selector. Output ONLY JSON."},
+                            {"role": "user", "content": retry_prompt},
+                        ],
+                        max_tokens=200,
+                        timeout=15.0,
+                    )
+                    idxs = (parsed2 or {}).get("tables") or []
+                    picks = [list(cand.keys())[i - 1]
+                             for i in idxs if isinstance(i, int) and 1 <= i <= len(cand)]
+                    picks_set = {p for p in picks}
+                except Exception:
+                    pass
+
+            if not picks_set:
                 return ranked
             kept = [h for h in ranked
-                    if ((h.get("metadata") or {}).get("table") or "").split(".")[-1].lower() in picks]
+                    if ((h.get("metadata") or {}).get("table") or "").split(".")[-1].lower() in picks_set]
             # never drop below k meaningful hits — fall back on aggressive pruning
             if len(kept) < max(2, len(ranked) // 3):
                 return ranked
             return kept
-        except LLMError:
-            return ranked
         except Exception:
             return ranked
 
@@ -401,48 +451,68 @@ class RagPipeline:
         return self._examples
 
     def _few_shot_block(self, question: str, k: int | None = None) -> str:
+        """Build the few-shot block: up to `k` verified + up to `k` ICRL examples.
+
+        Paper §3.2: prompt the LLM with (q, D, S) examples. We pull from TWO
+        sources: the verified human-curated store AND the ICRL router KB.
+        Both are returned as clearly-labelled blocks so the LLM can use the
+        verified examples as ground truth and the ICRL examples as style
+        hints for joins/aggregations.
+        """
+        blocks: list[str] = []
+        import logging
+
+        log = logging.getLogger("chat.ask")
+
+        # 1) verified examples (preferred — ground truth)
         try:
             hits = self._example_store().search(question, k=k or 2)
         except Exception:
             hits = []
         good = [h for h in hits if h["distance"] < 0.85]
-        if not good:
-            # paper (q, D, S) in-context examples: fall back to the nearest
-            # synthetic example generated for this schema (ICRL KB)
-            try:
-                from .icrl import retrieve_synthetic_example
-
-                syn = retrieve_synthetic_example(
-                    question,
-                    self.store.embedder,
-                    chroma_dir=str(self.settings.chroma_dir),
-                    collection=self.settings.collection,
-                )
-            except Exception:
-                syn = None
-            if not syn or not syn.get("sql"):
-                return ""
-            import logging
-
-            logging.getLogger("chat.ask").info(
-                "using synthetic example from ICRL KB: %s", syn["question"][:80]
+        if good:
+            log.info("using %d verified example(s)", len(good))
+            parts = []
+            for h in good:
+                note = f"\nNotes: {h['notes']}" if h.get("notes") else ""
+                parts.append(f"---\nQ: {h['question']}\nSQL:\n{h['sql']}{note}")
+            blocks.append(
+                "\n\nVERIFIED QUERY EXAMPLES previously confirmed correct for this database "
+                "(imitate their join paths, table usage and value formatting):\n"
+                + "\n".join(parts)
             )
-            return (
-                "\n\nSIMILAR SYNTHETIC EXAMPLE generated from this schema "
-                "(style reference for joins and aggregations):\n"
-                f"---\nQ: {syn['question']}\nSQL:\n{syn['sql']}"
-            )
-        import logging
 
-        logging.getLogger("chat.ask").info("using %d verified example(s)", len(good))
-        parts = []
-        for h in good:
-            note = f"\nNotes: {h['notes']}" if h["notes"] else ""
-            parts.append(f"---\nQ: {h['question']}\nSQL:\n{h['sql']}{note}")
-        return (
-            "\n\nVERIFIED QUERY EXAMPLES previously confirmed correct for this database "
-            "(imitate their join paths, table usage and value formatting):\n" + "\n".join(parts)
-        )
+        # 2) ICRL synthetic examples (style hints for joins/aggregations)
+        try:
+            from .icrl import retrieve_synthetic_example
+
+            # ask for up to k examples; the helper returns a list when k>1
+            syn_list = retrieve_synthetic_example(
+                question,
+                self.store.embedder,
+                chroma_dir=str(self.settings.chroma_dir),
+                collection=self.settings.collection,
+                k=k or 2,
+            )
+        except Exception:
+            syn_list = None
+        if syn_list:
+            # normalise to list — legacy callers may get a single dict
+            if isinstance(syn_list, dict):
+                syn_list = [syn_list]
+            syn_list = [s for s in syn_list if s and s.get("sql")]
+        if syn_list:
+            log.info("using %d ICRL synthetic example(s)", len(syn_list))
+            parts = []
+            for s in syn_list:
+                parts.append(f"---\nQ: {s['question']}\nSQL:\n{s['sql']}")
+            blocks.append(
+                "\n\nSIMILAR SYNTHETIC EXAMPLES generated for this schema (style "
+                "reference for joins and aggregations — treat as hints, not as "
+                "ground truth):\n" + "\n".join(parts)
+            )
+
+        return "".join(blocks)
 
     def _history_block(self) -> str:
         """Render recent conversation turns for context continuity."""

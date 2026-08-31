@@ -525,6 +525,42 @@ class ICRLGenerator:
 
         return best
 
+    def run_batch(
+        self,
+        traversals: Iterable["Traversal"],
+        *,
+        concurrency: int = 2,
+        validate_sql=None,
+        min_reward: float = 6.0,
+    ) -> list["ICRLResult | None"]:
+        """Run the ICRL loop over many traversals with bounded concurrency.
+
+        Each traversal is processed independently by its own LLM chain; a
+        `ThreadPoolExecutor` lets us overlap I/O-bound LLM calls. The default
+        `concurrency=2` is safe for local Ollama-style models; raise it for
+        hosted APIs.
+        """
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        traversals = list(traversals)
+        if not traversals:
+            return []
+        results: list[ICRLResult | None] = [None] * len(traversals)
+
+        def _one(i: int, t: Traversal) -> tuple[int, ICRLResult | None]:
+            try:
+                return i, self.run(t, validate_sql=validate_sql, min_reward=min_reward)
+            except Exception as exc:  # pragma: no cover — best-effort
+                logger.warning("icrl: run_batch traversal %s failed: %s", t.label, exc)
+                return i, None
+
+        with ThreadPoolExecutor(max_workers=max(1, concurrency)) as ex:
+            futures = [ex.submit(_one, i, t) for i, t in enumerate(traversals)]
+            for fut in as_completed(futures):
+                i, r = fut.result()
+                results[i] = r
+        return results
+
 
 # ---------------------------------------------------------------------------
 # Knowledge base indexing (schema routing collection)
