@@ -1865,3 +1865,59 @@ Traceback (most recent call last):
   File "/home/russellzparadox/work/rag/rag/llm.py", line 103, in chat
     raise LLMError(f"LLM returned HTTP {response.status_code}: {response.text[:400]}")
 rag.llm.LLMError: LLM returned HTTP 429: {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"z-ai/glm-5.2:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Decart","is_byok":false,"provider_error_code":"upstream_429","limit_source":"upstream_provider_shared_pool","remedy_hint":"Retry sho
+2026-08-31 11:43:37,464 ERROR   django.request — Internal Server Error: /db/1/icrl/sample/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/russellzparadox/work/rag/webapp/chat/views.py", line 456, in db_icrl_sample
+    return JsonResponse({"entries": _sample_router_entries(dbp, k=k)})
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/http/response.py", line 772, in __init__
+    data = json.dumps(data, cls=encoder, **json_dumps_params)
+  File "/usr/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/usr/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/usr/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/serializers/json.py", line 113, in default
+    return super().default(o)
+           ~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type SimpleNamespace is not JSON serializable
+when serializing list item 0
+when serializing dict item 'entries'
+2026-08-31 11:44:03,951 ERROR   django.request — Internal Server Error: /db/1/icrl/sample/
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/exception.py", line 56, in inner
+    response = get_response(request)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/handlers/base.py", line 199, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/contrib/auth/decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/russellzparadox/work/rag/webapp/chat/views.py", line 456, in db_icrl_sample
+    return JsonResponse({"entries": _sample_router_entries(dbp, k=k)})
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/http/response.py", line 772, in __init__
+    data = json.dumps(data, cls=encoder, **json_dumps_params)
+  File "/usr/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/usr/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/usr/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/django/core/serializers/json.py", line 113, in default
+    return super().default(o)
+           ~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type SimpleNamespace is not JSON serializable
+when serializing list item 0
+when serializing dict item 'entries'

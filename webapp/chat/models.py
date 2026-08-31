@@ -44,6 +44,11 @@ class DatabaseProfile(models.Model):
     index_error = models.TextField(blank=True)
     indexed_at = models.DateTimeField(null=True, blank=True)
     indexed_vectors = models.PositiveIntegerField(default=0)
+    # ---- ICRL coverage (Phase G) ----
+    icrl_count = models.PositiveIntegerField(default=0)
+    icrl_avg_reward = models.FloatField(default=0.0)
+    icrl_last_run = models.DateTimeField(null=True, blank=True)
+    icrl_coverage_pct = models.FloatField(default=0.0)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

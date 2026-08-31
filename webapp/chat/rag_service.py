@@ -204,6 +204,135 @@ def start_reindex(dbp) -> None:
     thread.start()
 
 
+def start_icrl_reindex(dbp) -> None:
+    """Kick off a background ICRL synthetic-QA generation thread for `dbp`.
+
+    Mirrors `start_reindex`: sets the profile to INDEXING, drops the cached
+    router collection (no — the worker will append), and spawns a daemon
+    thread that runs `run_icrl_generation` from `rag.icrl`.
+    """
+    _schema_store_cache.pop(dbp.pk, None)
+    for key in [k for k in _pipeline_cache if k[0] == dbp.pk]:
+        _pipeline_cache.pop(key, None)
+    thread = threading.Thread(target=_reindex_icrl_worker, args=(dbp.pk,), daemon=True)
+    thread.start()
+
+
+def _reindex_icrl_worker(dbp_id: int) -> None:
+    """Background ICRL generation: run rag.icrl.run_icrl_generation and
+    persist the resulting coverage stats on the DatabaseProfile.
+    """
+    import logging
+    import time
+    import traceback
+
+    from django.db import close_old_connections
+    from django.utils import timezone
+
+    from chat.models import DatabaseProfile
+
+    logger = logging.getLogger("chat.icrl")
+    close_old_connections()
+    try:
+        dbp = DatabaseProfile.objects.get(pk=dbp_id)
+        # mark as busy — we reuse INDEXING because the UI already polls it
+        dbp.index_status = DatabaseProfile.IndexStatus.INDEXING
+        dbp.index_error = ""
+        dbp.save(update_fields=["index_status", "index_error"])
+        logger.info("ICRL reindex started for %s (pk=%s)", dbp.name, dbp.pk)
+
+        # Build settings + LLM
+        from rag.embeddings import get_embedder
+        from rag.llm import LLMClient
+        from rag.icrl import (
+            index_results_for_profile,
+            load_entries,
+            run_icrl_generation,
+            save_entries,
+        )
+        from rag.sqlguard import validate_sql
+
+        settings = build_rag_settings(dbp, None)
+        llm = LLMClient(
+            base_url=settings.llm_base_url,
+            model=settings.llm_model,
+            api_key=settings.llm_api_key,
+            temperature=settings.llm_temperature,
+        )
+        embedder = get_embedder(settings)
+
+        t0 = time.time()
+        results = run_icrl_generation(
+            settings, llm, n=30, max_iterations=3,
+            validate_sql=validate_sql, min_reward=2.0, incremental=True,
+        )
+        close_old_connections()
+
+        # persist entries (v2 schema, append-merge)
+        n_saved = save_entries(settings, [
+            {
+                "question": r.question, "sql": r.sql, "tables": r.tables,
+                "reward": r.reward, "iterations": r.iterations,
+            }
+            for r in results
+        ], append=True)
+
+        # and index them into the router KB
+        n_indexed = index_results_for_profile(settings, embedder, results) if results else 0
+
+        # update coverage stats
+        dbp.refresh_from_db()
+        existing = load_entries(settings)
+        n_total = len(existing)
+        avg_reward = (
+            sum(float(e.get("reward", 0.0)) for e in existing) / n_total
+            if n_total else 0.0
+        )
+        # coverage: % of tables in the warehouse covered by at least one ICRL entry
+        # (rough proxy: distinct table set in all entries vs. introspected count)
+        all_tables: set[str] = set()
+        for e in existing:
+            for t in (e.get("tables") or []):
+                all_tables.add(t.split(".")[-1].lower())
+        try:
+            from rag.dialects import get_dialect
+            n_warehouse = len([
+                t for t in get_dialect(settings).introspect().values()
+                if t.kind == "r"
+            ])
+        except Exception:
+            n_warehouse = 0
+        coverage_pct = (100.0 * len(all_tables) / n_warehouse) if n_warehouse else 0.0
+
+        dbp.icrl_count = n_total
+        dbp.icrl_avg_reward = round(avg_reward, 4)
+        dbp.icrl_last_run = timezone.now()
+        dbp.icrl_coverage_pct = round(coverage_pct, 2)
+        dbp.index_status = DatabaseProfile.IndexStatus.READY
+        dbp.index_error = ""
+        dbp.save(update_fields=[
+            "icrl_count", "icrl_avg_reward", "icrl_last_run",
+            "icrl_coverage_pct", "index_status", "index_error",
+        ])
+        logger.info(
+            "ICRL reindex done for %s: %s entries (saved=%s indexed=%s) in %.1fs; "
+            "coverage=%.1f%%",
+            dbp.name, n_total, n_saved, n_indexed, time.time() - t0, coverage_pct,
+        )
+    except Exception as exc:
+        logger.error(
+            "ICRL reindex failed for pk=%s: %s\n%s", dbp_id, exc, traceback.format_exc()
+        )
+        close_old_connections()
+        try:
+            dbp = DatabaseProfile.objects.get(pk=dbp_id)
+            dbp.index_status = DatabaseProfile.IndexStatus.ERROR
+            dbp.index_error = str(exc)[:2000]
+            dbp.save(update_fields=["index_status", "index_error"])
+        except Exception:
+            pass
+
+
 def _reindex_worker(dbp_id: int) -> None:
     import logging
     import time

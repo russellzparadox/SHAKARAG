@@ -33,6 +33,20 @@
         <noscript><button class="btn small" type="submit">{% trans "Save" %}</button></noscript>
       </form>
     </div>
+    <div class="meta-group" id="icrl-panel" data-db-pk="{{ object.database.pk }}" data-csrf="{{ csrf_token }}">
+      <h3>{% trans "ICRL synthetic training data" %}</h3>
+      <p class="muted">
+        <span id="icrl-count">{{ object.database.icrl_count }}</span> {% trans "entries" %},
+        {% trans "avg reward" %} <span id="icrl-avg-reward">{{ object.database.icrl_avg_reward|floatformat:2 }}</span>,
+        {% trans "coverage" %} <span id="icrl-coverage">{{ object.database.icrl_coverage_pct|floatformat:1 }}</span>%
+      </p>
+      <div class="icrl-actions">
+        <button id="icrl-rebuild" class="btn small" type="button">{% trans "Rebuild" %}</button>
+        <button id="icrl-sample" class="btn small ghost" type="button">{% trans "Sample" %}</button>
+      </div>
+      <div id="icrl-status" class="muted"></div>
+      <pre id="icrl-sample-out" class="icrl-sample-out" hidden></pre>
+    </div>
   </aside>
 
   <section class="chat-main" id="chat-main">
@@ -95,4 +109,71 @@
 <script src="/static/chat/marked.min.js"></script>
 <script src="/static/chat/purify.min.js"></script>
 <script src="/static/chat/chat.js"></script>
+<script>
+(function () {
+  var panel = document.getElementById('icrl-panel');
+  if (!panel) return;
+  var dbpk = panel.getAttribute('data-db-pk');
+  var csrf = panel.getAttribute('data-csrf');
+  var btnRebuild = document.getElementById('icrl-rebuild');
+  var btnSample = document.getElementById('icrl-sample');
+  var statusEl = document.getElementById('icrl-status');
+  var out = document.getElementById('icrl-sample-out');
+  var countEl = document.getElementById('icrl-count');
+  var avgEl = document.getElementById('icrl-avg-reward');
+  var covEl = document.getElementById('icrl-coverage');
+
+  function pollStatus() {
+    fetch('/db/' + dbpk + '/icrl/status/', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        countEl.textContent = d.count;
+        avgEl.textContent = (d.avg_reward || 0).toFixed(2);
+        covEl.textContent = (d.coverage_pct || 0).toFixed(1);
+        if (d.status === 'indexing') {
+          statusEl.textContent = 'Rebuilding...';
+          setTimeout(pollStatus, 2000);
+        } else if (d.status === 'error') {
+          statusEl.textContent = 'Error: ' + (d.error || '');
+        } else {
+          statusEl.textContent = d.last_run ? ('Last run: ' + d.last_run) : '';
+        }
+      })
+      .catch(function (e) { statusEl.textContent = 'Status fetch failed'; });
+  }
+
+  btnRebuild && btnRebuild.addEventListener('click', function () {
+    btnRebuild.disabled = true;
+    statusEl.textContent = 'Starting...';
+    fetch('/db/' + dbpk + '/icrl/rebuild/', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: ''
+    }).then(function () {
+      btnRebuild.disabled = false;
+      pollStatus();
+    }).catch(function () { btnRebuild.disabled = false; });
+  });
+
+  btnSample && btnSample.addEventListener('click', function () {
+    fetch('/db/' + dbpk + '/icrl/sample/?k=5', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var entries = d.entries || [];
+        if (!entries.length) {
+          out.hidden = false;
+          out.textContent = '(no entries yet)';
+          return;
+        }
+        out.hidden = false;
+        out.textContent = entries.map(function (e) {
+          return 'Q: ' + (e.question || '') + '\nSQL: ' + (e.sql || '') +
+                 '\nTables: ' + (e.tables || []).join(', ');
+        }).join('\n---\n');
+      })
+      .catch(function () { out.hidden = false; out.textContent = 'Sample failed'; });
+  });
+})();
+</script>
 {% endblock %}

@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView
 from django.db.models import Q
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views import View
@@ -339,6 +339,121 @@ def db_status(request, pk):
             "indexed_at": dbp.indexed_at.strftime("%Y-%m-%d %H:%M") if dbp.indexed_at else None,
         }
     )
+
+
+# ---- ICRL (Phase G) --------------------------------------------------------
+
+@login_required
+def db_icrl_rebuild(request, pk):
+    """POST /db/<pk>/icrl/rebuild/ — kick the background ICRL generation.
+
+    Mirrors `db_reindex`: editor-only access; otherwise 403. On success,
+    redirects to the database list with a flash message.
+    """
+    dbp = get_object_or_404(visible_profiles(request.user, DatabaseProfile), pk=pk)
+    if not can_edit_profiles(request.user, DatabaseProfile):
+        return HttpResponseForbidden("editor access required to rebuild the ICRL KB")
+    if request.method == "POST":
+        if dbp.index_status == DatabaseProfile.IndexStatus.INDEXING:
+            messages.warning(request, "ICRL generation already running.")
+        else:
+            from . import rag_service
+            rag_service.start_icrl_reindex(dbp)
+            messages.info(request, f"ICRL generation for '{dbp.name}' started.")
+    return redirect("chat:db_list")
+
+
+@login_required
+def db_icrl_status(request, pk):
+    """GET /db/<pk>/icrl/status/ — JSON of the profile's ICRL coverage fields."""
+    dbp = get_object_or_404(visible_profiles(request.user, DatabaseProfile), pk=pk)
+    return JsonResponse(
+        {
+            "status": dbp.index_status,
+            "count": dbp.icrl_count,
+            "avg_reward": dbp.icrl_avg_reward,
+            "coverage_pct": dbp.icrl_coverage_pct,
+            "last_run": dbp.icrl_last_run.strftime("%Y-%m-%d %H:%M") if dbp.icrl_last_run else None,
+            "error": dbp.index_error,
+        }
+    )
+
+
+def _sample_router_entries(dbp, k: int) -> list[dict]:
+    """Return up to `k` random entries from this profile's router KB.
+
+    Reads directly from Chroma so the caller doesn't need the full ICRL
+    pipeline to be running; degrades gracefully when the collection is
+    empty or missing.
+    """
+    import os
+    import random as _r
+
+    import chromadb
+    from chromadb.config import Settings as ChromaSettings
+
+    k = max(1, min(int(k or 5), 50))
+    chroma_dir = os.environ.get(
+        "DJANGO_CHROMA_DIR",
+        os.path.join(os.path.dirname(__file__), "..", "..", "data", "chroma"),
+    )
+    try:
+        client = chromadb.PersistentClient(
+            path=chroma_dir,
+            settings=ChromaSettings(anonymized_telemetry=False, allow_reset=True),
+        )
+        col = client.get_collection(dbp.collection_name + "-router")
+    except Exception:
+        return []
+    if col.count() == 0:
+        return []
+    try:
+        # over-fetch so random.sample has enough to pick from
+        res = col.get(limit=min(col.count(), max(k * 4, 10)),
+                      include=["documents", "metadatas"])
+    except Exception:
+        return []
+    docs = res.get("documents") or []
+    metas = res.get("metadatas") or []
+    pairs = list(zip(docs, metas))
+    if not pairs:
+        return []
+    rng = _r.Random()
+    rng.shuffle(pairs)
+    out: list[dict] = []
+    for doc, meta in pairs[:k]:
+        sql = ""
+        question = (meta or {}).get("question", "")
+        for line in (doc or "").splitlines():
+            if line.startswith("Q:"):
+                question = question or line[2:].strip()
+            elif line.startswith("SQL:"):
+                sql = line[4:].strip()
+        try:
+            tables = json.loads((meta or {}).get("tables", "[]"))
+        except Exception:
+            tables = []
+        out.append({
+            "question": question,
+            "sql": sql,
+            "tables": tables,
+            "reward": (meta or {}).get("reward"),
+        })
+    return out
+
+
+@login_required
+def db_icrl_sample(request, pk):
+    """GET /db/<pk>/icrl/sample/?k=5 — random sample of router entries."""
+    dbp = get_object_or_404(visible_profiles(request.user, DatabaseProfile), pk=pk)
+    if not can_edit_profiles(request.user, DatabaseProfile):
+        return HttpResponseForbidden("editor access required to sample the ICRL KB")
+    k = request.GET.get("k", 5)
+    try:
+        k = int(k)
+    except (TypeError, ValueError):
+        k = 5
+    return JsonResponse({"entries": _sample_router_entries(dbp, k=k)})
 
 
 @login_required
