@@ -144,3 +144,46 @@ def test_algorithm_a2_power_set_branching():
     three_table = {("R", "db1", "Hub", x, y) for x, y in [("D1", "D2"), ("D1", "D3"), ("D2", "D3")]}
     assert two_table.issubset(paths), f"missing 2-table: {two_table - paths}"
     assert three_table.issubset(paths), f"missing 3-table: {three_table - paths}"
+
+
+# ---- A10: no cycles within path ----
+
+def test_algorithm_a2_no_cycles_within_path():
+    """Per-path visited set prevents re-entering a node within one path.
+
+    Even with reverse FK edges in the graph (A→B and B→A both present),
+    the traversal must not produce (R, db1, A, B, A) or similar cycles.
+    """
+    a = _t("A", schema="db1", fks=["B"])
+    b = _t("B", schema="db1", fks=["A"])  # bidirectional FK declaration
+    g = build_from_tables([a, b])
+
+    traversals = enumerate_traversals(g, cutoff=4, min_tables=2)
+    paths = [t.nodes for t in traversals]
+
+    # every node list must be self-cycle-free (no node appears twice in a path)
+    for p in paths:
+        assert len(p) == len(set(p)), f"cycle in {p}"
+    # and the (R, db1, A, B) traversal exists
+    assert ("R", "db1", "A", "B") in paths
+    # but no (R, db1, A, B, A) — A should not be re-entered
+    assert ("R", "db1", "A", "B", "A") not in paths
+
+
+# ---- A12: determinism ----
+
+def test_enumerate_traversals_deterministic_and_bounded():
+    """Same input → same output, no randomness; runs in bounded time."""
+    # moderately complex graph: hub + 3 dims + 1 dim-of-dim
+    hub = _t("Hub", schema="db1", fks=["D1", "D2", "D3"])
+    d1 = _t("D1", schema="db1", fks=["D1a"])
+    d2 = _t("D2", schema="db1")
+    d3 = _t("D3", schema="db1")
+    d1a = _t("D1a", schema="db1")
+    g = build_from_tables([hub, d1, d2, d3, d1a])
+
+    t1 = [p.nodes for p in enumerate_traversals(g, cutoff=3, min_tables=2)]
+    t2 = [p.nodes for p in enumerate_traversals(g, cutoff=3, min_tables=2)]
+    assert t1 == t2
+    # and it terminates
+    assert isinstance(t1, list)
