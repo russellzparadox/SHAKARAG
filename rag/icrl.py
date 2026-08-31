@@ -17,6 +17,7 @@ Everything is prompt-based: no fine-tuning.
 """
 from __future__ import annotations
 
+import hashlib
 import itertools
 import json
 import logging
@@ -531,24 +532,73 @@ class ICRLGenerator:
 
 ROUTER_SUFFIX = "-router"
 
+# Router KB gating thresholds (paper §3 + plan §1.3).
+MIN_ROUTER_REWARD: float = 2.0    # below this, entry is too low-quality to route
+MAX_ROUTER_DISTANCE: float = 0.85  # chroma cosine distance; higher = irrelevant
 
-def index_qa_triplets(store_any, results: Iterable[ICRLResult]) -> int:
-    """Index (question -> tables) pairs into '<collection>-router' for table routing."""
+
+def _deterministic_router_id(question: str, tables: list[str]) -> str:
+    """Stable ID for a (question, tables) pair.
+
+    sha1(`<tables_sorted>::<question_normalized>`)[:16] — short enough to be
+    readable in logs, long enough to avoid collisions on the ICRL KB scale
+    (10k-100k entries).
+    """
+    sorted_tables = sorted(t.strip().lower() for t in tables)
+    q_norm = re.sub(r"\s+", " ", question.strip().lower())
+    payload = "::".join(sorted_tables) + "::" + q_norm
+    digest = hashlib.sha1(payload.encode("utf-8")).hexdigest()[:16]
+    return f"route:{digest}"
+
+
+def index_qa_triplets(
+    store_any,
+    results: Iterable["ICRLResult"],
+    *,
+    dialect: str = "",
+) -> int:
+    """Index (question -> tables) pairs into '<collection>-router' for table routing.
+
+    IDs are deterministic (sha1 of `tables_sorted::q_normalized`) so re-runs
+    dedupe naturally. Metadata includes the per-bucket reward counts,
+    an `executable` flag (last-known parse result), and the `dialect`.
+    """
     n = 0
     batch_ids, batch_docs, batch_metas, batch_embeds_src = [], [], [], []
     for r in results:
+        # re-compute the reward buckets from the SQL so the metadata is
+        # in sync with the latest run (the ICRLResult may not carry the
+        # raw counts).
+        _, counts = complexity_reward(r.sql)
+        try:
+            parse_sql(r.sql, dialect=dialect or "")
+            executable = True
+        except SQLParseError:
+            executable = False
+
         doc = (
             f"Q: {r.question}\nTables: {', '.join(r.tables)}\n"
             f"SQL: {r.sql}\nReward: {r.reward}"
         )
-        qid = "route:" + re.sub(r"[^a-z0-9]+", "-", r.question.lower())[:80]
-        meta = {"kind": "routing", "tables": json.dumps(r.tables), "reward": r.reward}
+        qid = _deterministic_router_id(r.question, r.tables)
+        meta = {
+            "kind": "routing",
+            "tables": json.dumps(r.tables),
+            "reward": float(r.reward),
+            "reward_buckets": json.dumps(counts),
+            "executable": bool(executable),
+            "dialect": dialect or "",
+            "traversal_signature": "::".join(sorted(r.tables)),
+            "iteration_count": int(r.iterations),
+        }
         batch_ids.append(qid)
         batch_docs.append(doc)
         batch_metas.append(meta)
         batch_embeds_src.append(r.question)
         n += 1
 
+    if not batch_ids:
+        return 0
     embedder = store_any.embedder
     embeddings = embedder(batch_embeds_src)
     store_any.collection.upsert(
