@@ -170,10 +170,13 @@ def test_retrieve_tables_gates_on_distance_and_reward(tmp_path):
 
     # query with the *near* embedding
     class _StubStore:
-        embedder = embedder
+        pass
+
+    store = _StubStore()
+    store.embedder = embedder
 
     tables = retrieve_tables_for_question(
-        _StubStore(), "near query", top_k=5,
+        store, "near query", top_k=5,
         chroma_dir=chroma_dir, collection="c",
     )
     # far entry (orthogonal, distance 2 > 0.85) is gated out
@@ -201,16 +204,19 @@ def test_retrieve_tables_weighted_by_distance_and_reward(tmp_path):
         embeddings=[base, base],
     )
 
-    class _StubStore:
-        embedder = embedder
-
     # internal call: inspect the returned weight indirectly — high-reward entry
     # should be considered (still distance 0, weight 1.0) and survive; we just
     # assert both contribute to the same table (public.x) so the test of the
     # weight formula is observable via the function not erroring on multiple
     # entries with same embedding.
+    class _StubStore:
+        pass
+
+    store = _StubStore()
+    store.embedder = embedder
+
     tables = retrieve_tables_for_question(
-        _StubStore(), "base", top_k=5,
+        store, "base", top_k=5,
         chroma_dir=chroma_dir, collection="c",
     )
     assert tables == ["public.x"]
@@ -225,19 +231,20 @@ def test_retrieve_synthetic_returns_top_k(tmp_path):
     col, chroma_dir, embedder = _tmp_router_col(tmp_path)
     base = embedder(["base question"])[0]
     # three identical embeddings so distances are 0 — ordering by score (1-d)*reward
+    # rewards all above MIN_ROUTER_REWARD=2.0 to survive the gate
     col.upsert(
         ids=["e1", "e2", "e3"],
         documents=[
-            "Q: base question\nTables: public.orders\nSQL: SELECT 1\nReward: 1.0",
-            "Q: base question\nTables: public.orders\nSQL: SELECT 2\nReward: 2.0",
-            "Q: base question\nTables: public.orders\nSQL: SELECT 3\nReward: 3.0",
+            "Q: base question\nTables: public.orders\nSQL: SELECT 1\nReward: 2.5",
+            "Q: base question\nTables: public.orders\nSQL: SELECT 2\nReward: 5.0",
+            "Q: base question\nTables: public.orders\nSQL: SELECT 3\nReward: 8.0",
         ],
         metadatas=[
-            {"tables": json.dumps(["public.orders"]), "reward": 1.0,
+            {"tables": json.dumps(["public.orders"]), "reward": 2.5,
              "reward_buckets": "{}", "executable": True, "dialect": ""},
-            {"tables": json.dumps(["public.orders"]), "reward": 2.0,
+            {"tables": json.dumps(["public.orders"]), "reward": 5.0,
              "reward_buckets": "{}", "executable": True, "dialect": ""},
-            {"tables": json.dumps(["public.orders"]), "reward": 3.0,
+            {"tables": json.dumps(["public.orders"]), "reward": 8.0,
              "reward_buckets": "{}", "executable": True, "dialect": ""},
         ],
         embeddings=[base, base, base],

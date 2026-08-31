@@ -611,11 +611,23 @@ def index_qa_triplets(
 
 
 def retrieve_tables_for_question(
-    pipeline_store: Any, question: str, top_k: int = 5, chroma_dir: str = "", collection: str = ""
+    pipeline_store: Any,
+    question: str,
+    top_k: int = 5,
+    chroma_dir: str = "",
+    collection: str = "",
+    *,
+    min_reward: float = MIN_ROUTER_REWARD,
+    max_distance: float = MAX_ROUTER_DISTANCE,
 ) -> list[str]:
     """Look up similar synthetic questions and return their table sets (router).
 
     Queries the '<collection>-router' KB; returns [] when it doesn't exist yet.
+    Each candidate is gated by:
+      - `distance <= max_distance` (default 0.85 cosine)
+      - `reward >= min_reward`   (default 2.0; entries below this are noise)
+    The vote weight is `(1 - distance) * reward` so high-quality entries
+    contribute more to the ranked table list.
     """
     import os
 
@@ -629,9 +641,10 @@ def retrieve_tables_for_question(
         )
         col = client.get_collection((collection or "c") + ROUTER_SUFFIX)
         embedding = pipeline_store.embedder([question])[0]
+        # ask chroma for more candidates than `top_k` so the gate has room
         res = col.query(
             query_embeddings=[embedding],
-            n_results=top_k,
+            n_results=max(top_k * 3, 10),
             include=["metadatas", "distances"],
         )
     except Exception:
@@ -646,20 +659,41 @@ def retrieve_tables_for_question(
     for meta, d in zip(metas, dists):
         try:
             tables = json.loads((meta or {}).get("tables", "[]"))
+            reward = float((meta or {}).get("reward", 0.0))
         except Exception:
             continue
-        weight = max(0.0, 1.0 - float(d))
+        d = float(d) if d is not None else 1.0
+        if d > max_distance or reward < min_reward:
+            continue
+        weight = max(0.0, 1.0 - d) * max(reward, 0.0)
         for t in tables:
-            counter[t] += weight  # weighted vote
+            counter[t] += weight
     return [t for t, _ in counter.most_common(top_k)]
 
 
 def retrieve_synthetic_example(
-    question: str, embedder, chroma_dir: str, collection: str, max_distance: float = 0.9
-) -> dict | None:
-    """Nearest synthetic (question, sql, tables) from the router KB, for few-shot.
+    question: str,
+    embedder,
+    chroma_dir: str,
+    collection: str,
+    max_distance: float = MAX_ROUTER_DISTANCE,
+    min_reward: float = MIN_ROUTER_REWARD,
+    k: int = 1,
+    boost_tables: set[str] | None = None,
+) -> list[dict] | dict | None:
+    """Retrieve up to `k` synthetic (question, sql, tables) from the router KB.
 
-    Returns {"question", "sql", "tables"} or None.
+    Used for few-shot prompting. Returns a list of dicts (length 1..k) when
+    k >= 1; for back-compat with the original single-result API, if the
+    caller passed the legacy positional/default form the function still
+    returns a single dict or None when `k == 1`. (Callers that want the
+    list shape should pass `k` explicitly.)
+
+    Gating:
+      - `distance <= max_distance`
+      - `reward >= min_reward`
+      - if `boost_tables` is provided, candidates whose tables overlap
+        with the set get a multiplicative boost of `1 + 0.2 * overlap`.
     """
     import chromadb
     from chromadb.config import Settings as ChromaSettings
@@ -671,29 +705,66 @@ def retrieve_synthetic_example(
         )
         col = client.get_collection(collection + ROUTER_SUFFIX)
         if col.count() == 0:
-            return None
+            return None if k == 1 else []
         embedding = embedder([question])[0]
+        # over-fetch to give the gate + boost room
         res = col.query(
             query_embeddings=[embedding],
-            n_results=1,
+            n_results=max(k * 3, 5),
             include=["documents", "metadatas", "distances"],
         )
-        dist = (res.get("distances") or [[None]])[0][0]
-        if dist is None or float(dist) > max_distance:
-            return None
-        doc = ((res.get("documents") or [[]])[0][0]) or ""
-        meta = ((res.get("metadatas") or [[]])[0][0]) or {}
+    except Exception:
+        return None if k == 1 else []
+
+    metas = (res.get("metadatas") or [[]])[0]
+    dists = (res.get("distances") or [[]])[0]
+    docs = (res.get("documents") or [[]])[0]
+
+    candidates: list[tuple[float, dict]] = []  # (score, dict)
+    boost_set = {t.strip().lower() for t in (boost_tables or set())}
+
+    for meta, d, doc in zip(metas, dists, docs):
+        meta = meta or {}
+        d = float(d) if d is not None else 1.0
+        try:
+            reward = float(meta.get("reward", 0.0))
+        except (TypeError, ValueError):
+            reward = 0.0
+        if d > max_distance or reward < min_reward:
+            continue
+        # parse tables from metadata
+        try:
+            tables = json.loads(meta.get("tables", "[]"))
+        except Exception:
+            tables = []
+        # score with optional table-overlap boost
+        base = max(0.0, 1.0 - d) * max(reward, 0.0)
+        if boost_set and tables:
+            t_norm = {t.strip().lower() for t in tables}
+            overlap = len(boost_set & t_norm)
+            base *= 1.0 + 0.2 * overlap
+
         sql = ""
-        for line in doc.splitlines():
+        for line in (doc or "").splitlines():
             if line.startswith("SQL:"):
                 sql = line[len("SQL:"):].strip()
-        return {
-            "question": meta.get("question") or doc.splitlines()[0][3:],
-            "sql": sql,
-            "tables": json.loads(meta.get("tables", "[]")),
-        }
-    except Exception:
-        return None
+                break
+        # question is best-effort: prefer metadata, fall back to doc first line
+        q_text = meta.get("question") or ""
+        if not q_text:
+            first = (doc or "").splitlines()[0] if doc else ""
+            q_text = first[2:].strip() if first.startswith("Q:") else first
+        candidates.append(
+            (base, {"question": q_text, "sql": sql, "tables": tables})
+        )
+
+    candidates.sort(key=lambda x: x[0], reverse=True)
+    top = [d for _, d in candidates[:k]]
+
+    # back-compat: when k==1 return a single dict (or None) for old callers
+    if k == 1:
+        return top[0] if top else None
+    return top
 
 
 # ---------------------------------------------------------------------------
