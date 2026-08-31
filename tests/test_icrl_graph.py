@@ -71,3 +71,21 @@ def test_algorithm_a1_root_db_table_fk_edges():
     # exactly one FK edge in the FK direction (A→B)
     assert {e.src for e in type3 if not e.is_reverse} == {"A"}
     assert {e.dst for e in type3 if not e.is_reverse} == {"B"}
+
+
+# ---- A4: FK directional + reverse navigation edge ----
+
+def test_algorithm_a1_fk_directional_with_reverse():
+    """FK edges are stored directionally (A→B) AND carry a reverse nav edge (B→A, is_reverse=True)."""
+    a = _t("A", schema="db1", fks=["B"])
+    b = _t("B", schema="db1")
+    g = build_from_tables([a, b])
+
+    fk_edges = g.edges_of_type(EdgeType.TABLE_FK)
+    # directional: A → B
+    directional = [e for e in fk_edges if not e.is_reverse]
+    reverse = [e for e in fk_edges if e.is_reverse]
+    assert len(directional) == 1 and directional[0].src == "A" and directional[0].dst == "B"
+    assert len(reverse) == 1 and reverse[0].src == "B" and reverse[0].dst == "A"
+    # reverse is *navigation-only* (not a duplicate FK declaration)
+    assert directional[0].type == EdgeType.TABLE_FK == reverse[0].type
