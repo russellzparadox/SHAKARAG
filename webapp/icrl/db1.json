@@ -1,0 +1,146 @@
+[
+  {
+    "question": "List active products with default code, total assigned putaway rules, distinct package types count, average package max weight, and heaviest package name per product, filtered to products having at least two package types across all their putaway rules, ordered by product default code",
+    "sql": "WITH product_putaway AS (SELECT p.id AS product_id, p.default_code, spr.id AS putaway_id FROM product_product p JOIN stock_putaway_rule spr ON spr.product_id = p.id WHERE p.active), putaway_packages AS (SELECT pp.product_id, pp.default_code, spt.id AS package_id, spt.name AS package_name, spt.max_weight FROM product_putaway pp JOIN stock_package_type_stock_putaway_rule_rel rel ON rel.stock_putaway_rule_id = pp.putaway_id JOIN stock_package_type spt ON spt.id = rel.stock_package_type_id) SELECT default_code, COUNT(DISTINCT putaway_id) AS putaway_rule_count, COUNT(DISTINCT package_id) AS package_type_count, ROUND(AVG(max_weight)::numeric, 2) AS avg_package_max_weight, MAX(package_name) FILTER (WHERE max_weight = (SELECT MAX(max_weight) FROM putaway_packages pp2 WHERE pp2.product_id = pp.product_id)) AS heaviest_package_name FROM putaway_packages pp GROUP BY default_code HAVING COUNT(DISTINCT package_id) >= 2 ORDER BY default_code",
+    "tables": [
+      "public.product_product",
+      "public.stock_putaway_rule",
+      "public.stock_package_type_stock_putaway_rule_rel",
+      "public.stock_package_type"
+    ],
+    "reward": 6.82,
+    "iterations": 2
+  },
+  {
+    "question": "Show each user who created an active payment token, their login, and total products across all product fetch image wizards they created.",
+    "sql": "SELECT ru.id, ru.login, COUNT(pfwpr.product_product_id) AS total_products FROM public.res_users ru JOIN public.payment_token pt ON ru.id = pt.create_uid JOIN public.product_fetch_image_wizard pfw ON ru.id = pfw.create_uid JOIN public.product_fetch_image_wizard_product_product_rel pfwpr ON pfw.id = pfwpr.product_fetch_image_wizard_id WHERE pt.active = true GROUP BY ru.id, ru.login ORDER BY total_products DESC",
+    "tables": [
+      "public.payment_token",
+      "public.res_users",
+      "public.product_fetch_image_wizard",
+      "public.product_fetch_image_wizard_product_product_rel"
+    ],
+    "reward": 2.82,
+    "iterations": 1
+  },
+  {
+    "question": "List model inheritance parent fields with property definitions and creator user login",
+    "sql": "WITH joined AS (SELECT imi.id AS inherit_id, imf.name AS field_name, pbd.properties_definition, ru.login AS creator_login FROM public.ir_model_inherit imi JOIN public.ir_model_fields imf ON imi.parent_field_id = imf.id JOIN public.properties_base_definition pbd ON imf.id = pbd.properties_field_id JOIN public.res_users ru ON pbd.create_uid = ru.id) SELECT inherit_id, field_name, properties_definition, creator_login FROM joined ORDER BY inherit_id",
+    "tables": [
+      "public.ir_model_inherit",
+      "public.ir_model_fields",
+      "public.properties_base_definition",
+      "public.res_users"
+    ],
+    "reward": 3.16,
+    "iterations": 1
+  },
+  {
+    "question": "Show onboarding step titles and sequences alongside return creation wizard categories and date ranges for each company, linked by users who created both.",
+    "sql": "WITH step_creators AS (SELECT oos.id AS step_id, oos.title AS step_title, oos.sequence AS step_sequence, oos.create_uid AS user_id, ru.company_id FROM public.onboarding_onboarding_step oos JOIN public.res_users ru ON oos.create_uid = ru.id), wizard_creators AS (SELECT arcw.id AS wizard_id, arcw.category AS wizard_category, arcw.date_from, arcw.date_to, arcw.create_uid AS user_id, arcw.company_id FROM public.account_return_creation_wizard arcw) SELECT rc.name AS company_name, sc.step_title, sc.step_sequence, wc.wizard_category, wc.date_from, wc.date_to FROM step_creators sc JOIN wizard_creators wc ON sc.user_id = wc.user_id AND sc.company_id = wc.company_id JOIN public.res_company rc ON sc.company_id = rc.id ORDER BY rc.name, sc.step_sequence",
+    "tables": [
+      "public.onboarding_onboarding_step",
+      "public.res_users",
+      "public.account_return_creation_wizard",
+      "public.res_company"
+    ],
+    "reward": 3.88,
+    "iterations": 1
+  },
+  {
+    "question": "List partial reconciliations linked to reversed journal entries with reversal reference, original entry sequence, move line account, and reconciliation amount.",
+    "sql": "SELECT r.reversal_id, m.sequence_number, l.account_id, p.amount, p.debit_amount_currency, p.credit_amount_currency, p.max_date FROM account_move_reversal_move r JOIN account_move m ON r.move_id = m.id JOIN account_move_line l ON l.move_id = m.id JOIN account_partial_reconcile p ON p.debit_move_id = l.id OR p.credit_move_id = l.id ORDER BY p.max_date DESC",
+    "tables": [
+      "public.account_move_reversal_move",
+      "public.account_move",
+      "public.account_move_line",
+      "public.account_partial_reconcile"
+    ],
+    "reward": 2.19,
+    "iterations": 1
+  },
+  {
+    "question": "List pos preparation display reset wizards with attendances of resource calendars created by same user",
+    "sql": "SELECT wiz.id AS wizard_id, wiz.create_date AS wizard_created, u.login AS creator_login, cal.name AS calendar_name, att.name AS attendance_name, att.dayofweek, att.hour_from, att.hour_to FROM public.pos_preparation_display_reset_wizard wiz JOIN public.res_users u ON wiz.create_uid = u.id JOIN public.resource_calendar cal ON cal.create_uid = u.id JOIN public.resource_calendar_attendance att ON att.calendar_id = cal.id ORDER BY wiz.create_date",
+    "tables": [
+      "public.pos_preparation_display_reset_wizard",
+      "public.res_users",
+      "public.resource_calendar",
+      "public.resource_calendar_attendance"
+    ],
+    "reward": 2.14,
+    "iterations": 1
+  },
+  {
+    "question": "List model access rules with group name, privilege category, and creator login for both access rule and group",
+    "sql": "WITH access_base AS (SELECT ima.id, ima.model_id, ima.group_id, ima.create_uid AS access_create_uid, ima.write_uid AS access_write_uid, ima.name AS access_name, ima.active, ima.perm_read, ima.perm_write, ima.perm_create, ima.perm_unlink FROM public.ir_model_access ima) SELECT ab.id, ab.access_name, rg.name AS group_name, rgp.name AS privilege_name, rgp.category_id, ru1.login AS access_creator_login, ru2.login AS group_creator_login FROM access_base ab JOIN public.res_groups rg ON ab.group_id = rg.id JOIN public.res_groups_privilege rgp ON rg.privilege_id = rgp.id JOIN public.res_users ru1 ON ab.access_create_uid = ru1.id JOIN public.res_users ru2 ON rg.create_uid = ru2.id ORDER BY ab.id",
+    "tables": [
+      "public.ir_model_access",
+      "public.res_groups",
+      "public.res_groups_privilege",
+      "public.res_users"
+    ],
+    "reward": 2.68,
+    "iterations": 1
+  },
+  {
+    "question": "List channels with linked groups and digest tips per group",
+    "sql": "SELECT dc.id AS channel_id, dc.name AS channel_name, rg.id AS group_id, rg.name AS group_name, dt.id AS tip_id, dt.name AS tip_name, dt.tip_description FROM discuss_channel dc JOIN discuss_channel_res_groups_rel dcrg ON dc.id = dcrg.discuss_channel_id JOIN res_groups rg ON dcrg.res_groups_id = rg.id LEFT JOIN digest_tip dt ON rg.id = dt.group_id ORDER BY dc.name, rg.name",
+    "tables": [
+      "public.discuss_channel",
+      "public.discuss_channel_res_groups_rel",
+      "public.res_groups",
+      "public.digest_tip"
+    ],
+    "reward": 2.37,
+    "iterations": 1
+  },
+  {
+    "question": "Analytic plans created by users who also created model relations for mail-thread models",
+    "sql": "WITH user_relations AS (\n  SELECT DISTINCT imr.create_uid\n  FROM ir_model_relation imr\n  JOIN ir_model im ON imr.model = im.id\n  WHERE im.is_mail_thread = true\n)\nSELECT aap.id, aap.name, aap.create_date, ru.login AS creator_login\nFROM account_analytic_plan aap\nJOIN res_users ru ON aap.create_uid = ru.id\nWHERE aap.create_uid IN (SELECT create_uid FROM user_relations)\nORDER BY aap.create_date DESC",
+    "tables": [
+      "public.account_analytic_plan",
+      "public.res_users",
+      "public.ir_model_relation",
+      "public.ir_model"
+    ],
+    "reward": 3.43,
+    "iterations": 1
+  },
+  {
+    "question": "Partners in both mail follower edits and mail compose messages, show follower operation and compose count per partner.",
+    "sql": "SELECT rp.id AS partner_id, rp.name, mfe.operation, mfe.message, COUNT(mcm.wizard_id) AS compose_count FROM mail_followers_edit mfe JOIN mail_followers_edit_res_partner_rel mfer ON mfe.id = mfer.mail_followers_edit_id JOIN res_partner rp ON mfer.res_partner_id = rp.id JOIN mail_compose_message_res_partner_rel mcm ON rp.id = mcm.partner_id GROUP BY rp.id, rp.name, mfe.operation, mfe.message ORDER BY compose_count DESC",
+    "tables": [
+      "public.mail_followers_edit",
+      "public.mail_followers_edit_res_partner_rel",
+      "public.res_partner",
+      "public.mail_compose_message_res_partner_rel"
+    ],
+    "reward": 3.02,
+    "iterations": 1
+  },
+  {
+    "question": "Batch error wizard payment move return state aggregation posted payments closed returns",
+    "sql": "WITH wizard_payments AS (SELECT w.account_create_batch_error_wizard_id, p.id AS payment_id, p.state AS payment_state, p.move_id FROM account_create_batch_error_wizard_account_payment_rel w JOIN account_payment p ON w.account_payment_id = p.id WHERE p.state = 'posted'), payment_moves AS (SELECT wp.*, m.id AS move_id, m.closing_return_id FROM wizard_payments wp JOIN account_move m ON wp.move_id = m.id WHERE m.closing_return_id IS NOT NULL), move_returns AS (SELECT pm.*, r.state AS return_state FROM payment_moves pm JOIN account_return r ON pm.closing_return_id = r.id WHERE r.state = 'done') SELECT account_create_batch_error_wizard_id, COUNT(DISTINCT payment_id) AS payment_count, COUNT(DISTINCT move_id) AS move_count, return_state FROM move_returns GROUP BY account_create_batch_error_wizard_id, return_state ORDER BY account_create_batch_error_wizard_id",
+    "tables": [
+      "public.account_create_batch_error_wizard_account_payment_rel",
+      "public.account_payment",
+      "public.account_move",
+      "public.account_return"
+    ],
+    "reward": 5.44,
+    "iterations": 1
+  },
+  {
+    "question": "Tax unit name VAT count invoices with transactions tax return state for each tax unit where tax return date_from in 2023",
+    "sql": "WITH inv_txn AS (SELECT DISTINCT am.id AS move_id, am.company_id FROM account_invoice_transaction_rel aitr JOIN account_move am ON aitr.invoice_id = am.id), tax_returns AS (SELECT ar.id AS return_id, ar.tax_unit_id, ar.company_id, ar.state, ar.date_from FROM account_return ar WHERE ar.date_from >= '2023-01-01' AND ar.date_from < '2024-01-01') SELECT atu.name AS tax_unit_name, atu.vat, COUNT(DISTINCT inv_txn.move_id) AS invoice_count, tr.state AS tax_return_state FROM account_tax_unit atu JOIN tax_returns tr ON atu.id = tr.tax_unit_id JOIN inv_txn ON inv_txn.company_id = tr.company_id GROUP BY atu.name, atu.vat, tr.state ORDER BY atu.name",
+    "tables": [
+      "public.account_invoice_transaction_rel",
+      "public.account_move",
+      "public.account_return",
+      "public.account_tax_unit"
+    ],
+    "reward": 4.09,
+    "iterations": 1
+  }
+]

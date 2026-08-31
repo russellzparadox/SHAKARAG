@@ -72,7 +72,12 @@ class LLMClient:
             return self.base_url
         return f"{self.base_url}/chat/completions"
 
-    def chat(self, messages: list[dict[str, Any]], max_tokens: int = 8192) -> str:
+    def chat(
+        self,
+        messages: list[dict[str, Any]],
+        max_tokens: int = 8192,
+        timeout: float | None = None,
+    ) -> str:
         headers = {"Content-Type": "application/json"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
@@ -82,16 +87,17 @@ class LLMClient:
             "temperature": self.temperature,
             "max_tokens": max_tokens,
         }
+        eff_timeout = timeout if timeout else self.timeout
         try:
             response = httpx.post(
-                self.endpoint, json=payload, headers=headers, timeout=self.timeout
+                self.endpoint, json=payload, headers=headers, timeout=eff_timeout
             )
         except httpx.HTTPError as exc:
             raise LLMError(f"LLM request failed: {exc}") from exc
         if response.status_code == 400:
             payload.pop("max_tokens", None)
             response = httpx.post(
-                self.endpoint, json=payload, headers=headers, timeout=self.timeout
+                self.endpoint, json=payload, headers=headers, timeout=eff_timeout
             )
         if response.status_code != 200:
             raise LLMError(f"LLM returned HTTP {response.status_code}: {response.text[:400]}")
@@ -104,9 +110,14 @@ class LLMClient:
         except (KeyError, IndexError, TypeError) as exc:
             raise LLMError(f"Unexpected LLM response shape: {response.text[:400]}") from exc
 
-    def chat_json(self, messages: list[dict[str, Any]], max_tokens: int = 8192) -> dict[str, Any]:
+    def chat_json(
+        self,
+        messages: list[dict[str, Any]],
+        max_tokens: int = 8192,
+        timeout: float | None = None,
+    ) -> dict[str, Any]:
         messages = [*messages]
-        raw = self.chat(messages, max_tokens=max_tokens)
+        raw = self.chat(messages, max_tokens=max_tokens, timeout=timeout)
         parsed = extract_json(raw)
         if parsed is None:
             messages.append({"role": "assistant", "content": raw})
@@ -116,7 +127,7 @@ class LLMClient:
                     "content": f"That was not valid JSON. {JSON_INSTRUCTIONS}",
                 }
             )
-            raw = self.chat(messages, max_tokens=max_tokens)
+            raw = self.chat(messages, max_tokens=max_tokens, timeout=timeout)
             parsed = extract_json(raw)
         if parsed is None:
             raise LLMError("Model did not return parseable JSON.")

@@ -154,7 +154,103 @@ class RagPipeline:
                 "query expanded for schema vocabulary: %s", expanded
             )
         hits = self.store.query_text(expanded, top_k=max(k * 3, 12))
-        return rerank_hits(hits, question)[:k]
+        ranked = rerank_hits(hits, question)
+
+        # ICRL table-router (paper §4): synthetic QA pairs vote for tables; boost those.
+        try:
+            from .icrl import retrieve_tables_for_question
+
+            suggested = retrieve_tables_for_question(
+                self.store,
+                question,
+                top_k=5,
+                chroma_dir=str(self.settings.chroma_dir),
+                collection=self.settings.collection,
+            )
+            if suggested:
+                logging.getLogger("chat.ask").info(
+                    "icrl router suggests tables: %s", suggested[:5]
+                )
+                suggested_set = {t.split(".")[-1].lower() for t in suggested}
+                for h in ranked:
+                    m = h.get("metadata") or {}
+                    bare = (m.get("table") or "").split(".")[-1].lower()
+                    if bare in suggested_set:
+                        h["distance"] = max(0.0, h["distance"] - 0.06)
+                ranked.sort(key=lambda x: x.get("distance", 1.0))
+        except Exception:
+            pass
+
+        # LLM-aided schema pooling (paper §4): a fast LLM pass selects the
+        # most relevant tables from the ranked candidates; keep fallback.
+        ranked = self._llm_schema_pool(question, ranked)
+
+        return ranked[:k]
+
+    def _llm_schema_pool(self, question: str, ranked: list[dict]) -> list[dict]:
+        """Paper: top-k candidates → LLM picks the relevant schemas.
+
+        Keeps the ranking order; only prunes candidates the LLM judges irrelevant.
+        Any failure (no LLM, timeout, bad JSON) returns `ranked` unchanged.
+        """
+        if self.llm is None or not ranked:
+            return ranked
+
+        # distinct candidate tables with one-line summaries
+        cand: dict[str, dict] = {}
+        for h in ranked[:24]:
+            m = h.get("metadata") or {}
+            table = m.get("table") or ""
+            if not table:
+                continue
+            key = table.split(".")[-1].lower()
+            if key not in cand:
+                cand[key] = {
+                    "table": table,
+                    "role": m.get("role") or m.get("warehouse_role") or "",
+                    "cols": len(m.get("columns") or []),
+                    "comment": (m.get("comment") or "")[:80],
+                }
+        if len(cand) < 3:
+            return ranked  # nothing to prune
+
+        lines = [f"{i+1}. {c['table']} ({c['role'] or 'table'}, {c['cols']} cols)"
+                 + (f" — {c['comment']}" if c['comment'] else "")
+                 for i, c in enumerate(cand.values())]
+        prompt = (
+            f"User question: {question}\n\n"
+            f"Candidate tables:\n" + "\n".join(lines) + "\n\n"
+            "Select ONLY the tables actually needed to answer the question "
+            "(the joins must connect them). Respond with JSON: {'tables': [1, 2]}"
+        )
+        try:
+            from .llm import LLMError
+
+            parsed = self.llm.chat_json(
+                [
+                    {"role": "system", "content":
+                     "You are a database schema selector. Output ONLY JSON."},
+                    {"role": "user", "content": prompt},
+                ],
+                max_tokens=200,
+                timeout=15.0,
+            )
+            idxs = (parsed or {}).get("tables") or []
+            picks = [cand[list(cand.keys())[i - 1]]["table"].split(".")[-1].lower()
+                     for i in idxs if isinstance(i, int) and 1 <= i <= len(cand)]
+            picks = {p for p in picks}
+            if not picks:
+                return ranked
+            kept = [h for h in ranked
+                    if ((h.get("metadata") or {}).get("table") or "").split(".")[-1].lower() in picks]
+            # never drop below k meaningful hits — fall back on aggressive pruning
+            if len(kept) < max(2, len(ranked) // 3):
+                return ranked
+            return kept
+        except LLMError:
+            return ranked
+        except Exception:
+            return ranked
 
     def build_context(self, hits: list[dict]) -> tuple[str, list[str]]:
         budget = self.settings.context_char_budget
@@ -308,10 +404,34 @@ class RagPipeline:
         try:
             hits = self._example_store().search(question, k=k or 2)
         except Exception:
-            return ""
+            hits = []
         good = [h for h in hits if h["distance"] < 0.85]
         if not good:
-            return ""
+            # paper (q, D, S) in-context examples: fall back to the nearest
+            # synthetic example generated for this schema (ICRL KB)
+            try:
+                from .icrl import retrieve_synthetic_example
+
+                syn = retrieve_synthetic_example(
+                    question,
+                    self.store.embedder,
+                    chroma_dir=str(self.settings.chroma_dir),
+                    collection=self.settings.collection,
+                )
+            except Exception:
+                syn = None
+            if not syn or not syn.get("sql"):
+                return ""
+            import logging
+
+            logging.getLogger("chat.ask").info(
+                "using synthetic example from ICRL KB: %s", syn["question"][:80]
+            )
+            return (
+                "\n\nSIMILAR SYNTHETIC EXAMPLE generated from this schema "
+                "(style reference for joins and aggregations):\n"
+                f"---\nQ: {syn['question']}\nSQL:\n{syn['sql']}"
+            )
         import logging
 
         logging.getLogger("chat.ask").info("using %d verified example(s)", len(good))

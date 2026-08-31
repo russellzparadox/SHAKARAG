@@ -273,6 +273,22 @@ in `rag_service.py` → dialect connect. Remember cache-key invalidation comes f
 **Tune accuracy**: raise TOP_K/CONTEXT_CHAR_BUDGET → upgrade embedder (tag change forces
 re-index automatically) → thumbs-up good answers → add COMMENT ON TABLE/COLUMN in source DBs.
 
+**Synthetic training data (ICRL, paper method)**: `rag/icrl.py` implements the
+"In-Context Reinforcement Learning" paper for text-to-SQL. Random walks over the FK
+graph → LLM writes a hard NL+SQL pair for each traversal → complexity reward
+(JOIN/AGG/CONDITIONAL keyword buckets, paper A.3 weights) + an LLM coach that pushes
+for harder follow-ups. Results land in a `<collection>-router` Chroma KB: at query
+time they (a) boost retrieval for their tables and (b) serve as few-shot examples when
+no user-verified example matches. Run per profile (needs DB + LLM reachable):
+
+```bash
+.venv/bin/python scripts/run_icrl.py --db-profile <pk> [--n 30] [--max-iterations 3]
+```
+
+Results persist to `webapp/db/icrl/db<pk>.json` (re-index later without LLM cost).
+The pipeline also does LLM-aided schema pooling (`_llm_schema_pool`) after ranking —
+it prunes irrelevant candidate tables; it silently no-ops if the LLM is unavailable.
+
 ## 9. Known limitations & roadmap candidates
 - Generic dialect relies on SQLAlchemy reflection quality per backend (some lack comments/rows).
 - Clarify gate costs one extra LLM call per message (skipped when a verified example matches).
