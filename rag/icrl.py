@@ -27,6 +27,14 @@ from typing import Any, Iterable
 
 from .introspect import TableRecord
 from .llm import LLMClient, LLMError
+from .icrl_graph import (  # re-exports — paper Alg. A.1 + A.2
+    EdgeType,
+    GraphEdge,
+    SchemaGraph,
+    TraversalPath,
+    build_from_tables as build_schema_graph_typed,
+    enumerate_traversals as enumerate_traversals_typed,
+)
 
 logger = logging.getLogger("chat.icrl")
 
