@@ -139,6 +139,29 @@ Rules learned the hard way (keep them):
 - Similar future questions get the example injected as "VERIFIED QUERY EXAMPLES" (few-shot).
 - 👎 removes it. IDs are deterministic (sha256 of normalized question) → re-rating = upsert.
 
+### 3.4a ICRL synthetic data (paper §3.1 — In-Context RL)
+For warehouses where humans can't curate enough verified examples, the
+ICRL pipeline generates synthetic (question, SQL) pairs from the schema
+graph and stores them in a separate "router" collection
+(`<collection>-router`). Algorithm A.1 builds a typed schema graph
+(root→DB→Table→FK) and Alg. A.2 enumerates traversals with depth cutoff,
+power-set branching at type-3 fan-outs, and per-path visited sets (no
+cycles). The ICRLGenerator then refines each traversal's question/SQL
+through an LLM-coach loop scored by a 4-bucket complexity reward
+(retrieval / conditional / aggregation / modification) per paper §A.3.
+
+Public surface: `rag.icrl_graph.build_from_tables`, `enumerate_traversals`,
+`rag.icrl.ICRLGenerator`, `complexity_reward`, `bucket_gaps`,
+`OPERATOR_SUGGESTIONS`, `index_qa_triplets`, `retrieve_tables_for_question`,
+`retrieve_synthetic_example`, `parse_sql` (sqlglot), `run_icrl_generation`.
+
+Persisted JSON uses a v2 schema (`{"version": 2, "entries": [...]}`)
+with a v1-compatible reader; saved to `webapp/icrl/db<pk>.json` via
+`save_entries(..., append=True)` for idempotent re-runs. CLI flags
+`--incremental` (default on) and `--dry-run`. The pipeline ingest in
+Phase H, the eval harness (`scripts/eval_recall.py`) measures R@k and
+EX on a deterministic NL-templated holdout set.
+
 ### 3.5 Warehouse intelligence
 - Roles are heuristic (names, FK counts, measure/date columns, row ratios) and rendered on cards:
   `Warehouse role: FACT … Grain: one row per combination of (...)`.
@@ -274,20 +297,39 @@ in `rag_service.py` → dialect connect. Remember cache-key invalidation comes f
 re-index automatically) → thumbs-up good answers → add COMMENT ON TABLE/COLUMN in source DBs.
 
 **Synthetic training data (ICRL, paper method)**: `rag/icrl.py` implements the
-"In-Context Reinforcement Learning" paper for text-to-SQL. Random walks over the FK
-graph → LLM writes a hard NL+SQL pair for each traversal → complexity reward
-(JOIN/AGG/CONDITIONAL keyword buckets, paper A.3 weights) + an LLM coach that pushes
-for harder follow-ups. Results land in a `<collection>-router` Chroma KB: at query
-time they (a) boost retrieval for their tables and (b) serve as few-shot examples when
-no user-verified example matches. Run per profile (needs DB + LLM reachable):
+"In-Context Reinforcement Learning" paper for text-to-SQL with the
+paper's Algorithm A.1 (typed schema graph) and A.2 (cutoff + power-set
+traversal enumeration) in `rag/icrl_graph.py`. Per-iteration:
+- sqlglot parse gate rejects malformed SQL before scoring
+- bucket-aware coach (`bucket_gaps` + `OPERATOR_SUGGESTIONS`) suggests
+  specific operator upgrades from paper §A.3
+- plateau termination (Δ-reward < ε) stops wasted LLM calls
 
-```bash
-.venv/bin/python scripts/run_icrl.py --db-profile <pk> [--n 30] [--max-iterations 3]
-```
+The router KB (`<collection>-router`) holds (question → tables) pairs
+indexed with deterministic sha1 IDs. At ask time the router call
+*seeds* the embedder search query and the pipeline merges ICRL
+synthetic examples with the verified ones (separately labelled blocks).
+`scripts/run_icrl.py --db-profile <pk> [--llm-profile <pk>] [--n 30] [--max-iterations 3] [--incremental|--no-incremental] [--dry-run] [--drop] [--timeout 180]`
+— new flags: `--incremental` (default on, skips traversals whose
+table-signature is already in `db<pk>.json`), `--dry-run` (counts
+traversals and exits without LLM calls), `--no-incremental` to force
+a full re-run, `--drop` to wipe the router collection first.
+Results persist to `webapp/icrl/db<pk>.json` (v2 schema, append-merge).
 
-Results persist to `webapp/db/icrl/db<pk>.json` (re-index later without LLM cost).
-The pipeline also does LLM-aided schema pooling (`_llm_schema_pool`) after ranking —
-it prunes irrelevant candidate tables; it silently no-ops if the LLM is unavailable.
+`scripts/eval_recall.py --db-profile <pk> [--holdout-n 20] [--seed 42] [--k-values 1,2,5,10] [--exit-threshold 0.5] [--eval-dir webapp/icrl/eval]`
+— measures R@k and execution accuracy on a deterministic NL-templated
+holdout. Writes `webapp/icrl/eval/db<pk>.json`. Exits 0 if R@1 ≥
+threshold, else 1.
+
+The webapp exposes 3 new endpoints per profile:
+- `POST /db/<pk>/icrl/rebuild/` — kicks the background ICRL worker
+  (editor-only, mirrors `/reindex/`)
+- `GET /db/<pk>/icrl/status/` — JSON of `icrl_count / avg_reward /
+  coverage_pct / last_run`
+- `GET /db/<pk>/icrl/sample/?k=5` — random sample of router entries
+
+`DatabaseProfile` gained `icrl_count / icrl_avg_reward / icrl_last_run /
+icrl_coverage_pct` (migration `0007_databaseprofile_icrl_avg_reward_and_more`).
 
 ## 9. Known limitations & roadmap candidates
 - Generic dialect relies on SQLAlchemy reflection quality per backend (some lack comments/rows).
@@ -295,3 +337,11 @@ it prunes irrelevant candidate tables; it silently no-ops if the LLM is unavaila
 - No streaming responses; answers arrive as one payload.
 - Single SQLite tenant DB — swap `DATABASES` for Postgres before real multi-user deployment.
 - MCP server / Playwright E2E identified as next integrations (skills available in repo notes).
+- **ICRL free-tier LLM rate limit:** `qwen/qwen3.8-27b-free` (and similar
+  free-tier models) hit HTTP 429 from the upstream provider after
+  small bursts; large ICRL runs need either a paid tier or local Ollama.
+  See `.chroma_Shaka/admin1-router` for the router collection; once
+  populated, the ICRL boost is query-time only and has no LLM cost.
+- ICRL exec-accuracy (EX) in `scripts/eval_recall.py` currently uses
+  count-equality only; for richer match (column-set, ordering) the
+  evaluator needs a hand-curated gold set (deferred — see plan §5).

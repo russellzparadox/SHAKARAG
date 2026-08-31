@@ -1921,3 +1921,283 @@ Traceback (most recent call last):
 TypeError: Object of type SimpleNamespace is not JSON serializable
 when serializing list item 0
 when serializing dict item 'entries'
+2026-08-31 11:52:40,838 ERROR   chat.indexing — Indexing failed for pk=1: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 11:53:16,520 ERROR   chat.indexing — Indexing failed for pk=1: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+
+2026-08-31 11:53:42,064 ERROR   chat.indexing — Indexing failed for pk=1: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 11:54:52,055 ERROR   chat.indexing — Indexing failed for pk=4: connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5432, hostaddr: '::1': connection failed: connection to server at "::1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5432, hostaddr: '::1': connection failed: connection to server at "::1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2026-08-31 11:56:24,166 ERROR   chat.indexing — Indexing failed for pk=4: connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5432, hostaddr: '::1': connection failed: connection to server at "::1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5432, hostaddr: '::1': connection failed: connection to server at "::1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2026-08-31 11:57:15,135 ERROR   chat.indexing — Indexing failed for pk=4: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 11:57:58,131 ERROR   chat.indexing — Indexing failed for pk=4: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 11:59:40,819 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 12:00:56,919 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 12:00:58,294 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 12:00:59,086 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 12:01:09,311 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+

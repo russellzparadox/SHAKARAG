@@ -2355,3 +2355,455 @@ when serializing dict item 'entries'
 2026-08-31 11:51:00,381 WARNING django.request — Not Found: /chat/1/send/
 2026-08-31 11:51:02,717 WARNING django.request — Forbidden: /db/1/icrl/rebuild/
 2026-08-31 11:51:06,521 WARNING django.request — Not Found: /db/1/edit/
+2026-08-31 11:52:36,515 WARNING django.request — Not Found: /favicon.ico
+2026-08-31 11:52:40,778 INFO    chat.indexing — Indexing started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 11:52:40,838 ERROR   chat.indexing — Indexing failed for pk=1: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 11:52:45,020 WARNING django.request — Not Found: /favicon.ico
+2026-08-31 11:53:16,480 INFO    chat.indexing — Indexing started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 11:53:16,520 ERROR   chat.indexing — Indexing failed for pk=1: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "admin"
+
+2026-08-31 11:53:20,075 WARNING django.request — Not Found: /favicon.ico
+2026-08-31 11:53:42,045 INFO    chat.indexing — Indexing started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 11:53:42,064 ERROR   chat.indexing — Indexing failed for pk=1: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 11:53:45,853 WARNING django.request — Not Found: /favicon.ico
+2026-08-31 11:54:52,052 INFO    chat.indexing — Indexing started for admin (pk=4)
+2026-08-31 11:54:52,055 ERROR   chat.indexing — Indexing failed for pk=4: connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5432, hostaddr: '::1': connection failed: connection to server at "::1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5432, hostaddr: '::1': connection failed: connection to server at "::1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2026-08-31 11:56:24,113 INFO    chat.indexing — Indexing started for admin (pk=4)
+2026-08-31 11:56:24,166 ERROR   chat.indexing — Indexing failed for pk=4: connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5432, hostaddr: '::1': connection failed: connection to server at "::1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5432, hostaddr: '::1': connection failed: connection to server at "::1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2026-08-31 11:56:28,041 WARNING django.request — Not Found: /favicon.ico
+2026-08-31 11:57:15,100 INFO    chat.indexing — Indexing started for admin (pk=4)
+2026-08-31 11:57:15,135 ERROR   chat.indexing — Indexing failed for pk=4: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 11:57:18,308 WARNING django.request — Not Found: /favicon.ico
+2026-08-31 11:57:58,111 INFO    chat.indexing — Indexing started for admin (pk=4)
+2026-08-31 11:57:58,131 ERROR   chat.indexing — Indexing failed for pk=4: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 11:58:16,194 INFO    chat.indexing — Indexing started for admin (pk=4)
+2026-08-31 11:59:08,309 WARNING django.request — Not Found: /favicon.ico
+2026-08-31 11:59:10,237 INFO    chat.indexing — Indexing finished for admin: 588 tables, 629 vectors in 54.0s
+2026-08-31 11:59:35,271 INFO    chat.ask — route=chat
+2026-08-31 11:59:38,218 INFO    chat.ask — ask ok db=admin llm=qwen3.8 clarify=False tables=['public.discuss_channel', 'discuss_channel_member', 'pos_preparation_display_reset_wizard', 'mail_message_link_preview', 'mail_alias', 'mail_link_preview', 'discuss_call_history', 'account_journal', 'mail_message_reaction'] rows=0
+2026-08-31 11:59:40,813 INFO    chat.icrl — ICRL reindex started for admin (pk=4)
+2026-08-31 11:59:40,819 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 11:59:58,988 INFO    chat.ask — route=sql
+2026-08-31 12:00:31,410 INFO    chat.ask — ask ok db=admin llm=qwen3.8 clarify=False tables=['public.ai_composer', 'res_role', 'res_groups_privilege', 'res_groups', 'ai_prompt_button', 'res_users_settings', 'ir_actions_server_history', 'res_users_settings_embedded_action', 'spreadsheet_dashboard'] rows=6
+2026-08-31 12:00:56,902 INFO    chat.icrl — ICRL reindex started for admin (pk=4)
+2026-08-31 12:00:56,919 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 12:00:58,293 INFO    chat.icrl — ICRL reindex started for admin (pk=4)
+2026-08-31 12:00:58,294 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 12:00:59,084 INFO    chat.icrl — ICRL reindex started for admin (pk=4)
+2026-08-31 12:00:59,086 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 12:01:09,306 INFO    chat.icrl — ICRL reindex started for admin (pk=4)
+2026-08-31 12:01:09,311 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 12:15:29,857 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-31 12:15:30,370 WARNING django.request — Not Found: /chat/1/send/
+2026-08-31 12:15:32,673 WARNING django.request — Forbidden: /db/1/icrl/rebuild/
+2026-08-31 12:15:36,405 WARNING django.request — Not Found: /db/1/edit/
+2026-08-31 12:16:00,367 INFO    chat.icrl — icrl: graph 582 nodes / 2904 FK edges
+2026-08-31 12:16:00,370 INFO    chat.icrl — icrl: [1/30] stock_move_line -> stock_move_line_stock_put_in_pack_rel -> stock_put_in_pack -> res_users
+2026-08-31 12:16:11,854 INFO    chat.icrl — icrl iter=1 reward=2.82 tables=stock_move_line -> stock_move_line_stock_put_in_pack_rel -> stock_put_in_pack -> res_users
+2026-08-31 12:16:11,854 INFO    chat.icrl — icrl: [2/30] ir_act_server_webhook_field_rel -> ir_model_fields -> properties_base_definition -> res_users
+2026-08-31 12:16:31,523 INFO    chat.icrl — icrl iter=1 reward=2.9 tables=ir_act_server_webhook_field_rel -> ir_model_fields -> properties_base_definition -> res_users
+2026-08-31 12:16:31,523 INFO    chat.icrl — icrl: [3/30] account_fiscal_position -> res_config_settings -> account_fiscal_position_res_config_settings_rel
+2026-08-31 12:16:42,481 INFO    chat.icrl — icrl iter=1 reward=2.5 tables=account_fiscal_position -> res_config_settings -> account_fiscal_position_res_config_settings_rel
+2026-08-31 12:16:42,482 INFO    chat.icrl — icrl: [4/30] stock_warehouse_orderpoint -> stock_warehouse -> stock_picking_type -> stock_picking
+2026-08-31 12:16:54,154 INFO    chat.icrl — icrl iter=1 reward=3.27 tables=stock_warehouse_orderpoint -> stock_warehouse -> stock_picking_type -> stock_picking
+2026-08-31 12:16:54,155 INFO    chat.icrl — icrl: [5/30] product_combo -> product_combo_item -> product_product -> product_template
+2026-08-31 12:17:19,275 INFO    chat.icrl — icrl iter=1 reward=3.57 tables=product_combo -> product_combo_item -> product_product -> product_template
+2026-08-31 12:17:19,275 INFO    chat.icrl — icrl: [6/30] pos_prep_state -> pos_prep_stage -> res_users -> barcode_rule
+2026-08-31 12:17:47,894 WARNING chat.icrl — icrl: traversal pos_prep_state -> pos_prep_stage -> res_users -> barcode_rule skipped (Model did not return parseable JSON.)
+2026-08-31 12:17:47,894 INFO    chat.icrl — icrl: [7/30] restaurant_floor -> pos_config_restaurant_floor_rel -> pos_config -> pos_config_pos_note_rel
+2026-08-31 12:18:13,203 INFO    chat.icrl — icrl: graph 582 nodes / 2904 FK edges
+2026-08-31 12:18:13,206 INFO    chat.icrl — icrl: [1/30] mail_template_mail_template_reset_rel -> mail_template -> pos_preset -> resource_calendar
+2026-08-31 12:18:25,191 INFO    chat.icrl — icrl iter=1 reward=2.9 tables=mail_template_mail_template_reset_rel -> mail_template -> pos_preset -> resource_calendar
+2026-08-31 12:18:25,191 INFO    chat.icrl — icrl: [2/30] account_audit_account_status -> res_users -> ir_sequence_date_range -> ir_sequence
+2026-08-31 12:18:54,066 WARNING chat.icrl — icrl: traversal account_audit_account_status -> res_users -> ir_sequence_date_range -> ir_sequence skipped (Model did not return parseable JSON.)
+2026-08-31 12:18:54,066 INFO    chat.icrl — icrl: [3/30] stock_traceability_report -> res_users -> stock_inventory_warning -> stock_inventory_warning_stock_quant_rel
+2026-08-31 12:19:00,656 INFO    chat.icrl — icrl iter=1 reward=2.7 tables=stock_traceability_report -> res_users -> stock_inventory_warning -> stock_inventory_warning_stock_quant_rel
+2026-08-31 12:19:00,656 INFO    chat.icrl — icrl: [4/30] stock_replenishment_info -> res_users -> account_incoterms -> res_company
+2026-08-31 12:19:07,696 INFO    chat.icrl — icrl iter=1 reward=2.7 tables=stock_replenishment_info -> res_users -> account_incoterms -> res_company
+2026-08-31 12:19:07,696 INFO    chat.icrl — icrl: [5/30] stock_location -> stock_warehouse_orderpoint -> stock_warehouse -> product_replenish
+2026-08-31 12:19:36,459 WARNING chat.icrl — icrl: traversal stock_location -> stock_warehouse_orderpoint -> stock_warehouse -> product_replenish skipped (Model did not return parseable JSON.)
+2026-08-31 12:19:36,459 INFO    chat.icrl — icrl: [6/30] product_combo -> pos_order_line -> pos_order -> pos_config
+2026-08-31 12:20:02,268 WARNING chat.icrl — icrl: traversal product_combo -> pos_order_line -> pos_order -> pos_config skipped (Model did not return parseable JSON.)
+2026-08-31 12:20:02,268 INFO    chat.icrl — icrl: [7/30] ir_cron_trigger -> res_users -> pos_details_wizard -> pos_detail_configs
+2026-08-31 12:20:12,513 INFO    chat.icrl — icrl iter=1 reward=3.5 tables=ir_cron_trigger -> res_users -> pos_details_wizard -> pos_detail_configs
+2026-08-31 12:20:12,513 INFO    chat.icrl — icrl: [8/30] sms_template_preview -> res_users -> ai_prompt_button -> ai_composer
+2026-08-31 12:20:19,333 INFO    chat.icrl — icrl iter=1 reward=2.7 tables=sms_template_preview -> res_users -> ai_prompt_button -> ai_composer
+2026-08-31 12:20:19,333 INFO    chat.icrl — icrl: [9/30] pos_category_pos_prep_display_rel -> pos_prep_display -> pos_config_pos_prep_display_rel -> pos_config
+2026-08-31 12:20:44,257 INFO    chat.icrl — icrl iter=1 reward=2.7 tables=pos_category_pos_prep_display_rel -> pos_prep_display -> pos_config_pos_prep_display_rel -> pos_config
+2026-08-31 12:20:44,257 INFO    chat.icrl — icrl: [10/30] stock_scrap_reason_tag -> stock_scrap_stock_scrap_reason_tag_rel -> stock_scrap -> stock_move
+2026-08-31 12:21:10,580 WARNING chat.icrl — icrl: traversal stock_scrap_reason_tag -> stock_scrap_stock_scrap_reason_tag_rel -> stock_scrap -> stock_move skipped (Model did not return parseable JSON.)
+2026-08-31 12:21:10,580 INFO    chat.icrl — icrl: [11/30] product_combo_item -> pos_order_line -> account_move -> res_users
+2026-08-31 12:21:37,183 WARNING chat.icrl — icrl: traversal product_combo_item -> pos_order_line -> account_move -> res_users skipped (Model did not return parseable JSON.)
+2026-08-31 12:21:37,184 INFO    chat.icrl — icrl: [12/30] utm_tag_rel -> utm_campaign -> link_tracker_click -> res_users
+2026-08-31 12:22:03,625 INFO    chat.icrl — icrl iter=1 reward=3.02 tables=utm_tag_rel -> utm_campaign -> link_tracker_click -> res_users
+2026-08-31 12:22:03,625 INFO    chat.icrl — icrl: [13/30] pos_make_invoice -> res_users -> pos_prep_order -> pos_order
+2026-08-31 12:22:29,020 INFO    chat.icrl — icrl iter=1 reward=3.14 tables=pos_make_invoice -> res_users -> pos_prep_order -> pos_order
+2026-08-31 12:22:29,020 INFO    chat.icrl — icrl: [14/30] account_analytic_distribution_model -> product_product -> stock_move_line -> stock_move_line_consume_rel
+2026-08-31 12:22:56,244 WARNING chat.icrl — icrl: traversal account_analytic_distribution_model -> product_product -> stock_move_line -> stock_move_line_consume_rel skipped (Model did not return parseable JSON.)
+2026-08-31 12:22:56,252 INFO    chat.icrl — icrl: [15/30] account_bank_statement_line_transient -> account_journal -> account_duplicate_transaction_wizard -> res_users
+2026-08-31 12:23:06,347 INFO    chat.icrl — icrl iter=1 reward=2.82 tables=account_bank_statement_line_transient -> account_journal -> account_duplicate_transaction_wizard -> res_users
+2026-08-31 12:23:06,348 INFO    chat.icrl — icrl: [16/30] picking_label_type_stock_picking_rel -> stock_picking -> stock_picking_sms_rel -> confirm_stock_sms
+2026-08-31 12:23:17,584 INFO    chat.icrl — icrl iter=1 reward=2.7 tables=picking_label_type_stock_picking_rel -> stock_picking -> stock_picking_sms_rel -> confirm_stock_sms
+2026-08-31 12:23:17,591 INFO    chat.icrl — icrl: [17/30] account_accrued_orders_wizard -> res_currency -> mail_tracking_value -> mail_message
+2026-08-31 12:23:32,406 WARNING chat.icrl — icrl: traversal account_accrued_orders_wizard -> res_currency -> mail_tracking_value -> mail_message skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Retry shortly, or add credits for higher, more stable limits: https://www.orcarouter.ai/console/billing | Recharging will increase your access frequency. (request id: 2026083108533217424953)
+2026-08-31 12:23:32,406 INFO    chat.icrl — icrl: [18/30] printer_category_rel -> pos_category -> pos_category_product_template_rel -> product_template
+2026-08-31 12:23:32,432 WARNING chat.icrl — icrl: traversal printer_category_rel -> pos_category -> pos_category_product_template_rel -> product_template skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,432 INFO    chat.icrl — icrl: [19/30] stock_reference_move_rel -> stock_move -> res_users -> account_report_column
+2026-08-31 12:23:32,458 WARNING chat.icrl — icrl: traversal stock_reference_move_rel -> stock_move -> res_users -> account_report_column skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,459 INFO    chat.icrl — icrl: [20/30] mail_gateway_allowed -> res_users -> product_category -> account_analytic_distribution_model
+2026-08-31 12:23:32,478 WARNING chat.icrl — icrl: traversal mail_gateway_allowed -> res_users -> product_category -> account_analytic_distribution_model skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,479 INFO    chat.icrl — icrl: [21/30] onboarding_onboarding_onboarding_onboarding_step_rel -> onboarding_onboarding -> res_users -> res_users_settings_embedded_action
+2026-08-31 12:23:32,523 WARNING chat.icrl — icrl: traversal onboarding_onboarding_onboarding_onboarding_step_rel -> onboarding_onboarding -> res_users -> res_users_settings_embedded_action skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,523 INFO    chat.icrl — icrl: [22/30] server_action_history_wizard -> ir_act_server -> ai_topic_ir_act_server_rel -> ai_topic
+2026-08-31 12:23:32,534 WARNING chat.icrl — icrl: traversal server_action_history_wizard -> ir_act_server -> ai_topic_ir_act_server_rel -> ai_topic skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,534 INFO    chat.icrl — icrl: [23/30] pos_close_session_wizard -> res_users -> mail_message_translation -> mail_message
+2026-08-31 12:23:32,544 WARNING chat.icrl — icrl: traversal pos_close_session_wizard -> res_users -> mail_message_translation -> mail_message skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,545 INFO    chat.icrl — icrl: [24/30] stock_route_warehouse -> stock_route -> stock_warehouse -> stock_warehouse_orderpoint
+2026-08-31 12:23:32,556 WARNING chat.icrl — icrl: traversal stock_route_warehouse -> stock_route -> stock_warehouse -> stock_warehouse_orderpoint skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,556 INFO    chat.icrl — icrl: [25/30] res_config -> res_users -> stock_storage_category -> stock_storage_category_capacity
+2026-08-31 12:23:32,567 WARNING chat.icrl — icrl: traversal res_config -> res_users -> stock_storage_category -> stock_storage_category_capacity skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,568 INFO    chat.icrl — icrl: [26/30] stock_putaway_rule -> res_company -> account_journal_group -> res_users
+2026-08-31 12:23:32,578 WARNING chat.icrl — icrl: traversal stock_putaway_rule -> res_company -> account_journal_group -> res_users skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,578 INFO    chat.icrl — icrl: [27/30] account_report_line -> account_report_expression -> res_users -> ir_module_category
+2026-08-31 12:23:32,589 WARNING chat.icrl — icrl: traversal account_report_line -> account_report_expression -> res_users -> ir_module_category skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,589 INFO    chat.icrl — icrl: [28/30] change_password_wizard -> change_password_user -> res_users -> account_analytic_line
+2026-08-31 12:23:32,599 WARNING chat.icrl — icrl: traversal change_password_wizard -> change_password_user -> res_users -> account_analytic_line skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,599 INFO    chat.icrl — icrl: [29/30] payment_provider_pos_payment_method_rel -> pos_payment_method -> pos_make_payment -> pos_config
+2026-08-31 12:23:32,609 WARNING chat.icrl — icrl: traversal payment_provider_pos_payment_method_rel -> pos_payment_method -> pos_make_payment -> pos_config skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:32,610 INFO    chat.icrl — icrl: [30/30] account_return_check -> res_users -> base_language_install -> res_lang_install_rel
+2026-08-31 12:23:32,620 WARNING chat.icrl — icrl: traversal account_return_check -> res_users -> base_language_install -> res_lang_install_rel skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 2s)"}})
+2026-08-31 12:23:33,097 INFO    chat.icrl — icrl: graph 582 nodes / 2904 FK edges
+2026-08-31 12:23:33,100 INFO    chat.icrl — icrl: dry-run — counted 30 traversals, no LLM calls
+2026-08-31 13:39:39,254 INFO    chat.icrl — icrl: graph 582 nodes / 2904 FK edges
+2026-08-31 13:39:39,258 INFO    chat.icrl — icrl: [1/3] message_attachment_rel -> mail_message -> sms_sms -> res_partner
+2026-08-31 13:39:40,409 WARNING chat.icrl — icrl: traversal message_attachment_rel -> mail_message -> sms_sms -> res_partner skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Retry shortly, or add credits for higher, more stable limits: https://www.orcarouter.ai/console/billing | Recharging will increase your access frequency. (request id: 2026083110094114456257)
+2026-08-31 13:39:40,410 INFO    chat.icrl — icrl: [2/3] stock_quant_relocate -> stock_package -> stock_put_in_pack -> stock_package_type
+2026-08-31 13:39:40,427 WARNING chat.icrl — icrl: traversal stock_quant_relocate -> stock_package -> stock_put_in_pack -> stock_package_type skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,427 INFO    chat.icrl — icrl: [3/3] stock_picking -> res_users -> stock_backorder_confirmation_line -> stock_backorder_confirmation
+2026-08-31 13:39:40,452 WARNING chat.icrl — icrl: traversal stock_picking -> res_users -> stock_backorder_confirmation_line -> stock_backorder_confirmation skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,835 INFO    chat.icrl — icrl: graph 582 nodes / 2904 FK edges
+2026-08-31 13:39:40,837 INFO    chat.icrl — icrl: incremental — 0 existing high-reward signatures
+2026-08-31 13:39:40,837 INFO    chat.icrl — icrl: [1/12] stock_warehouse -> stock_rule -> stock_route -> stock_package_type_stock_route_rel
+2026-08-31 13:39:40,849 WARNING chat.icrl — icrl: traversal stock_warehouse -> stock_rule -> stock_route -> stock_package_type_stock_route_rel skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,849 INFO    chat.icrl — icrl: [2/12] account_report_budget_item -> res_users -> portal_wizard_user -> res_partner
+2026-08-31 13:39:40,863 WARNING chat.icrl — icrl: traversal account_report_budget_item -> res_users -> portal_wizard_user -> res_partner skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,863 INFO    chat.icrl — icrl: [3/12] product_taxes_rel -> product_template -> product_tag_product_template_rel -> product_tag
+2026-08-31 13:39:40,875 WARNING chat.icrl — icrl: traversal product_taxes_rel -> product_template -> product_tag_product_template_rel -> product_tag skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,876 INFO    chat.icrl — icrl: [4/12] res_partner_bank -> account_return_type -> res_users -> barcode_rule
+2026-08-31 13:39:40,888 WARNING chat.icrl — icrl: traversal res_partner_bank -> account_return_type -> res_users -> barcode_rule skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,888 INFO    chat.icrl — icrl: [5/12] base_module_upgrade -> res_users -> mail_mail -> mail_message
+2026-08-31 13:39:40,900 WARNING chat.icrl — icrl: traversal base_module_upgrade -> res_users -> mail_mail -> mail_message skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,900 INFO    chat.icrl — icrl: [6/12] base_import_mapping -> res_users -> pos_close_session_wizard -> account_account
+2026-08-31 13:39:40,913 WARNING chat.icrl — icrl: traversal base_import_mapping -> res_users -> pos_close_session_wizard -> account_account skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,914 INFO    chat.icrl — icrl: [7/12] account_analytic_plan -> account_analytic_applicability -> res_company -> snailmail_letter
+2026-08-31 13:39:40,925 WARNING chat.icrl — icrl: traversal account_analytic_plan -> account_analytic_applicability -> res_company -> snailmail_letter skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,925 INFO    chat.icrl — icrl: [8/12] base_import_mapping -> res_users -> product_template_attribute_line -> product_template_attribute_value
+2026-08-31 13:39:40,936 WARNING chat.icrl — icrl: traversal base_import_mapping -> res_users -> product_template_attribute_line -> product_template_attribute_value skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,936 INFO    chat.icrl — icrl: [9/12] account_report_send -> res_users -> res_groups -> discuss_channel
+2026-08-31 13:39:40,946 WARNING chat.icrl — icrl: traversal account_report_send -> res_users -> res_groups -> discuss_channel skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,946 INFO    chat.icrl — icrl: [10/12] auth_totp_rate_limit_log -> res_users -> account_cash_rounding -> account_move
+2026-08-31 13:39:40,964 WARNING chat.icrl — icrl: traversal auth_totp_rate_limit_log -> res_users -> account_cash_rounding -> account_move skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,964 INFO    chat.icrl — icrl: [11/12] account_followup_manual_reminder_ir_attachment_rel -> ir_attachment -> ir_attachment_pos_config_rel -> pos_config
+2026-08-31 13:39:40,976 WARNING chat.icrl — icrl: traversal account_followup_manual_reminder_ir_attachment_rel -> ir_attachment -> ir_attachment_pos_config_rel -> pos_config skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:39:40,976 INFO    chat.icrl — icrl: [12/12] account_cash_rounding -> pos_config -> pos_config_pos_note_rel -> pos_note
+2026-08-31 13:39:40,987 WARNING chat.icrl — icrl: traversal account_cash_rounding -> pos_config -> pos_config_pos_note_rel -> pos_note skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:04,510 INFO    chat.icrl — icrl: graph 582 nodes / 2904 FK edges
+2026-08-31 13:45:04,513 INFO    chat.icrl — icrl: [1/3] pos_config_pos_preset_rel -> pos_config -> pos_config_trust_relation
+2026-08-31 13:45:05,444 WARNING chat.icrl — icrl: traversal pos_config_pos_preset_rel -> pos_config -> pos_config_trust_relation skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Retry shortly, or add credits for higher, more stable limits: https://www.orcarouter.ai/console/billing | Recharging will increase your access frequency. (request id: 2026083110150528987130)
+2026-08-31 13:45:05,445 INFO    chat.icrl — icrl: [2/3] product_tag -> product_tag_product_product_rel -> product_product -> res_config_settings
+2026-08-31 13:45:05,458 WARNING chat.icrl — icrl: traversal product_tag -> product_tag_product_product_rel -> product_product -> res_config_settings skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,458 INFO    chat.icrl — icrl: [3/3] base_module_install_request -> res_users -> ir_filters_res_users_rel -> ir_filters
+2026-08-31 13:45:05,468 WARNING chat.icrl — icrl: traversal base_module_install_request -> res_users -> ir_filters_res_users_rel -> ir_filters skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,852 INFO    chat.icrl — icrl: graph 582 nodes / 2904 FK edges
+2026-08-31 13:45:05,854 INFO    chat.icrl — icrl: incremental — 0 existing high-reward signatures
+2026-08-31 13:45:05,855 INFO    chat.icrl — icrl: [1/12] utm_tag -> res_users -> ir_module_category -> res_groups_privilege
+2026-08-31 13:45:05,869 WARNING chat.icrl — icrl: traversal utm_tag -> res_users -> ir_module_category -> res_groups_privilege skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,869 INFO    chat.icrl — icrl: [2/12] product_label_layout -> product_label_layout_product_template_rel -> product_template -> product_product
+2026-08-31 13:45:05,881 WARNING chat.icrl — icrl: traversal product_label_layout -> product_label_layout_product_template_rel -> product_template -> product_product skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,881 INFO    chat.icrl — icrl: [3/12] product_supplier_taxes_rel -> account_tax -> account_tax_alternatives
+2026-08-31 13:45:05,895 WARNING chat.icrl — icrl: traversal product_supplier_taxes_rel -> account_tax -> account_tax_alternatives skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,895 INFO    chat.icrl — icrl: [4/12] res_groups_privilege -> res_users -> mail_message_subtype -> mail_followers_mail_message_subtype_rel
+2026-08-31 13:45:05,910 WARNING chat.icrl — icrl: traversal res_groups_privilege -> res_users -> mail_message_subtype -> mail_followers_mail_message_subtype_rel skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,911 INFO    chat.icrl — icrl: [5/12] module_country -> ir_module_module -> rel_modules_langexport -> base_language_export
+2026-08-31 13:45:05,924 WARNING chat.icrl — icrl: traversal module_country -> ir_module_module -> rel_modules_langexport -> base_language_export skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,924 INFO    chat.icrl — icrl: [6/12] change_password_wizard -> res_users -> account_return_submission_wizard -> account_return
+2026-08-31 13:45:05,934 WARNING chat.icrl — icrl: traversal change_password_wizard -> res_users -> account_return_submission_wizard -> account_return skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,935 INFO    chat.icrl — icrl: [7/12] account_audit_account_status -> account_return -> account_return_payment_wizard -> res_company
+2026-08-31 13:45:05,946 WARNING chat.icrl — icrl: traversal account_audit_account_status -> account_return -> account_return_payment_wizard -> res_company skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,946 INFO    chat.icrl — icrl: [8/12] res_partner_category -> res_partner_res_partner_category_rel -> res_partner -> sms_sms
+2026-08-31 13:45:05,960 WARNING chat.icrl — icrl: traversal res_partner_category -> res_partner_res_partner_category_rel -> res_partner -> sms_sms skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,960 INFO    chat.icrl — icrl: [9/12] sms_template -> ir_act_window -> ir_ui_view -> ir_ui_view_group_rel
+2026-08-31 13:45:05,972 WARNING chat.icrl — icrl: traversal sms_template -> ir_act_window -> ir_ui_view -> ir_ui_view_group_rel skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,972 INFO    chat.icrl — icrl: [10/12] account_payment_method -> account_payment_method_line -> account_account -> account_payment_register
+2026-08-31 13:45:05,983 WARNING chat.icrl — icrl: traversal account_payment_method -> account_payment_method_line -> account_account -> account_payment_register skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,983 INFO    chat.icrl — icrl: [11/12] ir_actions -> ir_model -> mail_alias -> res_users
+2026-08-31 13:45:05,995 WARNING chat.icrl — icrl: traversal ir_actions -> ir_model -> mail_alias -> res_users skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 13:45:05,995 INFO    chat.icrl — icrl: [12/12] barcode_rule -> uom_uom -> stock_warehouse_orderpoint -> stock_move
+2026-08-31 13:45:06,010 WARNING chat.icrl — icrl: traversal barcode_rule -> uom_uom -> stock_warehouse_orderpoint -> stock_move skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
