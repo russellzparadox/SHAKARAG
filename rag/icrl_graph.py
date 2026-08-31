@@ -195,18 +195,62 @@ def enumerate_traversals(
         #   - type-3 (directional): TABLE → TABLE (+1)
         #   - reverse FK edges are NOT walked (visited set already blocks
         #     cycles; reverse edges would just generate mirror paths)
+        # At type-3 fan-outs with >1 forward children, expand via the
+        # paper's power set (Alg. A.2 lines 10–15).
         for e in graph.outgoing(node):
-            child = e.dst
-            if child in visited:
-                continue
             if e.is_reverse:
-                continue  # skip reverse FK edges
-            step_depth = table_depth
+                continue
             if e.type in (EdgeType.DB_TO_TABLE, EdgeType.TABLE_FK):
                 step_depth = table_depth + 1
-            _walk(child, path, step_depth)
+            else:
+                step_depth = table_depth
+
+            if e.type == EdgeType.TABLE_FK:
+                # collect forward FK siblings at this node
+                siblings = [
+                    o.dst
+                    for o in graph.outgoing(node)
+                    if o.type == EdgeType.TABLE_FK and not o.is_reverse and o.dst not in visited
+                ]
+                if len(siblings) > 1:
+                    # paper Alg. A.2 power-set expansion
+                    for subset in _power_set(siblings):
+                        # recurse into the first child (counts as +1 table)
+                        new_path = path + (subset[0],)
+                        if new_path[2:].count(subset[0]) <= 1:
+                            yield_branch(new_path, table_depth + 1)
+                        # and recurse into the rest as children of the first
+                        for s in subset[1:]:
+                            if s in visited:
+                                continue
+                            visited.add(s)
+                            sub_path = new_path + (s,)
+                            if (
+                                len(sub_path[2:]) >= min_tables
+                                and sub_path not in seen
+                            ):
+                                seen.add(sub_path)
+                                out.append(TraversalPath(nodes=sub_path))
+                            visited.discard(s)
+                    continue
+            _walk(e.dst, path, step_depth)
 
         visited.discard(node)
+
+    def yield_branch(p: tuple[str, ...], td: int) -> None:
+        """Emit `p` if eligible, then recurse into the last node's forward children."""
+        if td > cutoff:
+            return
+        if len(p[2:]) >= min_tables and p not in seen:
+            seen.add(p)
+            out.append(TraversalPath(nodes=p))
+        # recurse from the last node in p, mirroring _walk's body
+        last = p[-1]
+        for e in graph.outgoing(last):
+            if e.is_reverse or e.dst in visited:
+                continue
+            step = td + 1 if e.type in (EdgeType.DB_TO_TABLE, EdgeType.TABLE_FK) else td
+            _walk(e.dst, p, step)
 
     _walk("R", tuple(), 0)
     return out

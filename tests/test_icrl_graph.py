@@ -116,3 +116,31 @@ def test_algorithm_a2_traversals_cutoff_depth():
         ("R", "db1", "C", "D"),
     }
     assert paths == expected
+
+
+# ---- A8: type-3 power-set branching at fan-out ----
+
+def test_algorithm_a2_power_set_branching():
+    """Paper Alg. A.2 lines 10-15: a type-3 fan-out with >1 children expands
+    via the power set, yielding non-trivial multi-child traversals.
+
+    Hub T with 3 dim children D1, D2, D3; cutoff=2:
+      expected 2-table traversals cover each child individually,
+      and 3-table traversals cover (D1,D2), (D1,D3), (D2,D3) — the
+      non-empty, non-full power-set subsets.
+    """
+    hub = _t("Hub", schema="db1", role="fact", fks=["D1", "D2", "D3"])
+    d1 = _t("D1", schema="db1")
+    d2 = _t("D2", schema="db1")
+    d3 = _t("D3", schema="db1")
+    g = build_from_tables([hub, d1, d2, d3])
+
+    traversals = enumerate_traversals(g, cutoff=2, min_tables=2)
+    paths = {tuple(t.nodes) for t in traversals}
+
+    # 2-table: (R, db1, Hub, D*) for each child
+    two_table = {("R", "db1", "Hub", c) for c in ("D1", "D2", "D3")}
+    # 3-table: (R, db1, Hub, X, Y) for each (X,Y) pair from {D1,D2,D3}
+    three_table = {("R", "db1", "Hub", x, y) for x, y in [("D1", "D2"), ("D1", "D3"), ("D2", "D3")]}
+    assert two_table.issubset(paths), f"missing 2-table: {two_table - paths}"
+    assert three_table.issubset(paths), f"missing 3-table: {three_table - paths}"
