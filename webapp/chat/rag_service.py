@@ -204,21 +204,27 @@ def start_reindex(dbp) -> None:
     thread.start()
 
 
-def start_icrl_reindex(dbp) -> None:
+def start_icrl_reindex(dbp, llm_pk: int | None = None) -> None:
     """Kick off a background ICRL synthetic-QA generation thread for `dbp`.
 
     Mirrors `start_reindex`: sets the profile to INDEXING, drops the cached
     router collection (no — the worker will append), and spawns a daemon
     thread that runs `run_icrl_generation` from `rag.icrl`.
+
+    `llm_pk` is passed through the thread args; the worker uses it to
+    resolve the LLM profile (instead of `LLMProfile.objects.first()`)
+    so the user's choice is honoured.
     """
     _schema_store_cache.pop(dbp.pk, None)
     for key in [k for k in _pipeline_cache if k[0] == dbp.pk]:
         _pipeline_cache.pop(key, None)
-    thread = threading.Thread(target=_reindex_icrl_worker, args=(dbp.pk,), daemon=True)
+    thread = threading.Thread(
+        target=_reindex_icrl_worker, args=(dbp.pk, llm_pk), daemon=True,
+    )
     thread.start()
 
 
-def _reindex_icrl_worker(dbp_id: int) -> None:
+def _reindex_icrl_worker(dbp_id: int, llm_pk: int | None = None) -> None:
     """Background ICRL generation: run rag.icrl.run_icrl_generation and
     persist the resulting coverage stats on the DatabaseProfile.
     """
@@ -229,7 +235,7 @@ def _reindex_icrl_worker(dbp_id: int) -> None:
     from django.db import close_old_connections
     from django.utils import timezone
 
-    from chat.models import DatabaseProfile
+    from chat.models import DatabaseProfile, LLMProfile
 
     logger = logging.getLogger("chat.icrl")
     close_old_connections()
@@ -241,7 +247,20 @@ def _reindex_icrl_worker(dbp_id: int) -> None:
         dbp.save(update_fields=["index_status", "index_error"])
         logger.info("ICRL reindex started for %s (pk=%s)", dbp.name, dbp.pk)
 
-        # Build settings + LLM
+        # Resolve the LLM: prefer the one the view stashed (passed via
+        # thread arg), else the first available LLMProfile. Guard against
+        # None / empty so we produce a clear error in the UI rather than
+        # a NoneType rstrip crash deep in LLMClient.
+        llmp = (
+            LLMProfile.objects.filter(pk=llm_pk).first()
+            if llm_pk else None
+        ) or LLMProfile.objects.first()
+        if llmp is None or not llmp.base_url or not llmp.model:
+            raise RuntimeError(
+                "ICRL rebuild needs an LLM profile with a base_url and model. "
+                "Add one under /llm/ first."
+            )
+
         from rag.embeddings import get_embedder
         from rag.llm import LLMClient
         from rag.icrl import (
@@ -252,7 +271,13 @@ def _reindex_icrl_worker(dbp_id: int) -> None:
         )
         from rag.sqlguard import validate_sql
 
-        settings = build_rag_settings(dbp, None)
+        # Build the settings with the chosen LLM
+        settings = build_rag_settings(dbp, llmp)
+        if not settings.llm_base_url or not settings.llm_model:
+            raise RuntimeError(
+                f"LLM profile '{llmp.name}' is missing base_url or model."
+            )
+
         llm = LLMClient(
             base_url=settings.llm_base_url,
             model=settings.llm_model,

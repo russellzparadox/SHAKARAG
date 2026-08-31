@@ -348,18 +348,44 @@ def db_icrl_rebuild(request, pk):
     """POST /db/<pk>/icrl/rebuild/ — kick the background ICRL generation.
 
     Mirrors `db_reindex`: editor-only access; otherwise 403. On success,
-    redirects to the database list with a flash message.
+    redirects to the database list with a flash message. The LLM profile
+    is taken from the optional `?llm=<pk>` query param, or the first
+    available `LLMProfile` as a fallback (matches `scripts/run_icrl.py`).
     """
+    from . import rag_service
+    from .models import LLMProfile
+
     dbp = get_object_or_404(visible_profiles(request.user, DatabaseProfile), pk=pk)
     if not can_edit_profiles(request.user, DatabaseProfile):
         return HttpResponseForbidden("editor access required to rebuild the ICRL KB")
-    if request.method == "POST":
-        if dbp.index_status == DatabaseProfile.IndexStatus.INDEXING:
-            messages.warning(request, "ICRL generation already running.")
-        else:
-            from . import rag_service
-            rag_service.start_icrl_reindex(dbp)
-            messages.info(request, f"ICRL generation for '{dbp.name}' started.")
+    if request.method != "POST":
+        return redirect("chat:db_list")
+
+    if dbp.index_status == DatabaseProfile.IndexStatus.INDEXING:
+        messages.warning(request, "ICRL generation already running.")
+        return redirect("chat:db_list")
+
+    # Resolve the LLM profile: explicit ?llm=N > first available > none.
+    llm_pk = request.GET.get("llm")
+    llmp = None
+    if llm_pk and llm_pk.isdigit():
+        llmp = LLMProfile.objects.filter(pk=int(llm_pk)).first()
+    if llmp is None:
+        llmp = LLMProfile.objects.first()
+    if llmp is None:
+        messages.error(
+            request,
+            "ICRL rebuild needs an LLM profile — add one under /llm/ first.",
+        )
+        return redirect("chat:db_list")
+
+    # Stash the chosen LLM PK so the worker picks it up.
+    dbp._icrl_llm_pk = llmp.pk  # type: ignore[attr-defined]
+    rag_service.start_icrl_reindex(dbp, llm_pk=llmp.pk)
+    messages.info(
+        request,
+        f"ICRL generation for '{dbp.name}' started (using '{llmp.name}').",
+    )
     return redirect("chat:db_list")
 
 

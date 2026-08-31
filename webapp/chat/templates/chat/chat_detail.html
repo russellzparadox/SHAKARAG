@@ -33,7 +33,10 @@
         <noscript><button class="btn small" type="submit">{% trans "Save" %}</button></noscript>
       </form>
     </div>
-    <div class="meta-group" id="icrl-panel" data-db-pk="{{ object.database.pk }}" data-csrf="{{ csrf_token }}">
+    <div class="meta-group" id="icrl-panel"
+         data-db-pk="{{ object.database.pk }}"
+         data-llm-pk="{{ object.llm.pk }}"
+         data-csrf="{{ csrf_token }}">
       <h3>{% trans "ICRL synthetic training data" %}</h3>
       <p class="muted">
         <span id="icrl-count">{{ object.database.icrl_count }}</span> {% trans "entries" %},
@@ -114,6 +117,7 @@
   var panel = document.getElementById('icrl-panel');
   if (!panel) return;
   var dbpk = panel.getAttribute('data-db-pk');
+  var llmPk = panel.getAttribute('data-llm-pk');
   var csrf = panel.getAttribute('data-csrf');
   var btnRebuild = document.getElementById('icrl-rebuild');
   var btnSample = document.getElementById('icrl-sample');
@@ -145,7 +149,11 @@
   btnRebuild && btnRebuild.addEventListener('click', function () {
     btnRebuild.disabled = true;
     statusEl.textContent = 'Starting...';
-    fetch('/db/' + dbpk + '/icrl/rebuild/', {
+    // ?llm=<session.llm.pk> so the worker uses THIS chat's LLM, not
+    // LLMProfile.objects.first() which may be a different model.
+    var url = '/db/' + dbpk + '/icrl/rebuild/';
+    if (llmPk) url += '?llm=' + encodeURIComponent(llmPk);
+    fetch(url, {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/x-www-form-urlencoded' },

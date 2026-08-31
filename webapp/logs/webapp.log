@@ -2807,3 +2807,222 @@ AttributeError: 'NoneType' object has no attribute 'rstrip'
 2026-08-31 13:45:05,995 WARNING chat.icrl — icrl: traversal ir_actions -> ir_model -> mail_alias -> res_users skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
 2026-08-31 13:45:05,995 INFO    chat.icrl — icrl: [12/12] barcode_rule -> uom_uom -> stock_warehouse_orderpoint -> stock_move
 2026-08-31 13:45:06,010 WARNING chat.icrl — icrl: traversal barcode_rule -> uom_uom -> stock_warehouse_orderpoint -> stock_move skipped (LLM returned HTTP 429: {"error":{"message":"[openai-compatible-chat-df2bb2d7-c19a-4056-b281-4cf08644cc38/qwen/qwen3.8-27b-free] [429]: {\"error\":{\"code\":\"free_rate_limited\",\"message\":\"Free model capacity is limited right now. Ret (reset after 5m)"}})
+2026-08-31 14:24:50,153 INFO    chat.indexing — Indexing started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 14:24:50,212 ERROR   chat.indexing — Indexing failed for pk=1: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 14:24:57,605 WARNING django.request — Not Found: /favicon.ico
+2026-08-31 14:25:11,164 INFO    chat.indexing — Indexing started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 14:26:08,395 INFO    chat.indexing — Indexing finished for Odoo shaka (Postgres): 570 tables, 612 vectors in 57.2s
+2026-08-31 14:27:20,592 INFO    chat.icrl — ICRL reindex started for admin (pk=4)
+2026-08-31 14:27:20,968 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 14:27:27,105 INFO    chat.icrl — ICRL reindex started for admin (pk=4)
+2026-08-31 14:27:27,106 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 14:27:27,958 INFO    chat.icrl — ICRL reindex started for admin (pk=4)
+2026-08-31 14:27:27,962 ERROR   chat.icrl — ICRL reindex failed for pk=4: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 14:28:44,613 INFO    chat.indexing — Indexing started for admin (pk=4)
+2026-08-31 14:28:44,875 ERROR   chat.indexing — Indexing failed for pk=4: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 358, in _reindex_worker
+    stats = run_ingest(drop=True, settings=build_rag_settings(dbp, None))
+  File "/home/russellzparadox/work/rag/scripts/ingest.py", line 28, in run_ingest
+    tables_map = dialect.introspect()
+  File "/home/russellzparadox/work/rag/rag/dialects/postgres.py", line 16, in introspect
+    with connect(self.settings) as conn:
+         ~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/russellzparadox/work/rag/rag/db.py", line 15, in connect
+    return psycopg.connect(
+           ~~~~~~~~~~~~~~~^
+        host=settings.db_host,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        row_factory=dict_row,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/.venv/lib/python3.14/site-packages/psycopg/connection.py", line 130, in connect
+    raise new_ex.with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5433, hostaddr: '::1': connection failed: connection to server at "::1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+- host: 'localhost', port: 5433, hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5433 failed: FATAL:  password authentication failed for user "shaka"
+
+2026-08-31 14:29:15,372 INFO    chat.icrl — ICRL reindex started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 14:29:15,380 ERROR   chat.icrl — ICRL reindex failed for pk=1: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 14:29:17,094 INFO    chat.icrl — ICRL reindex started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 14:29:17,096 ERROR   chat.icrl — ICRL reindex failed for pk=1: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 14:29:17,713 INFO    chat.icrl — ICRL reindex started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 14:29:17,715 ERROR   chat.icrl — ICRL reindex failed for pk=1: 'NoneType' object has no attribute 'rstrip'
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 256, in _reindex_icrl_worker
+    llm = LLMClient(
+        base_url=settings.llm_base_url,
+    ...<2 lines>...
+        temperature=settings.llm_temperature,
+    )
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 63, in __init__
+    self.base_url = base_url.rstrip("/")
+                    ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rstrip'
+
+2026-08-31 14:33:20,977 WARNING django.request — Forbidden: /db/1/icrl/rebuild/
+2026-08-31 14:37:10,099 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-31 14:37:10,600 WARNING django.request — Not Found: /chat/1/send/
+2026-08-31 14:37:12,877 WARNING django.request — Forbidden: /db/1/icrl/rebuild/
+2026-08-31 14:37:17,341 WARNING django.request — Not Found: /db/1/edit/
+2026-08-31 14:53:41,503 INFO    chat.ask — route=chat
+2026-08-31 14:53:46,558 ERROR   chat.ask — ask failed db=shaka_dw llm=9router default
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 89, in run_ask
+    result = pipeline.ask(
+        question,
+    ...<3 lines>...
+        history=history,
+    )
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 969, in ask
+    return self._conversational_answer(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        question, tables, result, answer_language
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 690, in _conversational_answer
+    result.answer = self.llm.chat(
+                    ~~~~~~~~~~~~~^
+        [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 103, in chat
+    raise LLMError(f"LLM returned HTTP {response.status_code}: {response.text[:400]}")
+rag.llm.LLMError: LLM returned HTTP 403: {"error":{"message":"[nvidia/nvidia/nemotron-3-ultra-550b-a55b] [403]: <html>\r\n<head><title>403 Forbidden</title></head>\r\n<body>\r\n<center><h1>403 Forbidden</h1></center>\r\n</body>\r\n</html>\r\n (reset after 1m 45s)"}}
+2026-08-31 14:53:46,599 INFO    chat.ask — route=chat
+2026-08-31 14:53:46,630 ERROR   chat.ask — ask failed db=admin llm=9router default
+Traceback (most recent call last):
+  File "/home/russellzparadox/work/rag/webapp/chat/rag_service.py", line 89, in run_ask
+    result = pipeline.ask(
+        question,
+    ...<3 lines>...
+        history=history,
+    )
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 969, in ask
+    return self._conversational_answer(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        question, tables, result, answer_language
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/pipeline.py", line 690, in _conversational_answer
+    result.answer = self.llm.chat(
+                    ~~~~~~~~~~~~~^
+        [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/russellzparadox/work/rag/rag/llm.py", line 103, in chat
+    raise LLMError(f"LLM returned HTTP {response.status_code}: {response.text[:400]}")
+rag.llm.LLMError: LLM returned HTTP 403: {"error":{"message":"[nvidia/nvidia/nemotron-3-ultra-550b-a55b] [403]: <html>\r\n<head><title>403 Forbidden</title></head>\r\n<body>\r\n<center><h1>403 Forbidden</h1></ce (reset after 1m 45s)"}}
+2026-08-31 14:58:30,920 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-31 14:58:31,439 WARNING django.request — Not Found: /chat/1/send/
+2026-08-31 14:58:33,777 WARNING django.request — Forbidden: /db/1/icrl/rebuild/
+2026-08-31 14:58:38,338 WARNING django.request — Not Found: /db/1/edit/
+2026-08-31 15:10:30,235 INFO    chat.indexing — Indexing started for Odoo shaka (Postgres) (pk=1)
+2026-08-31 15:11:20,767 INFO    chat.indexing — Indexing started for shaka_dw (pk=3)
+2026-08-31 15:11:32,902 INFO    chat.indexing — Indexing finished for Odoo shaka (Postgres): 588 tables, 630 vectors in 62.6s
+2026-08-31 15:19:49,326 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-31 15:19:49,835 WARNING django.request — Not Found: /chat/1/send/
+2026-08-31 15:19:52,139 WARNING django.request — Forbidden: /db/1/icrl/rebuild/
+2026-08-31 15:19:56,632 WARNING django.request — Not Found: /db/1/edit/
+2026-08-31 15:22:30,973 WARNING django.request — Bad Request: /chat/1/send/
+2026-08-31 15:22:31,499 WARNING django.request — Not Found: /chat/1/send/
+2026-08-31 15:22:33,849 WARNING django.request — Forbidden: /db/1/icrl/rebuild/
+2026-08-31 15:22:38,437 WARNING django.request — Not Found: /db/1/edit/

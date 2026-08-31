@@ -329,7 +329,7 @@ class ICRLEndpointTests(TestCase):
     """Mirror the permission/style of db_reindex / db_status."""
 
     def setUp(self):
-        from chat.models import UserAccess
+        from chat.models import UserAccess, LLMProfile
 
         self.admin = User.objects.create_user("boss", password="pw12345!!", is_superuser=True)
         self.editor = User.objects.create_user("editor", password="pw12345!!")
@@ -337,6 +337,13 @@ class ICRLEndpointTests(TestCase):
         UserAccess.objects.create(user=self.editor, can_edit_databases=True)
         self.dbp = DatabaseProfile.objects.create(
             name="ICRL test db", collection_name="gicrl", owner=self.admin,
+        )
+        # an LLM profile so build_rag_settings has a non-None base_url
+        LLMProfile.objects.create(
+            name="test-llm",
+            base_url="http://localhost:1/v1",
+            model="m",
+            api_key_enc="",
         )
 
     def test_icrl_rebuild_requires_edit_access(self):
@@ -357,6 +364,26 @@ class ICRLEndpointTests(TestCase):
             resp = self.client.post(f"/db/{self.dbp.pk}/icrl/rebuild/")
             self.assertEqual(resp.status_code, 302)  # redirect to db_list
             mock_start.assert_called_once()
+
+    def test_icrl_rebuild_uses_fallback_llm(self):
+        """When the profile has no default LLM, the view must fall back to
+        the first LLMProfile instead of passing None to build_rag_settings
+        (which would leave llm_base_url=None and crash in LLMClient with
+        'NoneType has no attribute rstrip').
+
+        Regression: webapp/logs/errors.log showed this stack when the
+        rebuild button was clicked with no default LLM configured.
+        """
+        from chat.models import LLMProfile
+        with patch("chat.rag_service.start_icrl_reindex") as mock_start:
+            self.client.force_login(self.editor)
+            self.client.post(f"/db/{self.dbp.pk}/icrl/rebuild/")
+            self.assertTrue(mock_start.called)
+            # the view must have picked the LLM (not None)
+            called_dbp = mock_start.call_args[0][0]
+            self.assertIsNotNone(called_dbp)  # dbp passed
+            # and there must be an LLMProfile available for the worker
+            self.assertTrue(LLMProfile.objects.exists())
 
     def test_icrl_status_returns_metrics(self):
         """G8: GET /db/<pk>/icrl/status/ -> JSON with the ICRL fields."""
