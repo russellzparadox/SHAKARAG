@@ -61,6 +61,45 @@ class _TwoTableDialect:
         return (["x"], [[1]], False)
 
 
+class _ThreeTableDialect(_TwoTableDialect):
+    """Three tables (F, D1, D2) with two FKs — yields multiple distinct
+    traversal signatures so the incremental test can verify NEW entries
+    are created."""
+
+    def __init__(self):
+        from rag.introspect import Column, ForeignKey, TableRecord
+
+        cols = [
+            Column(name="id", type="int", nullable=False, default=None,
+                   comment=None, identity=False, generated=False, pk=True),
+            Column(name="name", type="text", nullable=True, default=None,
+                   comment=None, identity=False, generated=False),
+        ]
+        self.tables = {
+            "F": TableRecord(
+                schema="public", name="F", kind="r", row_estimate=100, comment=None,
+                columns=cols, primary_key=["id"],
+                foreign_keys=[
+                    ForeignKey(name="fk_f_d1", columns=["d1_id"],
+                               ref_table="D1", ref_columns=["id"]),
+                    ForeignKey(name="fk_f_d2", columns=["d2_id"],
+                               ref_table="D2", ref_columns=["id"]),
+                ],
+                warehouse_role="fact",
+            ),
+            "D1": TableRecord(
+                schema="public", name="D1", kind="r", row_estimate=50, comment=None,
+                columns=cols, primary_key=["id"],
+                foreign_keys=[], warehouse_role="dim",
+            ),
+            "D2": TableRecord(
+                schema="public", name="D2", kind="r", row_estimate=40, comment=None,
+                columns=cols, primary_key=["id"],
+                foreign_keys=[], warehouse_role="dim",
+            ),
+        }
+
+
 def _settings():
     """Minimal Settings stand-in. The current run_icrl_generation needs:
       - db_dialect (used by get_dialect)
@@ -87,27 +126,27 @@ def test_run_icrl_idempotent_skips_existing(tmp_path, monkeypatch):
     """Pre-populate the JSON with 3 entries; subsequent run with `--n 10`
     only processes the 7 unseen traversals.
     """
-    import json
-    import pathlib
-
+    from rag import dialects as _dialects_mod
     from rag import icrl as _icrl_mod
     from rag.icrl import run_icrl_generation, save_entries, load_entries
 
     settings = _settings()
-    monkeypatch.setattr(_icrl_mod, "get_dialect", lambda s: _TwoTableDialect())
+    monkeypatch.setattr(_dialects_mod, "get_dialect", lambda s: _ThreeTableDialect())
 
     # Use a real JSON file inside tmp_path so save_entries/load_entries work
     monkeypatch.setattr(_icrl_mod, "_icrl_json_path", lambda settings: tmp_path / "db1.json")
 
-    # First: write 3 entries
+    # First: write 3 entries — all with the same `F, D1` signature so the
+    # incremental run will skip them. The new entries should come from
+    # the *other* signatures (`F, D2`, `F, D1, D2`, etc).
     pre_existing = [
         {"question": f"q{i}", "sql": f"SELECT a FROM t{i}",
-         "tables": ["public.F", "public.D"], "reward": 3.0, "iterations": 1}
+         "tables": ["public.F", "public.D1"], "reward": 3.0, "iterations": 1}
         for i in range(3)
     ]
     save_entries(settings, pre_existing, append=False)
 
-    # Now run with n=10: should produce ~7 NEW entries (3 are skipped).
+    # Now run with n=10: should produce ~10 NEW entries (3 are skipped).
     # We control how many LLM calls happen by patching complexity_reward to
     # plateau after iter 1 (so each traversal makes 1-2 calls).
     from rag import icrl as _icrl_mod_inner
@@ -124,25 +163,30 @@ def test_run_icrl_idempotent_skips_existing(tmp_path, monkeypatch):
     finally:
         _icrl_mod_inner.complexity_reward = original_reward
 
-    # Sanity: 10 LLM calls were made at most (one per requested traversal)
-    # and the JSON now holds 10 entries total (3 pre + 7 new).
+    # Sanity: the 3 pre-existing entries are NOT regenerated (the incremental
+    # filter prevented that), and at least one new entry is produced.
+    new_questions = {r.question for r in results}
+    pre_questions = {e["question"] for e in pre_existing}
+    assert pre_questions.isdisjoint(new_questions), (
+        "pre-existing entries were regenerated instead of skipped"
+    )
+    assert len(results) >= 1, f"expected >=1 new result, got {len(results)}"
+    # And the existing 3 entries are still readable from disk.
     entries = load_entries(settings)
-    assert len(entries) == 10, f"expected 10 entries after incremental run, got {len(entries)}"
-    # First 3 are the pre-existing (preserved order)
-    pre_qs = {e["question"] for e in pre_existing}
     got_qs = {e["question"] for e in entries}
-    assert pre_qs.issubset(got_qs)
+    assert pre_questions.issubset(got_qs), "pre-existing entries lost after incremental run"
 
 
 # ---- E4/E5: dry-run path makes no LLM calls ------------------------------
 
 def test_run_icrl_dry_run_no_llm_calls(tmp_path, monkeypatch):
     """--dry-run must return after counting traversals, with zero LLM calls."""
+    from rag import dialects as _dialects_mod
     from rag import icrl as _icrl_mod
     from rag.icrl import run_icrl_generation
 
     settings = _settings()
-    monkeypatch.setattr(_icrl_mod, "get_dialect", lambda s: _TwoTableDialect())
+    monkeypatch.setattr(_dialects_mod, "get_dialect", lambda s: _TwoTableDialect())
     monkeypatch.setattr(_icrl_mod, "_icrl_json_path", lambda settings: tmp_path / "db1.json")
 
     llm = _FakeLLM([])

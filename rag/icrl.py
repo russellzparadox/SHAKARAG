@@ -822,11 +822,25 @@ def get_router_collection(settings, embedder):
     )
 
 
-def run_icrl_generation(settings, llm, n: int = 30, max_iterations: int = 3,
-                        validate_sql=None, min_reward: float = 2.0):
+def run_icrl_generation(
+    settings,
+    llm,
+    n: int = 30,
+    max_iterations: int = 3,
+    validate_sql=None,
+    min_reward: float = 2.0,
+    *,
+    incremental: bool = False,
+    dry_run: bool = False,
+):
     """Full pipeline: introspect → walk → ICRL refine → return results.
 
     `settings` must carry a resolvable db_dialect (host settings or profile-based).
+
+    `incremental=True` reads `webapp/icrl/db<pk>.json` (or an explicit
+    `_icrl_json_path` override) before generating; traversals whose
+    table-signature already exists with reward >= `min_reward` are skipped.
+    `dry_run=True` counts traversals and returns [] without any LLM calls.
     """
     from .dialects import get_dialect
 
@@ -838,20 +852,117 @@ def run_icrl_generation(settings, llm, n: int = 30, max_iterations: int = 3,
     n_edges = sum(len(v) for v in graph.values())
     logger.info("icrl: graph %d nodes / %d FK edges", len(graph), n_edges)
 
-    traversals = random_walk_traversals(tables, n_walks=n)
+    # Build candidate traversals. We over-fetch by 4x in incremental mode
+    # so the skip-if-exists filter still leaves us with ~N *new* entries.
+    fetch_n = n * 4 if incremental else n
+    traversals = random_walk_traversals(tables, n_walks=fetch_n)
+
+    if dry_run:
+        logger.info("icrl: dry-run — counted %d traversals, no LLM calls", len(traversals))
+        return []
+
+    # Build the "already done" set from the persisted JSON (incremental mode).
+    done_signatures: set[str] = set()
+    if incremental:
+        existing = load_entries(settings)
+        for e in existing:
+            if float(e.get("reward", 0.0)) >= min_reward:
+                sig = "::".join(sorted(t.lower() for t in e.get("tables", [])))
+                done_signatures.add(sig)
+        logger.info("icrl: incremental — %d existing high-reward signatures", len(done_signatures))
+
     gen = ICRLGenerator(llm, max_iterations=max_iterations)
 
     results = []
     for i, tr in enumerate(traversals, start=1):
+        sig = "::".join(sorted(t.name.lower() for t in tr.tables))
+        if incremental and sig in done_signatures:
+            logger.info("icrl: [%d] skip (signature already done): %s", i, tr.label)
+            continue
+        # stop once we have enough *new* results
+        if len(results) >= n:
+            break
         logger.info("icrl: [%d/%d] %s", i, len(traversals), tr.label)
         try:
             res = gen.run(tr, validate_sql=validate_sql, min_reward=min_reward)
         except Exception as exc:
             logger.warning("icrl: traversal %s skipped (%s)", tr.label, exc)
             continue
-        if res is not None and res.reward >= 2.0:
+        if res is not None and res.reward >= min_reward:
             results.append(res)
     return results
+
+
+# ---- persistence: v1/v2 JSON I/O (Phase E) --------------------------------
+
+JSON_SCHEMA_VERSION = 2
+
+
+def _icrl_json_path(settings) -> "pathlib.Path":
+    """Default location of the per-profile ICRL JSON store.
+
+    Tests can monkeypatch this; otherwise it points at
+    `webapp/icrl/db<profile_pk>.json` based on either `settings.db_pk` or
+    `settings.collection`.
+    """
+    import pathlib
+
+    # webapp path is the canonical location; tests override this.
+    webapp_root = pathlib.Path(__file__).resolve().parent.parent / "webapp"
+    pk = getattr(settings, "db_pk", None) or settings.collection
+    return webapp_root / "icrl" / f"db{pk}.json"
+
+
+def load_entries(settings) -> list[dict]:
+    """Read the persisted ICRL JSON, handling both v1 (bare list) and v2
+    (`{"version": 2, "entries": [...]}`).
+    """
+    import json
+    import pathlib
+
+    path = _icrl_json_path(settings)
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text())
+    except Exception:
+        return []
+    if isinstance(data, list):
+        return data  # legacy v1
+    if isinstance(data, dict) and "entries" in data:
+        return list(data.get("entries", []))
+    return []
+
+
+def save_entries(settings, entries: list[dict], *, append: bool = False) -> int:
+    """Write the ICRL JSON in v2 schema. If `append=True`, merge with
+    existing entries (deduped by question+tables signature) and rewrite.
+    Returns the total number of entries written.
+    """
+    import json
+    import pathlib
+
+    path = _icrl_json_path(settings)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    if append:
+        existing = load_entries(settings)
+        # dedupe key: (q_norm, tables_sorted) — same as the router ID
+        seen: set[str] = set()
+        merged: list[dict] = []
+        for e in list(existing) + list(entries):
+            q = (e.get("question") or "").strip().lower()
+            tables = sorted(t.strip().lower() for t in (e.get("tables") or []))
+            key = f"{q}::{'::'.join(tables)}"
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(e)
+        entries = merged
+
+    payload = {"version": JSON_SCHEMA_VERSION, "entries": entries}
+    path.write_text(json.dumps(payload, indent=2))
+    return len(entries)
 
 
 def index_results_for_profile(settings, embedder, results) -> int:

@@ -29,7 +29,9 @@ from rag.embeddings import get_embedder  # noqa: E402
 from rag.icrl import (  # noqa: E402
     get_router_collection,
     index_results_for_profile,
+    load_entries,
     run_icrl_generation,
+    save_entries,
 )
 from rag.llm import LLMClient  # noqa: E402
 from rag.sqlguard import validate_sql  # noqa: E402
@@ -50,6 +52,19 @@ def main() -> int:
     ap.add_argument(
         "--drop", action="store_true",
         help="Drop the <collection>-router KB first, then rebuild it from scratch.",
+    )
+    ap.add_argument(
+        "--incremental", dest="incremental", action="store_true", default=True,
+        help="Skip traversals whose signature is already in db<pk>.json "
+             "(default: True). Use --no-incremental to force a full re-run.",
+    )
+    ap.add_argument(
+        "--no-incremental", dest="incremental", action="store_false",
+        help="Force a full re-run; don't skip any traversals.",
+    )
+    ap.add_argument(
+        "--dry-run", action="store_true",
+        help="Count traversals and exit without any LLM calls.",
     )
     args = ap.parse_args()
 
@@ -96,17 +111,43 @@ def main() -> int:
         validate_sql=validate_sql,
         min_reward=args.min_reward,
     )
+    if args.dry_run:
+        # count-only mode: invoke run_icrl_generation with dry_run=True so
+        # the function's traversal-walk still happens (so we report a real
+        # number) but no LLM calls are made.
+        run_icrl_generation(
+            settings, llm, n=args.n, max_iterations=args.max_iterations,
+            min_reward=args.min_reward, dry_run=True,
+        )
+        existing = load_entries(settings)
+        print(
+            f"DRY-RUN: profile db={dbp.pk} collection={settings.collection} "
+            f"would process {args.n} traversals "
+            f"({len(existing)} entries already in JSON).",
+            flush=True,
+        )
+        return 0
+
+    results = run_icrl_generation(
+        settings,
+        llm,
+        n=args.n,
+        max_iterations=args.max_iterations,
+        validate_sql=validate_sql,
+        min_reward=args.min_reward,
+        incremental=args.incremental,
+    )
     print(f"GENERATED {len(results)}", flush=True)
     for r in results:
         print(f"  reward={r.reward} iters={r.iterations} Q: {r.question[:100]}", flush=True)
 
     if results:
-        import json
         import pathlib
 
         out = pathlib.Path(os.environ["DJANGO_DB_PATH"]).parent / "icrl" / f"db{dbp.pk}.json"
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(json.dumps([
+        # use the v2-schema writer; append-merge keeps the prior entries
+        # (idempotent re-runs land cleanly without losing the old data).
+        n_saved = save_entries(settings, [
             {
                 "question": r.question,
                 "sql": r.sql,
@@ -115,8 +156,8 @@ def main() -> int:
                 "iterations": r.iterations,
             }
             for r in results
-        ], indent=2))
-        print(f"SAVED {len(results)} -> {out}", flush=True)
+        ], append=True)
+        print(f"SAVED total {n_saved} -> {out}", flush=True)
         n = index_results_for_profile(settings, embedder, results)
         col = get_router_collection(settings, embedder)
         print(f"INDEXED {n} -> router count {col.count()}", flush=True)
