@@ -1,0 +1,363 @@
+{
+  "version": 2,
+  "entries": [
+    {
+      "question": "For each warehouse, what is the total number of sales transactions recorded in the sales fact table that are linked to pre-order items, and how many inventory voucher records reference that warehouse as the sender? Return the warehouse code, title, sales transaction count, and sender voucher count, sorted by warehouse code.",
+      "sql": "SELECT w.Code, w.Title, COUNT(DISTINCT s.ID) AS SalesTransactionCount, COUNT(DISTINCT v.ID) AS SenderVoucherCount FROM BI.DimWarehouse w LEFT JOIN BI.FactSales s ON w.WarehouseID = s.WarehouseID AND s.SalesPreOrderItemID IS NOT NULL LEFT JOIN BI.FactInventoryVoucher v ON w.WarehouseID = v.SenderWarehouseID GROUP BY w.WarehouseID, w.Code, w.Title ORDER BY w.Code",
+      "tables": [
+        "BI.DimWarehouse",
+        "BI.FactInventoryVoucher",
+        "BI.DimSalesPreOrderItem",
+        "BI.FactSales"
+      ],
+      "reward": 3.6,
+      "iterations": 1
+    },
+    {
+      "question": "For each subsidiary ledger, calculate the total quantity of inventory voucher items received and the total payment amount processed, joining the inventory voucher fact table with the sales order item dimension and the payment fact table with the subsidiary ledger dimension. Group the results by subsidiary ledger code and title, and order by the total payment amount descending.",
+      "sql": "SELECT\n    ssl.SubsidiaryLedgerCode,\n    ssl.SubsidiaryLedgerTitle,\n    COALESCE(SUM(fiv.Quantity), 0) AS TotalInventoryQuantity,\n    COALESCE(SUM(fp.Amount), 0) AS TotalPaymentAmount\nFROM BI.DimSubsidiaryLedger ssl\nLEFT JOIN BI.FactInventoryVoucher fiv\n    ON ssl.SubsidiaryLedgerID = fiv.SubsidiaryLedgerID\nLEFT JOIN BI.DimSalesOrderItem soi\n    ON fiv.SalesOrderItemID = soi.SalesOrderItemID\nLEFT JOIN BI.FactPayment fp\n    ON ssl.SubsidiaryLedgerID = fp.SubsidiaryLedgerID\nGROUP BY\n    ssl.SubsidiaryLedgerCode,\n    ssl.SubsidiaryLedgerTitle\nORDER BY\n    TotalPaymentAmount DESC",
+      "tables": [
+        "BI.DimSalesOrderItem",
+        "BI.FactInventoryVoucher",
+        "BI.DimSubsidiaryLedger",
+        "BI.FactPayment"
+      ],
+      "reward": 3.85,
+      "iterations": 1
+    },
+    {
+      "question": "For each customer, calculate the total quantity of pre-order items received in inventory vouchers, grouped by the pre-order state, and only include customers who have at least one sales record.",
+      "sql": "SELECT c.CustomerID, c.CodeTitle, sp.StateTitle, SUM(fiv.Quantity) AS TotalQuantity\nFROM BI.DimCustomer c\nINNER JOIN BI.FactSales fs ON c.CustomerID = fs.CustomerID\nINNER JOIN BI.FactInventoryVoucher fiv ON fs.SalesPreOrderItemID = fiv.SalesPreOrderItemID\nINNER JOIN BI.DimSalesPreOrderItem sp ON fiv.SalesPreOrderItemID = sp.SalesPreOrderItemID\nGROUP BY c.CustomerID, c.CodeTitle, sp.StateTitle\nORDER BY TotalQuantity DESC",
+      "tables": [
+        "BI.DimCustomer",
+        "BI.FactSales",
+        "BI.DimSalesPreOrderItem",
+        "BI.FactInventoryVoucher"
+      ],
+      "reward": 2.8,
+      "iterations": 1
+    },
+    {
+      "question": "For each cash flow factor, calculate the total debit and credit amounts from bank account transactions, and join with the payment fact table to count the number of payments associated with each factor. Include the cash flow factor title and code in the result, ordered by total debit amount descending.",
+      "sql": "SELECT \n    dcf.CashFlowFactorID,\n    dcf.Title AS CashFlowFactorTitle,\n    dcf.Code AS CashFlowFactorCode,\n    COALESCE(SUM(fbat.Debit), 0) AS TotalDebit,\n    COALESCE(SUM(fbat.Credit), 0) AS TotalCredit,\n    COUNT(fp.ID) AS PaymentCount\nFROM BI.DimCashFlowFactor dcf\nLEFT JOIN BI.FactBankAccountTransaction fbat \n    ON dcf.CashFlowFactorID = fbat.CashFlowFactorID\nLEFT JOIN BI.FactPayment fp \n    ON dcf.CashFlowFactorID = fp.CashFlowFactorID\nGROUP BY \n    dcf.CashFlowFactorID,\n    dcf.Title,\n    dcf.Code\nORDER BY \n    TotalDebit DESC",
+      "tables": [
+        "BI.DimCashFlowFactor",
+        "BI.FactPayment",
+        "BI.DimAccountingOperation",
+        "BI.FactBankAccountTransaction"
+      ],
+      "reward": 3.8,
+      "iterations": 1
+    },
+    {
+      "question": "For each combination of receipt/payment guarantee type and duration type, calculate the total receipt amount and total payment amount, and return the guarantee type title, duration type title, and the difference between total receipts and total payments, ordered by the difference descending.",
+      "sql": "SELECT g.Title AS GuaranteeTypeTitle, d.Title AS DurationTypeTitle, COALESCE(SUM(r.Amount), 0) AS TotalReceiptAmount, COALESCE(SUM(p.Amount), 0) AS TotalPaymentAmount, COALESCE(SUM(r.Amount), 0) - COALESCE(SUM(p.Amount), 0) AS Difference FROM BI.DimReceiptAndPaymentGuaranteeType g JOIN BI.DimReceiptAndPaymentDurationType d ON g.CompanyID = d.CompanyID LEFT JOIN BI.FactReceipt r ON g.ReceiptAndPaymentGuaranteeTypeID = r.ReceiptAndPaymentGuaranteeTypeID AND d.ReceiptAndPaymentDurationTypeID = r.ReceiptAndPaymentDurationTypeID LEFT JOIN BI.FactPayment p ON g.ReceiptAndPaymentGuaranteeTypeID = p.ReceiptAndPaymentGuaranteeTypeID AND d.ReceiptAndPaymentDurationTypeID = p.ReceiptAndPaymentDurationTypeID GROUP BY g.Title, d.Title ORDER BY Difference DESC",
+      "tables": [
+        "BI.DimReceiptAndPaymentGuaranteeType",
+        "BI.FactReceipt",
+        "BI.DimReceiptAndPaymentDurationType",
+        "BI.FactPayment"
+      ],
+      "reward": 5.49,
+      "iterations": 1
+    },
+    {
+      "question": "For each product pack, calculate the total sales quantity and the total logistic control quantity, joining the sales fact table with the product pack dimension and the logistic control fact table through the unit dimension. Return the product pack title, total sales quantity, and total logistic control quantity, ordered by total sales quantity descending.",
+      "sql": "SELECT\n    pp.Title AS ProductPackTitle,\n    SUM(s.Quantity) AS TotalSalesQuantity,\n    SUM(lc.Quantity) AS TotalLogisticControlQuantity\nFROM BI.FactSales s\nINNER JOIN BI.DimProductPack pp ON s.ProductPackID = pp.ProductPackID\nINNER JOIN BI.DimUnit u_sales ON s.UnitID = u_sales.UnitID\nINNER JOIN BI.FactLogisticControl lc ON u_sales.UnitID = lc.UnitID\nGROUP BY pp.Title\nORDER BY TotalSalesQuantity DESC",
+      "tables": [
+        "BI.DimProductPack",
+        "BI.FactSales",
+        "BI.DimUnit",
+        "BI.FactLogisticControl"
+      ],
+      "reward": 3.25,
+      "iterations": 1
+    },
+    {
+      "question": "For each payment step, calculate the total debit and credit amounts from financial vouchers, along with the count of payment transactions, grouped by the subsidiary ledger title. Only include records where the payment step is associated with a valid subsidiary ledger and the financial voucher state indicates posted transactions.",
+      "sql": "SELECT \n    ps.Title AS PaymentStepTitle,\n    sl.SubsidiaryLedgerTitle,\n    SUM(fv.Debit) AS TotalDebit,\n    SUM(fv.Credit) AS TotalCredit,\n    COUNT(fp.ID) AS PaymentTransactionCount\nFROM BI.FactPayment fp\nINNER JOIN BI.DimPaymentStep ps ON fp.PaymentStepID = ps.PaymentStepID\nINNER JOIN BI.DimSubsidiaryLedger sl ON fp.SubsidiaryLedgerID = sl.SubsidiaryLedgerID\nINNER JOIN BI.FactFinancialVoucher fv ON sl.SubsidiaryLedgerID = fv.SubsidiaryLedgerID\nWHERE fv.FinancialVoucherStateID = 1\nGROUP BY ps.Title, sl.SubsidiaryLedgerTitle\nORDER BY TotalDebit DESC",
+      "tables": [
+        "BI.DimPaymentStep",
+        "BI.FactPayment",
+        "BI.DimSubsidiaryLedger",
+        "BI.FactFinancialVoucher"
+      ],
+      "reward": 3.9,
+      "iterations": 1
+    },
+    {
+      "question": "For each payment step, show the step title, the count of payments grouped by their receipt and payment duration type, and a derived payment status column that labels each payment as 'On Schedule', 'Overdue', or 'Pending' based on the duration type title.",
+      "sql": "SELECT ps.Title AS PaymentStepTitle, drt.Title AS DurationTypeTitle, COUNT(fp.ID) AS PaymentCount, CASE WHEN drt.Title = 'Short Term' THEN 'On Schedule' WHEN drt.Title = 'Long Term' THEN 'Overdue' ELSE 'Pending' END AS PaymentStatus FROM BI.FactPayment fp JOIN BI.DimPaymentStep ps ON fp.PaymentStepID = ps.PaymentStepID JOIN BI.DimReceiptAndPaymentDurationType drt ON fp.ReceiptAndPaymentDurationTypeID = drt.ReceiptAndPaymentDurationTypeID GROUP BY ps.Title, drt.Title, CASE WHEN drt.Title = 'Short Term' THEN 'On Schedule' WHEN drt.Title = 'Long Term' THEN 'Overdue' ELSE 'Pending' END ORDER BY PaymentStepTitle, DurationTypeTitle",
+      "tables": [
+        "BI.DimReceiptAndPaymentDurationType",
+        "BI.FactPayment",
+        "BI.DimPaymentStep"
+      ],
+      "reward": 5.47,
+      "iterations": 2
+    },
+    {
+      "question": "For each currency, calculate the total number of payment items and the average unit price of parts priced in that currency. Include only payment items that are linked to a payment fact record and part prices that are currently active (ToDateID is NULL or in the future). Group the results by currency title and order by the total payment item count descending.",
+      "sql": "SELECT \n    c.Title AS CurrencyTitle,\n    COUNT(DISTINCT pi.PaymentItemID) AS TotalPaymentItems,\n    AVG(pp.UnitPrice) AS AvgPartUnitPrice\nFROM BI.DimCurrency c\nLEFT JOIN BI.FactPayment fp ON c.CurrencyID = fp.CurrencyID\nLEFT JOIN BI.DimPaymentItem pi ON fp.PaymentItemID = pi.PaymentItemID\nLEFT JOIN BI.FactPartPrice_Pre pp ON c.CurrencyID = pp.CurrencyID\n    AND (pp.ToDateID IS NULL OR pp.ToDateID > (SELECT MAX(DateID) FROM BI.DimDate))\nGROUP BY c.Title\nORDER BY TotalPaymentItems DESC",
+      "tables": [
+        "BI.DimPaymentItem",
+        "BI.FactPayment",
+        "BI.DimCurrency",
+        "BI.FactPartPrice_Pre"
+      ],
+      "reward": 4.58,
+      "iterations": 1
+    },
+    {
+      "question": "For each supplier, calculate the total miscellaneous cost incurred and the total sales contract amount, then compute the cost-to-sales ratio. Return the supplier title, total misc cost, total sales amount, and ratio, ordered by ratio descending.",
+      "sql": "SELECT\n    s.Title AS SupplierTitle,\n    COALESCE(SUM(mc.InvoiceItemMisCostPrice), 0) AS TotalMiscCost,\n    COALESCE(SUM(sc.Amount), 0) AS TotalSalesAmount,\n    CASE WHEN COALESCE(SUM(sc.Amount), 0) = 0 THEN 0\n         ELSE COALESCE(SUM(mc.InvoiceItemMisCostPrice), 0) / NULLIF(SUM(sc.Amount), 0)\n    END AS CostToSalesRatio\nFROM BI.DimSupplier s\nLEFT JOIN BI.FactMiscellaneousCost mc ON s.SupplierID = mc.SupplierID\nLEFT JOIN BI.FactSalesContract sc ON s.SupplierID = sc.CustomerID\nGROUP BY s.SupplierID, s.Title\nORDER BY CostToSalesRatio DESC",
+      "tables": [
+        "BI.DimSupplier",
+        "BI.FactMiscellaneousCost",
+        "BI.DimCurrency",
+        "BI.FactSalesContract"
+      ],
+      "reward": 6.38,
+      "iterations": 1
+    },
+    {
+      "question": "For each payment agreement state, calculate the total number of sales transactions and the total number of sales variable records, along with the count of distinct discount modes used. Include only records where the payment agreement is in an active state (StateCode = 'A') and the sales occurred in the year 2024. Group the results by payment agreement state title and order by total sales transactions descending.",
+      "sql": "SELECT \n    pa.StateTitle AS PaymentAgreementState,\n    COUNT(DISTINCT fs.ID) AS TotalSalesTransactions,\n    COUNT(DISTINCT fsv.ID) AS TotalSalesVariableRecords,\n    COUNT(DISTINCT fs.SalesItemDiscountModeID) AS DistinctDiscountModesUsed\nFROM BI.DimPaymentAgreement pa\nINNER JOIN BI.FactSales fs ON pa.PaymentAgreementID = fs.PaymentAgreementID\nINNER JOIN BI.FactSalesVariable fsv ON fs.SalesID = fsv.SalesID\nINNER JOIN BI.DimDate d ON fs.DateID = d.DateID\nWHERE pa.StateCode = 'A'\n    AND d.Year = 2024\nGROUP BY pa.StateTitle\nORDER BY TotalSalesTransactions DESC",
+      "tables": [
+        "BI.DimSalesItemDiscountMode",
+        "BI.FactSalesVariable",
+        "BI.DimPaymentAgreement",
+        "BI.FactSales"
+      ],
+      "reward": 4.62,
+      "iterations": 1
+    },
+    {
+      "question": "For each part, retrieve its code and title along with the unit price from the pre-calculation price fact table and the accumulated depreciation value from the depreciation fact table. Only include parts that have both a price record and a depreciation record. Additionally, derive a status column using a CASE WHEN expression that evaluates to 'High Value' when the unit price exceeds 1000 and the accumulated depreciation value is less than 500, 'Depreciating' when the accumulated depreciation value is 500 or more, and 'Standard' otherwise. Order the results by the part code.",
+      "sql": "SELECT dp.Code, dp.Title, fpp.UnitPrice, fd.AccumulatedDepreciationValue, CASE WHEN fpp.UnitPrice > 1000 AND fd.AccumulatedDepreciationValue < 500 THEN 'High Value' WHEN fd.AccumulatedDepreciationValue >= 500 THEN 'Depreciating' ELSE 'Standard' END AS Status FROM BI.DimPart dp INNER JOIN BI.FactPartPrice_Pre fpp ON dp.PartID = fpp.PartID INNER JOIN BI.FactDepreciation fd ON dp.PartID = fd.PartID ORDER BY dp.Code",
+      "tables": [
+        "BI.DimPricingSource",
+        "BI.FactPartPrice_Pre",
+        "BI.DimPart",
+        "BI.FactDepreciation"
+      ],
+      "reward": 3.08,
+      "iterations": 2
+    },
+    {
+      "question": "For each department, calculate the total mission duration in minutes and the count of employee repositionings, but only include departments that have at least one mission and one reposition. Show the department title alongside the metrics, ordered by total mission minutes descending.",
+      "sql": "SELECT d.Title AS DepartmentTitle, SUM(fm.MissionDurationMinutes) AS TotalMissionMinutes, COUNT(fer.ID) AS RepositionCount FROM BI.DimDepartment d JOIN BI.FactMission fm ON d.DepartmentID = fm.DepartmentID JOIN BI.FactEmployeeReposition fer ON d.DepartmentID = fer.DepartmentID GROUP BY d.DepartmentID, d.Title HAVING COUNT(fm.ID) > 0 AND COUNT(fer.ID) > 0 ORDER BY TotalMissionMinutes DESC",
+      "tables": [
+        "BI.DimDepartment",
+        "BI.FactMission",
+        "BI.DimJob",
+        "BI.FactEmployeeReposition"
+      ],
+      "reward": 3.87,
+      "iterations": 1
+    },
+    {
+      "question": "For each pricing source, what is the total unit price of parts, and how many sales variable records are associated with those parts? List the pricing source title, total unit price, and sales count, ordered by total unit price descending.",
+      "sql": "SELECT ps.Title AS PricingSourceTitle, SUM(pp.UnitPrice) AS TotalUnitPrice, COUNT(sv.ID) AS SalesCount FROM BI.DimPricingSource ps JOIN BI.FactPartPrice_Pre pp ON ps.PricingSourceID = pp.PricingSourceID JOIN BI.FactSalesVariable sv ON pp.PartID = sv.PartID GROUP BY ps.Title ORDER BY TotalUnitPrice DESC",
+      "tables": [
+        "BI.DimPricingSource",
+        "BI.FactPartPrice_Pre",
+        "BI.DimUnit",
+        "BI.FactSalesVariable"
+      ],
+      "reward": 2.55,
+      "iterations": 1
+    },
+    {
+      "question": "For each part and purchasing agent combination, calculate the total miscellaneous cost incurred in local currency, filtering only for active parts that are marked as products, and return the results sorted by total cost descending.",
+      "sql": "SELECT\n  p.PartID,\n  p.Title AS PartTitle,\n  pa.PurchasingAgentID,\n  pa.Title AS AgentTitle,\n  SUM(fc.InvoiceItemMisCostCurrencyLocalPrice) AS TotalLocalCost\nFROM BI.FactMiscellaneousCost fc\nJOIN BI.DimPart p ON fc.PartID = p.PartID\nJOIN BI.DimPurchasingAgent pa ON fc.PurchasingAgentID = pa.PurchasingAgentID\nWHERE p.IsProduct = 1\n  AND p.StateCode = 'Active'\nGROUP BY\n  p.PartID,\n  p.Title,\n  pa.PurchasingAgentID,\n  pa.Title\nORDER BY TotalLocalCost DESC",
+      "tables": [
+        "BI.DimPart",
+        "BI.FactMiscellaneousCost",
+        "BI.DimPurchasingAgent"
+      ],
+      "reward": 2.42,
+      "iterations": 1
+    },
+    {
+      "question": "For each purchasing agent, calculate the total miscellaneous cost (InvoiceItemMisCostPrice) and the count of associated logistic control steps (StepTitle) where the cost currency matches the logistic step's payment gateway currency. Group by purchasing agent title and order by total cost descending.",
+      "sql": "SELECT pa.Title, SUM(fm.InvoiceItemMisCostPrice) AS TotalMiscCost, COUNT(DISTINCT flc.StepTitle) AS LogisticStepCount FROM BI.DimPurchasingAgent pa JOIN BI.FactMiscellaneousCost fm ON pa.PurchasingAgentID = fm.PurchasingAgentID JOIN BI.FactLogisticControl flc ON fm.InvoiceItemID = flc.InvoiceItemID AND fm.CurrencyID = flc.PaymentGatewayID GROUP BY pa.Title ORDER BY TotalMiscCost DESC",
+      "tables": [
+        "BI.DimPurchasingAgent",
+        "BI.FactMiscellaneousCost",
+        "BI.DimDeliveryItem",
+        "BI.FactLogisticControl"
+      ],
+      "reward": 2.87,
+      "iterations": 1
+    },
+    {
+      "question": "For each company, what is the total miscellaneous cost incurred on invoice items, and how many employee reposition events were recorded for that company? Return the company title, total misc cost, and reposition count, sorted by total misc cost descending.",
+      "sql": "SELECT c.CompanyTitle, COALESCE(SUM(fm.InvoiceItemMisCostPrice), 0) AS TotalMiscCost, COUNT(DISTINCT er.ID) AS RepositionCount FROM BI.DimCompany c LEFT JOIN BI.FactMiscellaneousCost fm ON c.CompanyID = fm.CompanyID LEFT JOIN BI.FactEmployeeReposition er ON c.CompanyID = er.CompanyID GROUP BY c.CompanyID, c.CompanyTitle ORDER BY TotalMiscCost DESC",
+      "tables": [
+        "BI.DimMiscellaneousCostItem",
+        "BI.FactMiscellaneousCost",
+        "BI.DimCompany",
+        "BI.FactEmployeeReposition"
+      ],
+      "reward": 3.25,
+      "iterations": 1
+    },
+    {
+      "question": "For each company, what is the total number of employees grouped by their child count category, and what is the total payment amount processed for that company? Return the company title, child count title, employee count, and total payment amount, sorted by company title and child count title.",
+      "sql": "SELECT c.CompanyTitle, cc.Title AS ChildCountTitle, COUNT(DISTINCT e.EmployeeID) AS EmployeeCount, COALESCE(SUM(p.Amount), 0) AS TotalPaymentAmount FROM BI.DimCompany c LEFT JOIN BI.FactEmployeeCount e ON c.CompanyID = e.CompanyID LEFT JOIN BI.DimChildCount cc ON e.ChildCountID = cc.ChildCountID LEFT JOIN BI.FactPayment p ON c.CompanyID = p.CompanyID GROUP BY c.CompanyTitle, cc.Title ORDER BY c.CompanyTitle, cc.Title",
+      "tables": [
+        "BI.DimChildCount",
+        "BI.FactEmployeeCount",
+        "BI.DimCompany",
+        "BI.FactPayment"
+      ],
+      "reward": 3.6,
+      "iterations": 1
+    },
+    {
+      "question": "For each warehouse, calculate the total part request quantity and count of distinct tracking factors, joining the fact tables through the voucher item tracking factor dimension.",
+      "sql": "SELECT w.WarehouseID, w.Code, w.Title, SUM(f.PartRequestQuantity) AS TotalPartRequestQuantity, COUNT(DISTINCT tf.TrackingFactorID) AS DistinctTrackingFactorCount FROM BI.FactInevntoryPartRequest f JOIN BI.DimVoucherItemTrackingFactor v ON f.VoucherItemTrackingFactorID = v.VoucherItemTrackingFactorID JOIN BI.FactBridgeTrackingFactor b ON v.VoucherItemTrackingFactorID = b.VoucherItemTrackingFactorID JOIN BI.DimTrackingFactor tf ON b.TrackingFactorID = tf.TrackingFactorID JOIN BI.DimWarehouse w ON f.WarehouseID = w.WarehouseID GROUP BY w.WarehouseID, w.Code, w.Title ORDER BY TotalPartRequestQuantity DESC",
+      "tables": [
+        "BI.FactBridgeTrackingFactor",
+        "BI.DimVoucherItemTrackingFactor",
+        "BI.FactInevntoryPartRequest",
+        "BI.DimWarehouse"
+      ],
+      "reward": 3.55,
+      "iterations": 1
+    },
+    {
+      "question": "For each customer, calculate the total debit advice amount from the debit-credit statement and the total major unit quantity from the bascule paper records, then return the customer code, customer title, and both totals, sorted by the total debit advice in descending order.",
+      "sql": "SELECT c.Code, c.Title, SUM(fcs.DebitAdvice) AS TotalDebitAdvice, SUM(fbp.MajorUnitQuantity) AS TotalMajorUnitQuantity FROM BI.DimCustomer c LEFT JOIN BI.FactDebitCreditStatement fcs ON c.CustomerID = fcs.CustomerID LEFT JOIN BI.FactBasculePaper fbp ON c.CustomerID = fbp.CustomerID GROUP BY c.CustomerID, c.Code, c.Title ORDER BY TotalDebitAdvice DESC",
+      "tables": [
+        "BI.FactDebitCreditStatement",
+        "BI.DimCustomer",
+        "BI.FactBasculePaper",
+        "BI.DimBasculePaper"
+      ],
+      "reward": 2.75,
+      "iterations": 1
+    },
+    {
+      "question": "For each company, what is the total sales amount from variable sales and the total contract amount, broken down by sales type? Include only companies that have at least one variable sale record.",
+      "sql": "SELECT c.CompanyID, c.CompanyTitle, st.SalesTypeID, st.SalesTypeTitle, COALESCE(SUM(fsv.Amount), 0) AS TotalVariableSalesAmount, COALESCE(SUM(fsc.Amount), 0) AS TotalContractAmount FROM BI.DimCompany c LEFT JOIN BI.FactSalesVariable fsv ON c.CompanyID = fsv.CompanyID LEFT JOIN BI.DimSalesType st ON fsv.SalesTypeID = st.SalesTypeID LEFT JOIN BI.FactSalesContract fsc ON c.CompanyID = fsc.CompanyID AND st.SalesTypeID = fsc.SalesTypeID WHERE fsv.ID IS NOT NULL GROUP BY c.CompanyID, c.CompanyTitle, st.SalesTypeID, st.SalesTypeTitle ORDER BY c.CompanyID, st.SalesTypeID",
+      "tables": [
+        "BI.DimRecipient",
+        "BI.FactSalesVariable",
+        "BI.DimCompany",
+        "BI.FactSalesContract"
+      ],
+      "reward": 4.5,
+      "iterations": 1
+    },
+    {
+      "question": "For each work location, calculate the total number of employees and the total mission duration in days, broken down by employment type. Only include records where the employee has at least one year of experience and the mission occurred in the year 2024. Order the results by work location title and employment type title.",
+      "sql": "SELECT \n    wl.Title AS WorkLocationTitle,\n    et.Title AS EmploymentTypeTitle,\n    COUNT(DISTINCT fe.EmployeeID) AS TotalEmployees,\n    SUM(fm.MissionDurationDays) AS TotalMissionDays\nFROM BI.FactEmployeeCount fe\nINNER JOIN BI.DimWorkLocation wl ON fe.WorkLocationID = wl.WorkLocationID\nINNER JOIN BI.DimEmploymentType et ON fe.EmploymentTypeID = et.EmploymentTypeID\nINNER JOIN BI.FactMission fm ON fe.EmployeeID = fm.EmployeeID \n    AND fe.WorkLocationID = fm.WorkLocationID \n    AND fe.DateID = fm.DateID\nWHERE fe.EmployeeExperience >= 1\n    AND fm.DateID IN (SELECT DateID FROM BI.DimDate WHERE YEAR(DateValue) = 2024)\nGROUP BY wl.Title, et.Title\nORDER BY wl.Title, et.Title",
+      "tables": [
+        "BI.DimEmploymentType",
+        "BI.FactEmployeeCount",
+        "BI.DimWorkLocation",
+        "BI.FactMission"
+      ],
+      "reward": 4.8,
+      "iterations": 1
+    },
+    {
+      "question": "For each sales record, retrieve the sales number, sales step title, and the unloading order item number and type title, along with the local unit quantity delivered. Additionally, derive a delivery status column that categorizes the shipment as 'Under-delivered' when the local unit quantity is less than 100, 'Fully delivered' when it is between 100 and 500 inclusive, and 'Over-delivered' when it exceeds 500, by joining the sales dimension with the state history fact and the unloading order fact through their shared item identifier.",
+      "sql": "SELECT s.Number AS SalesNumber, s.SalesStepTitle, u.Number AS UnloadingOrderItemNumber, u.TypeTitle, f.LocalUnitQuantity, CASE WHEN f.LocalUnitQuantity < 100 THEN 'Under-delivered' WHEN f.LocalUnitQuantity BETWEEN 100 AND 500 THEN 'Fully delivered' WHEN f.LocalUnitQuantity > 500 THEN 'Over-delivered' END AS DeliveryStatus FROM BI.DimSales s JOIN BI.FactStateHistory f ON s.SalesID = f.SalesID JOIN BI.FactUnloadingOrder u ON f.UnloadingOrderItemID = u.UnloadingOrderItemID",
+      "tables": [
+        "BI.DimSales",
+        "BI.FactStateHistory",
+        "BI.DimUnloadingOrderItem",
+        "BI.FactUnloadingOrder"
+      ],
+      "reward": 3.16,
+      "iterations": 2
+    },
+    {
+      "question": "For each calendar year, what is the total number of payment transactions and the total number of sales transactions, broken down by product pack title? Only include product packs that have at least one payment or sales transaction in that year.",
+      "sql": "SELECT\n    d.CalendarYear,\n    pp.Title AS ProductPackTitle,\n    COUNT(DISTINCT fp.ID) AS TotalPayments,\n    COUNT(DISTINCT fs.ID) AS TotalSales\nFROM BI.DimDate d\nCROSS JOIN BI.DimProductPack pp\nLEFT JOIN BI.FactPayment fp ON d.DateID = fp.DateID\nLEFT JOIN BI.FactSalesVariable fs ON d.DateID = fs.DateID\n    AND fs.ProductPackID = pp.ProductPackID\nWHERE fp.ID IS NOT NULL OR fs.ID IS NOT NULL\nGROUP BY d.CalendarYear, pp.Title\nORDER BY d.CalendarYear, pp.Title",
+      "tables": [
+        "BI.FactPayment",
+        "BI.DimDate",
+        "BI.FactSalesVariable",
+        "BI.DimProductPack"
+      ],
+      "reward": 4.6,
+      "iterations": 1
+    },
+    {
+      "question": "For each bank account, calculate the total receipt amount and the total transfer amount grouped by receipt and payment cause. Include the bank name, account number, and cause title in the output. Only include records where the receipt or transfer amount is greater than zero, and order the results by bank name and cause title.",
+      "sql": "SELECT \n    dba.BankName,\n    dba.AccountNumber,\n    drpc.Title AS CauseTitle,\n    COALESCE(SUM(fr.Amount), 0) AS TotalReceiptAmount,\n    COALESCE(SUM(frt.ID), 0) AS TotalTransferCount\nFROM BI.DimBankAccount dba\nLEFT JOIN BI.FactReceipt fr ON dba.BankAccountID = fr.BankAccountID\nLEFT JOIN BI.FactReceiptAndPaymentTransfer frt ON dba.BankAccountID = frt.BankAccountID\nLEFT JOIN BI.DimReceiptAndPaymentCause drpc ON COALESCE(fr.ReceiptAndPaymentCauseID, frt.ReceiptAndPaymentCauseID) = drpc.ReceiptAndPaymentCauseID\nWHERE fr.Amount > 0 OR frt.ID IS NOT NULL\nGROUP BY dba.BankName, dba.AccountNumber, drpc.Title\nORDER BY dba.BankName, drpc.Title",
+      "tables": [
+        "BI.DimBankAccount",
+        "BI.FactReceipt",
+        "BI.DimReceiptAndPaymentCause",
+        "BI.FactReceiptAndPaymentTransfer"
+      ],
+      "reward": 4.8,
+      "iterations": 1
+    },
+    {
+      "question": "For each shipping order item, retrieve the shipping order number, item title, and type title, along with the total major unit quantity from associated bascule paper records and the count of linked sales order items. Include only those shipping order items that have at least one bascule paper record and at least one sales order item, and order the results by total major unit quantity descending.",
+      "sql": "SELECT\n    soi.ShippingOrderID,\n    soi.Number AS ShippingOrderNumber,\n    soi.Title AS ShippingOrderItemTitle,\n    soi.TypeTitle,\n    COALESCE(SUM(fp.MajorUnitQuantity), 0) AS TotalMajorUnitQuantity,\n    COUNT(DISTINCT fso.SalesOrderItemID) AS LinkedSalesOrderItemCount\nFROM BI.DimShippingOrderItem soi\nINNER JOIN BI.FactBasculePaper fp ON soi.ShippingOrderItemID = fp.ShippingOrderItemID\nINNER JOIN BI.FactShippingOrder fso ON soi.ShippingOrderItemID = fso.ShippingOrderItemID\nGROUP BY\n    soi.ShippingOrderID,\n    soi.Number,\n    soi.Title,\n    soi.TypeTitle\nHAVING COUNT(fp.ID) > 0 AND COUNT(fso.ID) > 0\nORDER BY TotalMajorUnitQuantity DESC",
+      "tables": [
+        "BI.DimShippingOrderItem",
+        "BI.FactBasculePaper",
+        "BI.DimSalesOrderItem",
+        "BI.FactShippingOrder"
+      ],
+      "reward": 4.57,
+      "iterations": 1
+    },
+    {
+      "question": "For each pricing source, calculate the average unit price of parts and the total number of logistic control steps recorded, but only include pricing sources that have at least one part price entry and one logistic step associated with the same unit. Return the pricing source title, average unit price, and total logistic steps, sorted by average unit price descending.",
+      "sql": "SELECT \n    ps.Title AS PricingSourceTitle,\n    AVG(pp.UnitPrice) AS AvgUnitPrice,\n    COUNT(DISTINCT lc.ID) AS TotalLogisticSteps\nFROM BI.DimPricingSource ps\nINNER JOIN BI.FactPartPrice_Pre pp ON ps.PricingSourceID = pp.PricingSourceID\nINNER JOIN BI.DimUnit u ON pp.UnitID = u.UnitID\nINNER JOIN BI.FactLogisticControl lc ON u.UnitID = lc.UnitID\nGROUP BY ps.Title\nHAVING COUNT(pp.ID) > 0 AND COUNT(lc.ID) > 0\nORDER BY AvgUnitPrice DESC",
+      "tables": [
+        "BI.DimPricingSource",
+        "BI.FactPartPrice_Pre",
+        "BI.DimUnit",
+        "BI.FactLogisticControl"
+      ],
+      "reward": 4.77,
+      "iterations": 1
+    },
+    {
+      "question": "For each business policy type, calculate the total price and effective price from the business policy facts that are linked to order items, and show the order state title alongside the aggregated values.",
+      "sql": "SELECT \n    dbp.EnglishBusinessPolicyType,\n    doi.StateTitle,\n    SUM(fbp.Price) AS TotalPrice,\n    SUM(fbp.EffectedPrice) AS TotalEffectedPrice\nFROM BI.FactBusinessPolicy fbp\nINNER JOIN BI.DimBusinessPolicy dbp ON fbp.BusinessPolicyID = dbp.BusinessPolicyID\nINNER JOIN BI.DimOrderItem doi ON fbp.OrderItemID = doi.OrderItemID\nGROUP BY \n    dbp.EnglishBusinessPolicyType,\n    doi.StateTitle\nORDER BY \n    TotalPrice DESC",
+      "tables": [
+        "BI.DimBusinessPolicy",
+        "BI.FactBusinessPolicy",
+        "BI.DimOrderItem",
+        "BI.FactUnloadingOrder"
+      ],
+      "reward": 2.75,
+      "iterations": 1
+    },
+    {
+      "question": "For each branch, calculate the total mission duration in days and the total number of sales transactions, along with the branch title and the currency abbreviation used for sales. Include only branches that have at least one mission and one sales transaction, and order the results by total mission duration in descending order.",
+      "sql": "SELECT b.Title AS BranchTitle, c.Abbreviation AS CurrencyAbbreviation, SUM(m.MissionDurationDays) AS TotalMissionDays, COUNT(s.ID) AS TotalSalesTransactions FROM BI.FactMission m JOIN BI.DimBranch b ON m.BranchID = b.BranchID JOIN BI.FactSales s ON b.BranchID = s.BranchID JOIN BI.DimCurrency c ON s.CurrencyID = c.CurrencyID GROUP BY b.Title, c.Abbreviation HAVING COUNT(m.ID) > 0 AND COUNT(s.ID) > 0 ORDER BY TotalMissionDays DESC",
+      "tables": [
+        "BI.FactMission",
+        "BI.DimBranch",
+        "BI.FactSales",
+        "BI.DimCurrency"
+      ],
+      "reward": 4.27,
+      "iterations": 1
+    },
+    {
+      "question": "For each branch, calculate the total debit amount from bank account transactions and the total amount from payments, along with the currency abbreviation. Only include records where the accounting operation is not null and the transaction date is in the year 2024. Group the results by branch title, currency abbreviation, and accounting operation title, and order by the total bank transaction debit in descending order.",
+      "sql": "SELECT b.Title AS BranchTitle, c.Abbreviation AS CurrencyAbbreviation, ao.Title AS AccountingOperationTitle, SUM(fbat.Amount) AS TotalBankTransactionAmount, SUM(fbat.Debit) AS TotalBankTransactionDebit, SUM(fp.Amount) AS TotalPaymentAmount FROM BI.FactBankAccountTransaction fbat JOIN BI.DimBranch b ON fbat.BranchID = b.BranchID JOIN BI.DimCurrency c ON fbat.CurrencyID = c.CurrencyID JOIN BI.DimAccountingOperation ao ON fbat.AccountingOperationID = ao.AccountingOperationID JOIN BI.DimDate d ON fbat.DateID = d.DateID LEFT JOIN BI.FactPayment fp ON fbat.BranchID = fp.BranchID AND fbat.CurrencyID = fp.CurrencyID AND fp.AccountingOperationID = fbat.AccountingOperationID AND fp.DateID = fbat.DateID WHERE fbat.AccountingOperationID IS NOT NULL AND d.Year = 2024 GROUP BY b.Title, c.Abbreviation, ao.Title ORDER BY TotalBankTransactionDebit DESC",
+      "tables": [
+        "BI.DimBranch",
+        "BI.FactBankAccountTransaction",
+        "BI.DimCurrency",
+        "BI.FactPayment"
+      ],
+      "reward": 5.46,
+      "iterations": 1
+    }
+  ]
+}

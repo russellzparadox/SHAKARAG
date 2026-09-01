@@ -1,0 +1,364 @@
+{
+  "version": 2,
+  "entries": [
+    {
+      "question": "List the top 10 products (by number of journal items) that have been used in account move lines, showing the product's default code and the total number of move lines, including only products with a default code set and at least one move line.",
+      "sql": "SELECT pp.id AS product_id, pp.default_code, COUNT(aml.id) AS move_line_count FROM public.product_product pp JOIN public.account_move_line aml ON aml.product_id = pp.id WHERE pp.default_code IS NOT NULL AND pp.default_code <> '' GROUP BY pp.id, pp.default_code HAVING COUNT(aml.id) > 0 ORDER BY move_line_count DESC, pp.default_code ASC LIMIT 10",
+      "tables": [
+        "public.account_account_tag_account_move_line_rel",
+        "public.account_move_line",
+        "public.product_product",
+        "public.product_fetch_image_wizard_product_product_rel"
+      ],
+      "reward": 3.5,
+      "iterations": 1
+    },
+    {
+      "question": "For each country, how many Odoo modules are installed, and what are the names of any account return check templates that have been associated with that country?",
+      "sql": "SELECT rc.id AS country_id, rc.name AS country_name, COUNT(DISTINCT mc.module_id) AS installed_module_count, ARRAY_AGG(DISTINCT arct.name) FILTER (WHERE arct.id IS NOT NULL) AS check_template_names FROM public.res_country rc LEFT JOIN public.module_country mc ON mc.country_id = rc.id LEFT JOIN public.account_return_check_template_res_country_rel rel ON rel.res_country_id = rc.id LEFT JOIN public.account_return_check_template arct ON arct.id = rel.account_return_check_template_id GROUP BY rc.id, rc.name ORDER BY installed_module_count DESC, rc.name",
+      "tables": [
+        "public.module_country",
+        "public.res_country",
+        "public.account_return_check_template_res_country_rel",
+        "public.account_return_check_template"
+      ],
+      "reward": 3.88,
+      "iterations": 1
+    },
+    {
+      "question": "Show me the top 10 bank statement lines (by amount, in absolute value) that have an attached file (via the journal's main attachment), were posted via a payment transaction, and come from the 'Bank' journal. For each, display the statement line amount, payment name, payment state, transaction reference, transaction state, attachment name, and attachment file size.",
+      "sql": "SELECT abs(bsl.amount) AS abs_amount, bsl.amount, ap.name AS payment_name, ap.state AS payment_state, pt.reference AS transaction_reference, pt.state AS transaction_state, att.name AS attachment_name, att.file_size AS attachment_size FROM public.account_bank_statement_line bsl JOIN public.account_move am ON am.id = bsl.move_id JOIN public.account_payment ap ON ap.move_id = am.id JOIN public.payment_transaction pt ON pt.payment_id = ap.id JOIN public.account_journal aj ON aj.id = bsl.journal_id LEFT JOIN public.ir_attachment att ON att.res_model = 'account.journal' AND att.res_id = aj.id WHERE aj.type = 'bank' AND att.id IS NOT NULL ORDER BY abs(bsl.amount) DESC LIMIT 10",
+      "tables": [
+        "public.account_bank_statement_line",
+        "public.ir_attachment",
+        "public.account_payment",
+        "public.payment_transaction"
+      ],
+      "reward": 3.67,
+      "iterations": 1
+    },
+    {
+      "question": "List all published dashboards along with their group name, the number of share links created for each dashboard, and the login of the user who created the dashboard. Order the results by the number of share links in descending order, then by dashboard name ascending.",
+      "sql": "SELECT d.id AS dashboard_id, d.name AS dashboard_name, g.name AS group_name, COUNT(s.id) AS share_count, u.login AS created_by_login FROM public.spreadsheet_dashboard d JOIN public.spreadsheet_dashboard_group g ON d.dashboard_group_id = g.id LEFT JOIN public.spreadsheet_dashboard_share s ON s.dashboard_id = d.id JOIN public.res_users u ON d.create_uid = u.id WHERE d.is_published = TRUE GROUP BY d.id, d.name, g.name, u.login ORDER BY share_count DESC, d.name ASC",
+      "tables": [
+        "public.spreadsheet_dashboard_group",
+        "public.spreadsheet_dashboard",
+        "public.spreadsheet_dashboard_share",
+        "public.res_users"
+      ],
+      "reward": 2.95,
+      "iterations": 1
+    },
+    {
+      "question": "For AI topics that are linked to more than one server action, show the AI topic ID, the count of distinct server actions linked to it, the names of those server actions concatenated together, and a comma-separated list of the selection values for the binding model fields of those actions. Only include topics whose linked actions collectively reference more than three distinct selection values.",
+      "sql": "SELECT t.ai_topic_id, COUNT(DISTINCT s.id) AS action_count, STRING_AGG(DISTINCT s.name, '; ' ORDER BY s.name) AS action_names, STRING_AGG(DISTINCT sel.value, ', ' ORDER BY sel.value) AS selection_values FROM public.ai_topic_ir_act_server_rel t JOIN public.ir_act_server s ON t.ir_act_server_id = s.id LEFT JOIN public.ir_model_fields_selection sel ON sel.field_id IN ( SELECT f.id FROM public.ir_model_fields f WHERE f.model_id = s.model_id ) GROUP BY t.ai_topic_id HAVING COUNT(DISTINCT s.id) > 1 AND COUNT(DISTINCT sel.value) > 3 ORDER BY action_count DESC, t.ai_topic_id",
+      "tables": [
+        "public.ai_topic_ir_act_server_rel",
+        "public.ir_act_server",
+        "public.ir_model_fields_selection",
+        "public.res_users"
+      ],
+      "reward": 5.56,
+      "iterations": 2
+    },
+    {
+      "question": "Can you list all server actions that have at least one history record, showing the action ID, latest revision code, latest wizard execution user, and the login of that user? Sort by the latest revision write date descending so I can see the most recently modified actions first.",
+      "sql": "SELECT iash.action_id, iash.code AS latest_revision_code, sahw.create_uid AS wizard_user_id, ru.login AS wizard_user_login, iash.write_date AS latest_revision_date FROM public.ir_actions_server_history AS iash JOIN (SELECT action_id, MAX(write_date) AS max_write_date FROM public.ir_actions_server_history GROUP BY action_id) AS latest ON latest.action_id = iash.action_id AND latest.max_write_date = iash.write_date JOIN public.server_action_history_wizard AS sahw ON sahw.revision = iash.id JOIN public.res_users AS ru ON ru.id = sahw.create_uid ORDER BY iash.write_date DESC",
+      "tables": [
+        "public.stock_replenishment_info",
+        "public.res_users",
+        "public.server_action_history_wizard",
+        "public.ir_actions_server_history"
+      ],
+      "reward": 2.82,
+      "iterations": 1
+    },
+    {
+      "question": "Which active users with a login have been assigned custom roles, and what are the names of those roles, ordered by user login then role name?",
+      "sql": "SELECT u.login, r.name AS role_name\nFROM public.res_users u\nJOIN public.res_role_res_users_rel rel ON rel.res_users_id = u.id\nJOIN public.res_role r ON r.id = rel.res_role_id\nWHERE u.active = TRUE AND u.login IS NOT NULL\nORDER BY u.login, r.name",
+      "tables": [
+        "public.res_role",
+        "public.res_role_res_users_rel",
+        "public.res_users",
+        "public.mail_message_schedule"
+      ],
+      "reward": 2.0,
+      "iterations": 1
+    },
+    {
+      "question": "For each currency, what is the total amount reconciled (sum of fully reconciled move lines) tied to payments made by partners, broken down by payment state? Please only include payment states that are not 'draft' and show the top 5 currencies by total reconciled amount.",
+      "sql": "SELECT rc.name AS currency, ap.state AS payment_state, SUM(aml.amount) AS total_reconciled, COUNT(DISTINCT aml.full_reconcile_id) AS reconcile_count FROM public.account_move_line aml JOIN public.account_full_reconcile afr ON aml.full_reconcile_id = afr.id JOIN public.account_payment ap ON aml.payment_id = ap.id JOIN public.res_currency rc ON ap.currency_id = rc.id WHERE ap.state <> 'draft' AND aml.full_reconcile_id IS NOT NULL GROUP BY rc.name, ap.state ORDER BY total_reconciled DESC LIMIT 5",
+      "tables": [
+        "public.account_full_reconcile",
+        "public.account_move_line",
+        "public.res_currency",
+        "public.account_payment"
+      ],
+      "reward": 4.05,
+      "iterations": 1
+    },
+    {
+      "question": "List all partners that have more than one active payment token, and for each such partner show their login (from the creating user of the payment token), the payment details of each token, the name of the responsible user on the UTM campaign whose name matches the token's payment details, and that campaign's title. Group the results by partner_id and only include partners with more than one active token, ordering by the partner login.",
+      "sql": "SELECT ru_create.login AS partner_login, pt.payment_details, uc_user.name AS campaign_responsible_user_name, uc.title AS campaign_title, COUNT(pt.id) AS token_count\nFROM public.payment_token pt\nJOIN public.res_users ru_create ON pt.create_uid = ru_create.id\nJOIN public.utm_campaign uc ON uc.name = pt.payment_details\nJOIN public.res_users uc_user ON uc.user_id = uc_user.id\nWHERE pt.active = TRUE\n  AND uc.active = TRUE\nGROUP BY pt.partner_id, ru_create.login, pt.payment_details, uc_user.name, uc.title\nHAVING COUNT(pt.id) > 1\nORDER BY ru_create.login",
+      "tables": [
+        "public.payment_transaction",
+        "public.payment_token",
+        "public.res_users",
+        "public.utm_campaign"
+      ],
+      "reward": 3.42,
+      "iterations": 2
+    },
+    {
+      "question": "Which onboarding workflows were created in 2024, how many steps does each one contain, who are the users responsible for them, and do they have any scheduled cron jobs associated with them?",
+      "sql": "SELECT o.id AS onboarding_id, o.name AS onboarding_name, o.sequence, o.create_date, ru_create.login AS created_by, COUNT(DISTINCT osr.onboarding_onboarding_step_id) AS step_count, COUNT(DISTINCT c.id) AS associated_cron_jobs FROM public.onboarding_onboarding o LEFT JOIN public.onboarding_onboarding_onboarding_onboarding_step_rel osr ON o.id = osr.onboarding_onboarding_id LEFT JOIN public.res_users ru_create ON o.create_uid = ru_create.id LEFT JOIN public.ir_cron c ON c.user_id = o.create_uid WHERE o.create_date >= '2024-01-01' AND o.create_date < '2025-01-01' GROUP BY o.id, o.name, o.sequence, o.create_date, ru_create.login ORDER BY step_count DESC, o.create_date DESC",
+      "tables": [
+        "public.onboarding_onboarding_onboarding_onboarding_step_rel",
+        "public.onboarding_onboarding",
+        "public.res_users",
+        "public.ir_cron"
+      ],
+      "reward": 4.12,
+      "iterations": 1
+    },
+    {
+      "question": "Can you list the working-time attendance slots for each module category, showing the module name, category, day of week, day period, and the number of hours scheduled, ordered by category and module name?",
+      "sql": "SELECT m.name AS module_name, c.name AS category_name, rca.dayofweek, rca.day_period, rca.duration_hours FROM public.resource_calendar_attendance rca JOIN public.res_users u ON rca.create_uid = u.id JOIN public.ir_module_module_exclusion ime ON ime.create_uid = u.id JOIN public.ir_module_module m ON ime.module_id = m.id LEFT JOIN public.ir_module_category c ON m.category_id = c.id ORDER BY c.name, m.name",
+      "tables": [
+        "public.resource_calendar_attendance",
+        "public.res_users",
+        "public.ir_module_module_exclusion",
+        "public.ir_module_module"
+      ],
+      "reward": 2.1,
+      "iterations": 1
+    },
+    {
+      "question": "Can you list the POS order names along with their journal codes and any associated stock reference names for all sales that used a journal? Please sort by the order name.",
+      "sql": "SELECT po.name AS order_name, aj.code AS journal_code, sr.name AS stock_reference_name FROM public.pos_order po LEFT JOIN public.account_journal aj ON po.sale_journal = aj.id LEFT JOIN public.stock_reference_pos_order_rel srel ON po.id = srel.pos_order_id LEFT JOIN public.stock_reference sr ON srel.reference_id = sr.id WHERE po.sale_journal IS NOT NULL ORDER BY po.name",
+      "tables": [
+        "public.stock_reference",
+        "public.stock_reference_pos_order_rel",
+        "public.pos_order",
+        "public.account_journal"
+      ],
+      "reward": 2.58,
+      "iterations": 1
+    },
+    {
+      "question": "Which partners (and their associated industries) have the highest volume settings configured in res_users_settings_volumes, grouped by industry, so we can identify which industry segments our power users come from?",
+      "sql": "SELECT pi.name AS industry_name, COUNT(DISTINCT rp.id) AS partner_count, AVG(vus.volume) AS avg_volume, SUM(vus.volume) AS total_volume\nFROM public.res_users_settings_volumes vus\nJOIN public.res_partner rp ON vus.partner_id = rp.id\nLEFT JOIN public.res_partner_industry pi ON rp.industry_id = pi.id\nWHERE vus.partner_id IS NOT NULL\nGROUP BY pi.name\nORDER BY total_volume DESC, partner_count DESC\nLIMIT 10",
+      "tables": [
+        "public.res_users_settings_volumes",
+        "public.res_partner",
+        "public.res_partner_industry",
+        "public.res_users"
+      ],
+      "reward": 4.23,
+      "iterations": 1
+    },
+    {
+      "question": "Which users (identified by login) belong to companies that have at least 3 users, and have themselves created at least one stock traceability report? Please return the login, company ID, and the count of traceability reports created.",
+      "sql": "SELECT u.login, cu.cid AS company_id, COUNT(tr.id) AS report_count\nFROM public.res_users u\nJOIN public.res_company_users_rel cu ON cu.user_id = u.id\nJOIN public.stock_traceability_report tr ON tr.create_uid = u.id\nWHERE cu.cid IN (\n    SELECT cid\n    FROM public.res_company_users_rel\n    GROUP BY cid\n    HAVING COUNT(user_id) >= 3\n)\nGROUP BY u.login, cu.cid\nORDER BY report_count DESC",
+      "tables": [
+        "public.res_company_users_rel",
+        "public.res_users",
+        "public.stock_traceability_report"
+      ],
+      "reward": 3.79,
+      "iterations": 1
+    },
+    {
+      "question": "Show the top 20 language export wizards that are in the 'done' state, displaying the wizard name, target language, the module name being exported, and the module's author, but only for modules whose author name contains the substring 'Odoo', ordered by the wizard's last modification date (write_date) in descending order.",
+      "sql": "SELECT ble.name AS wizard_name, ble.lang, imm.name AS module_name, imm.author AS module_author, ble.write_date\nFROM public.base_language_export ble\nJOIN public.rel_modules_langexport rml ON ble.id = rml.wiz_id\nJOIN public.ir_module_module imm ON rml.module_id = imm.id\nWHERE ble.state = 'done'\n  AND imm.author LIKE '%Odoo%'\nORDER BY ble.write_date DESC\nLIMIT 20",
+      "tables": [
+        "public.base_language_export",
+        "public.rel_modules_langexport",
+        "public.ir_module_module",
+        "public.ir_module_module_exclusion"
+      ],
+      "reward": 2.01,
+      "iterations": 2
+    },
+    {
+      "question": "List all packaging types across our companies whose name contains 'box' OR whose sequence prefix contains 'BOX', showing the company name, package type name, sequence prefix and next number, filtering only for active sequences. Show company name, package name, prefix, next number, and a 'match_type' tag indicating whether the row matched on package name ('name') or on sequence prefix ('prefix') or both ('both'). Sort by company then package name.",
+      "sql": "SELECT rc.name AS company_name, spt.name AS package_type_name, irs.prefix AS sequence_prefix, irs.number_next AS next_number, CASE WHEN spt.name ILIKE '%box%' AND irs.prefix ILIKE '%box%' THEN 'both' WHEN spt.name ILIKE '%box%' THEN 'name' WHEN irs.prefix ILIKE '%box%' THEN 'prefix' ELSE 'none' END AS match_type FROM public.stock_package_type spt JOIN public.res_company rc ON rc.id = spt.company_id JOIN public.ir_sequence irs ON irs.id = spt.sequence_id WHERE irs.active = true AND (spt.name ILIKE '%box%' OR irs.prefix ILIKE '%box%') ORDER BY rc.name, spt.name",
+      "tables": [
+        "public.ir_default",
+        "public.res_company",
+        "public.ir_sequence",
+        "public.stock_package_type"
+      ],
+      "reward": 3.8,
+      "iterations": 2
+    },
+    {
+      "question": "List the top 10 products by total number of stock moves that have at least one replenishment option configured, showing each product's default code and the name of its assigned replenishment route(s).",
+      "sql": "SELECT pp.default_code, sr.name AS route_name, COUNT(sm.id) AS total_moves FROM public.product_product pp JOIN public.stock_replenishment_option sro ON sro.product_id = pp.id JOIN public.stock_route sr ON sr.id = sro.route_id JOIN public.stock_replenishment_info sri ON sri.id = sro.replenishment_info_id JOIN public.stock_move sm ON sm.product_id = pp.id GROUP BY pp.id, pp.default_code, sr.name ORDER BY total_moves DESC LIMIT 10",
+      "tables": [
+        "public.stock_replenishment_info",
+        "public.stock_replenishment_option",
+        "public.product_product",
+        "public.stock_move"
+      ],
+      "reward": 3.0,
+      "iterations": 1
+    },
+    {
+      "question": "Which internal access groups (non-shared, non-portal) are currently used as default access on more than two discuss channels, and how many distinct UI menus can each of those groups see in the discuss application?",
+      "sql": "WITH default_groups AS (\n  SELECT dcrg.res_groups_id AS group_id, COUNT(DISTINCT dcrg.discuss_channel_id) AS channel_count\n  FROM public.discuss_channel_res_groups_rel dcrg\n  JOIN public.res_groups rg ON rg.id = dcrg.res_groups_id\n  WHERE rg.share = false\n  GROUP BY dcrg.res_groups_id\n  HAVING COUNT(DISTINCT dcrg.discuss_channel_id) > 2\n)\nSELECT rg.id AS group_id,\n       rg.name AS group_name,\n       dg.channel_count,\n       COUNT(DISTINCT ium.menu_id) AS distinct_menu_count\nFROM default_groups dg\nJOIN public.res_groups rg ON rg.id = dg.group_id\nLEFT JOIN public.ir_ui_menu_group_rel ium ON ium.gid = rg.id\nGROUP BY rg.id, rg.name, dg.channel_count\nORDER BY distinct_menu_count DESC, dg.channel_count DESC",
+      "tables": [
+        "public.discuss_channel",
+        "public.discuss_channel_res_groups_rel",
+        "public.res_groups",
+        "public.ir_ui_menu_group_rel"
+      ],
+      "reward": 5.25,
+      "iterations": 3
+    },
+    {
+      "question": "Across all companies, show each POS printer together with the categories it is assigned to, the printer type, and a unified 'active_ip_address' column that should return epson_printer_ip when printer_type = 'epson' and proxy_ip otherwise. Order the results by company name, printer name, and category name.",
+      "sql": "SELECT rc.name AS company_name, pp.name AS printer_name, pp.printer_type, CASE WHEN pp.printer_type = 'epson' THEN pp.epson_printer_ip ELSE pp.proxy_ip END AS active_ip_address, pc.name AS category_name FROM public.printer_category_rel pcr JOIN public.pos_printer pp ON pcr.printer_id = pp.id JOIN public.pos_category pc ON pcr.category_id = pc.id JOIN public.res_company rc ON pp.company_id = rc.id ORDER BY rc.name, pp.name, pc.name",
+      "tables": [
+        "public.printer_category_rel",
+        "public.pos_printer",
+        "public.res_company",
+        "public.account_fiscal_position_account"
+      ],
+      "reward": 2.68,
+      "iterations": 2
+    },
+    {
+      "question": "For each active mail activity type, count how many activities were created (as a non-automated user action) by users whose login contains the substring 'admin', and show the activity type name, its category, the responsible user's login, and the total activity count, ordered by total activity count descending and limited to the top 10.",
+      "sql": "SELECT t.name AS activity_type_name, t.category, u.login AS responsible_user_login, COUNT(m.id) AS total_activities\nFROM public.mail_activity m\nJOIN public.mail_activity_type t ON m.activity_type_id = t.id\nJOIN public.res_users u ON m.create_uid = u.id\nWHERE t.active = TRUE\n  AND m.automated = FALSE\n  AND u.login ILIKE '%admin%'\nGROUP BY t.name, t.category, u.login\nORDER BY total_activities DESC\nLIMIT 10",
+      "tables": [
+        "public.mail_activity_plan_template",
+        "public.mail_activity_type",
+        "public.mail_activity",
+        "public.res_users"
+      ],
+      "reward": 2.64,
+      "iterations": 1
+    },
+    {
+      "question": "Rank modules by how many non-abstract, non-transient 'base' state models have constraints defined in them, showing the module name, constraint type, and the count of constraints per module. Only include modules with more than zero constraints, and order by the highest constraint counts first.",
+      "sql": "SELECT imm.name AS module_name, imc.type AS constraint_type, COUNT(imc.name) AS constraint_count FROM public.ir_model_constraint imc JOIN public.ir_model im ON imc.model = im.id JOIN public.ir_module_module imm ON imc.module = imm.id WHERE im.state = 'base' AND im.abstract = false AND im.transient = false GROUP BY imm.name, imc.type HAVING COUNT(imc.name) > 0 ORDER BY COUNT(imc.name) DESC, imm.name",
+      "tables": [
+        "public.ir_model_constraint",
+        "public.ir_model",
+        "public.mail_activity_schedule",
+        "public.res_users"
+      ],
+      "reward": 3.74,
+      "iterations": 2
+    },
+    {
+      "question": "Show me the top 10 marketing campaigns by total number of link tracker clicks recorded for them, broken down by the country where the click originated. I want to see the campaign name, country name, and click count, ordered by click count descending. Only include clicks where the creating user is still an active user in the system.",
+      "sql": "SELECT \n    uc.name AS campaign_name,\n    rc.name AS country_name,\n    COUNT(ltc.id) AS click_count\nFROM public.link_tracker_click ltc\nINNER JOIN public.utm_campaign uc ON ltc.campaign_id = uc.id\nLEFT JOIN public.res_country rc ON ltc.country_id = rc.id\nINNER JOIN public.res_users ru ON ltc.create_uid = ru.id\nWHERE ru.active = TRUE\nGROUP BY uc.name, rc.name\nORDER BY click_count DESC\nLIMIT 10",
+      "tables": [
+        "public.base_module_uninstall",
+        "public.res_users",
+        "public.link_tracker_click",
+        "public.utm_campaign"
+      ],
+      "reward": 3.1,
+      "iterations": 1
+    },
+    {
+      "question": "For each active pricelist that has a product label layout configured, show the pricelist name, its sequence, the login of the user who created the label layout, the login of the user who created the pricelist, and an ownership_match flag that returns 'same creator' when the layout and pricelist were created by the same user and 'different creators' otherwise \u2014 I need this to audit who actually owns the pricing and labelling configuration.",
+      "sql": "SELECT pl.name AS pricelist_name, pl.sequence, u_layout.login AS layout_created_by_login, u_pl.login AS pricelist_created_by_login, CASE WHEN pll.create_uid = pl.create_uid THEN 'same creator' ELSE 'different creators' END AS ownership_match FROM public.product_label_layout pll JOIN public.product_pricelist pl ON pll.pricelist_id = pl.id JOIN public.res_users u_layout ON pll.create_uid = u_layout.id JOIN public.res_users u_pl ON pl.create_uid = u_pl.id WHERE pl.active = TRUE ORDER BY pl.sequence, pl.name",
+      "tables": [
+        "public.product_label_layout",
+        "public.product_pricelist",
+        "public.res_users",
+        "public.stock_return_picking_line"
+      ],
+      "reward": 2.88,
+      "iterations": 2
+    },
+    {
+      "question": "List all server actions (with their group names) that have at least one tip defined for them, showing the count of tips per action, ordered by tip count descending.",
+      "sql": "SELECT s.id AS server_action_id, g.name AS group_name, COUNT(t.id) AS tip_count FROM public.ir_act_server s JOIN public.ir_act_server_group_rel r ON r.act_id = s.id JOIN public.res_groups g ON g.id = r.gid JOIN public.digest_tip t ON t.group_id = g.id GROUP BY s.id, g.name HAVING COUNT(t.id) > 0 ORDER BY tip_count DESC",
+      "tables": [
+        "public.ir_act_server_group_rel",
+        "public.res_groups",
+        "public.digest_tip",
+        "public.res_users"
+      ],
+      "reward": 3.25,
+      "iterations": 1
+    },
+    {
+      "question": "Which onboarding steps are still pending across companies, showing the onboarding title, step title, current state, sequence, and the company name? Please list only the steps belonging to onboarding plans that have not yet been marked as closed, ordered by company and step sequence.",
+      "sql": "SELECT rc.name AS company_name, oo.title AS onboarding_title, oos.title AS step_title, ops.step_state, oos.sequence\nFROM public.onboarding_progress op\nJOIN public.onboarding_onboarding oo ON op.onboarding_id = oo.id\nJOIN public.onboarding_progress_onboarding_progress_step_rel rel ON rel.onboarding_progress_id = op.id\nJOIN public.onboarding_progress_step ops ON rel.onboarding_progress_step_id = ops.id\nJOIN public.onboarding_onboarding_step oos ON ops.step_id = oos.id\nJOIN public.res_company rc ON op.company_id = rc.id\nWHERE op.is_onboarding_closed = FALSE\n  AND ops.step_state <> 'done'\nORDER BY rc.name, oos.sequence",
+      "tables": [
+        "public.onboarding_progress",
+        "public.onboarding_progress_onboarding_progress_step_rel",
+        "public.onboarding_progress_step",
+        "public.onboarding_onboarding_step"
+      ],
+      "reward": 2.72,
+      "iterations": 1
+    },
+    {
+      "question": "Which dashboard groups contain the most published dashboards that have at least one shared access group, and how many dashboards does each group have? Show the top groups ordered by count descending.",
+      "sql": "SELECT sd.dashboard_group_id, COUNT(DISTINCT sd.id) AS published_dashboard_count FROM public.spreadsheet_dashboard sd INNER JOIN public.res_groups_spreadsheet_dashboard_rel rel ON rel.spreadsheet_dashboard_id = sd.id INNER JOIN public.res_groups rg ON rg.id = rel.res_groups_id WHERE sd.is_published = true AND rg.share = true AND sd.dashboard_group_id IS NOT NULL GROUP BY sd.dashboard_group_id ORDER BY published_dashboard_count DESC LIMIT 10",
+      "tables": [
+        "public.spreadsheet_cell_thread",
+        "public.spreadsheet_dashboard",
+        "public.res_groups_spreadsheet_dashboard_rel",
+        "public.res_groups"
+      ],
+      "reward": 3.52,
+      "iterations": 1
+    },
+    {
+      "question": "Which users have created the most stock relocation requests over the past 90 days, showing their login and the number of relocations they initiated?",
+      "sql": "SELECT u.login, COUNT(sr.id) AS relocation_count FROM public.stock_quant_relocate sr JOIN public.res_users u ON sr.create_uid = u.id WHERE sr.create_date >= CURRENT_DATE - INTERVAL '90 days' GROUP BY u.id, u.login ORDER BY relocation_count DESC LIMIT 10",
+      "tables": [
+        "public.stock_quant_stock_quant_relocate_rel",
+        "public.stock_quant_relocate",
+        "public.res_users",
+        "public.html_editor_converter_test"
+      ],
+      "reward": 2.0,
+      "iterations": 1
+    },
+    {
+      "question": "What is the total count of snail mail letters sent per country, broken down by report template name, including only letters that have an associated mail template report linkage and were successfully sent without errors?",
+      "sql": "SELECT rc.name AS country_name, iax.name AS report_template_name, COUNT(sl.id) AS letter_count\nFROM public.snailmail_letter sl\nJOIN public.ir_act_report_xml iax ON sl.report_template = iax.id\nJOIN public.mail_template_ir_actions_report_rel mtr ON mtr.ir_actions_report_id = iax.id\nJOIN public.res_country_state rs ON sl.state_id = rs.id\nJOIN public.res_country rc ON rs.country_id = rc.id\nWHERE sl.state = 'sent' AND sl.error_code IS NULL\nGROUP BY rc.name, iax.name\nORDER BY letter_count DESC",
+      "tables": [
+        "public.mail_template_ir_actions_report_rel",
+        "public.ir_act_report_xml",
+        "public.snailmail_letter",
+        "public.res_country_state"
+      ],
+      "reward": 3.46,
+      "iterations": 1
+    },
+    {
+      "question": "List all UTM campaigns along with the name of the user who created them and the name of the partner (contact) linked to that user, filtering only for campaigns that have an associated tag and where the user is still active.",
+      "sql": "SELECT c.name AS campaign_name, ru.login AS created_by_user, rp.name AS partner_name FROM public.utm_campaign c JOIN public.utm_tag_rel tr ON tr.campaign_id = c.id JOIN public.utm_tag t ON t.id = tr.tag_id JOIN public.res_users ru ON ru.id = t.create_uid JOIN public.res_partner rp ON rp.id = ru.partner_id WHERE ru.active = TRUE ORDER BY c.name",
+      "tables": [
+        "public.utm_tag_rel",
+        "public.utm_tag",
+        "public.res_users",
+        "public.res_partner_bank"
+      ],
+      "reward": 2.2,
+      "iterations": 1
+    },
+    {
+      "question": "Which products have been consumed (as components) in manufacturing orders across different companies, showing the consumption quantity by company, the source location from which the components were taken, and the destination location where the produced finished goods were stored? List the top results ordered by total consumed quantity descending.",
+      "sql": "SELECT\n    rc.name AS company_name,\n    pp.name AS product_name,\n    src_loc.complete_name AS source_location,\n    dest_loc.complete_name AS destination_location,\n    SUM(sml_consume.quantity) AS total_consumed_quantity\nFROM public.stock_move_line_consume_rel smcr\nJOIN public.stock_move_line sml_consume\n    ON sml_consume.id = smcr.consume_line_id\nJOIN public.stock_move_line sml_produce\n    ON sml_produce.id = smcr.produce_line_id\nJOIN public.res_company rc\n    ON rc.id = sml_consume.company_id\nJOIN public.product_product pp\n    ON pp.id = sml_consume.product_id\nJOIN public.stock_location src_loc\n    ON src_loc.id = sml_consume.location_id\nJOIN public.stock_location dest_loc\n    ON dest_loc.id = sml_produce.location_dest_id\nWHERE sml_consume.state = 'done'\nGROUP BY rc.name, pp.name, src_loc.complete_name, dest_loc.complete_name\nORDER BY total_consumed_quantity DESC",
+      "tables": [
+        "public.stock_move_line_consume_rel",
+        "public.stock_move_line",
+        "public.res_company",
+        "public.payment_transaction"
+      ],
+      "reward": 3.9,
+      "iterations": 1
+    }
+  ]
+}
